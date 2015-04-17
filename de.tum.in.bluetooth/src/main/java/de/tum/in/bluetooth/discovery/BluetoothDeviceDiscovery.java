@@ -630,6 +630,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 
 	}
 
+	/**
+	 * Used to register a service per device discovered
+	 * 
+	 * @param device
+	 *            The found device
+	 */
 	private synchronized void register(RemoteDevice device) {
 		final Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("device.id", device.getBluetoothAddress());
