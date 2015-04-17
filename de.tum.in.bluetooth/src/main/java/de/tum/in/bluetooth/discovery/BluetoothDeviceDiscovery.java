@@ -675,6 +675,13 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		}
 	}
 
+	/**
+	 * Used to pair {@link RemoteDevice}
+	 * 
+	 * @param device
+	 *            The currently discovered Remote Device
+	 * @return if paired then true else false
+	 */
 	boolean pair(final RemoteDevice device) {
 		if (m_fleet == null || m_fleet.getDevices() == null) {
 			m_logger.info("Ignoring autopairing - no fleet configured");
