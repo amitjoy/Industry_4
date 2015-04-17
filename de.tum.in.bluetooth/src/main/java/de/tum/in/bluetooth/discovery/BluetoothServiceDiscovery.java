@@ -19,6 +19,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class BluetoothServiceDiscovery {
 	/**
 	 * Bundle Context.
 	 */
-	private BundleContext m_context;
+	private final BundleContext m_context;
 
 	/**
 	 * Logger.
@@ -70,6 +71,7 @@ public class BluetoothServiceDiscovery {
 	 * Creates a {@link BluetoothServiceDiscovery}.
 	 */
 	public BluetoothServiceDiscovery() {
+		m_context = FrameworkUtil.getBundle(getClass()).getBundleContext();
 	}
 
 	/**
