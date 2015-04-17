@@ -33,12 +33,16 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudClientListener;
 import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloud.Cloudlet;
+import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.message.KuraRequestPayload;
+import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
@@ -61,8 +65,8 @@ import de.tum.in.bluetooth.devices.DeviceList;
  */
 @Component
 @Service(value = { BluetoothDeviceDiscovery.class, BluetoothController.class })
-public class BluetoothDeviceDiscovery implements BluetoothController,
-		CloudClientListener, ConfigurableComponent, CriticalComponent {
+public class BluetoothDeviceDiscovery extends Cloudlet implements
+		BluetoothController, ConfigurableComponent, CriticalComponent {
 
 	/**
 	 * Defines Application ID for Pi's bluetooth application
@@ -172,7 +176,7 @@ public class BluetoothDeviceDiscovery implements BluetoothController,
 	/**
 	 * Bundle Context.
 	 */
-	private BundleContext m_context;
+	private final BundleContext m_context;
 
 	/**
 	 * Map storing the currently exposed bluetooth device.
@@ -230,6 +234,8 @@ public class BluetoothDeviceDiscovery implements BluetoothController,
 	 * Creates a {@link BluetoothDeviceDiscovery}.
 	 */
 	public BluetoothDeviceDiscovery() {
+		super(APP_ID);
+		m_context = FrameworkUtil.getBundle(getClass()).getBundleContext();
 	}
 
 	/**
@@ -239,6 +245,7 @@ public class BluetoothDeviceDiscovery implements BluetoothController,
 	 *            the bundle context
 	 */
 	public BluetoothDeviceDiscovery(BundleContext context) {
+		super(APP_ID);
 		m_context = context;
 	}
 
@@ -249,6 +256,7 @@ public class BluetoothDeviceDiscovery implements BluetoothController,
 	 * @param cloudService
 	 *            The reference
 	 */
+	@Override
 	public void setCloudService(CloudService cloudService) {
 		if (m_cloudService == null)
 			m_cloudService = cloudService;
@@ -261,6 +269,7 @@ public class BluetoothDeviceDiscovery implements BluetoothController,
 	 * @param cloudService
 	 *            The reference
 	 */
+	@Override
 	public void unsetCloudService(CloudService cloudService) {
 		if (m_cloudService == cloudService)
 			m_cloudService = null;
@@ -862,13 +871,6 @@ public class BluetoothDeviceDiscovery implements BluetoothController,
 	}
 
 	@Override
-	public void onControlMessageArrived(String deviceId, String appTopic,
-			KuraPayload msg, int qos, boolean retain) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void onMessageArrived(String deviceId, String appTopic,
 			KuraPayload msg, int qos, boolean retain) {
 		m_logger.info("Subcription Message arriving...");
@@ -889,18 +891,6 @@ public class BluetoothDeviceDiscovery implements BluetoothController,
 	}
 
 	@Override
-	public void onMessageConfirmed(int arg0, String arg1) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onMessagePublished(int arg0, String arg1) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public String getCriticalComponentName() {
 		return APP_ID;
 	}
@@ -910,4 +900,15 @@ public class BluetoothDeviceDiscovery implements BluetoothController,
 		return 10;
 	}
 
+	@Override
+	protected void doExec(CloudletTopic reqTopic,
+			KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
+			throws KuraException {
+		if ("on".equals(reqTopic.getResources()[0])) {
+			start();
+		}
+		if ("off".equals(reqTopic.getResources()[0])) {
+			start();
+		}
+	}
 }
