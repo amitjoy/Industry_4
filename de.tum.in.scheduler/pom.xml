@@ -76,6 +76,8 @@
 							quartz
 						</Embed-Dependency>
 						<Bundle-Activator>de.tum.in.scheduler.Activator</Bundle-Activator>
+						<Bundle-Developer>Amit Kumar Mondal</Bundle-Developer>
+						<Bundle-Vendor>TU Munich</Bundle-Vendor>
 					</instructions>
 				</configuration>
 			</plugin>
