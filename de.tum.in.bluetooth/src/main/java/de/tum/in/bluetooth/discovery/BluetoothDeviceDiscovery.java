@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -27,13 +28,10 @@ import javax.xml.bind.JAXBException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraTimeoutException;
-import org.eclipse.kura.cloud.CloudClient;
-import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -45,7 +43,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +89,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private static final String M_PERIOD = "bluetooth.discovery.period";
 
 	/**
+	 * Configurable property to set list of bluetooth enabled devices to be
+	 * discovered
+	 */
+	private static final String M_DEVICES = "bluetooh.discovery.devices";
+
+	/**
 	 * Configuration property enabling the support of unnamed devices. Unnamed
 	 * devices do not communicate their name.
 	 */
@@ -117,6 +120,11 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * Configurable property specifying the discovery mode among GIAC and LIAC.
 	 */
 	private static final String M_DISCOVERY_MODE = "bluetooth.discovery.mode";
+
+	/**
+	 * Watchdog Critical Timeout Component
+	 */
+	private static final int _TIMEOUT_COMPONENT = 10;
 
 	/**
 	 * All the supported bluetooth stacks in Service Gateway
@@ -219,18 +227,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private DeviceDiscoveryAgent m_agent;
 
 	/**
-	 * Cloud Service Reference to publish/Subscribe to the Message broker
-	 */
-	@Reference
-	private CloudService m_cloudService;
-
-	/**
-	 * The Control Client invoked from {@link CloudService} to handle connection
-	 * to Message broker
-	 */
-	private CloudClient m_cloudClient;
-
-	/**
 	 * Creates a {@link BluetoothDeviceDiscovery}.
 	 */
 	public BluetoothDeviceDiscovery() {
@@ -247,32 +243,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	public BluetoothDeviceDiscovery(BundleContext context) {
 		super(APP_ID);
 		m_context = context;
-	}
-
-	/**
-	 * Callback used when {@link CloudService} is getting registered from this
-	 * component
-	 * 
-	 * @param cloudService
-	 *            The reference
-	 */
-	@Override
-	public void setCloudService(CloudService cloudService) {
-		if (m_cloudService == null)
-			m_cloudService = cloudService;
-	}
-
-	/**
-	 * Callback used when {@link CloudService} is getting deregistered from this
-	 * component
-	 * 
-	 * @param cloudService
-	 *            The reference
-	 */
-	@Override
-	public void unsetCloudService(CloudService cloudService) {
-		if (m_cloudService == cloudService)
-			m_cloudService = null;
 	}
 
 	public void setAutopairingConfiguration(File file) throws IOException {
@@ -390,17 +360,22 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	protected void activate(ComponentContext context,
 			Map<String, Object> properties) {
 		m_logger.info("Activating Bluetooth....");
-		try {
-			m_logger.info("Getting CloudClient for {}...", APP_ID);
-			m_cloudClient = m_cloudService.newCloudClient(APP_ID);
-			m_cloudClient.addCloudClientListener(this);
-		} catch (final Exception e) {
-			m_logger.error("Error during component activation", e);
-			throw new ComponentException(e);
-		}
-
+		super.activate(context);
 		_properties = properties;
 		m_logger.info("Activating Bluetooth... Done.");
+	}
+
+	/**
+	 * Callback while this component is getting deregistered
+	 * 
+	 * @param properties
+	 *            the service configuration properties
+	 */
+	@Deactivate
+	@Override
+	protected void deactivate(ComponentContext componentContext) {
+		super.deactivate(componentContext);
+		stop();
 	}
 
 	/**
@@ -410,26 +385,10 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	public void start() {
 		m_logger.info("Enabling Bluetooth...");
 
-		m_period = (int) _properties.get(M_PERIOD);
-		m_ignoreUnnamedDevices = (boolean) _properties
-				.get(M_IGNORE_UNNAMED_DEVICES);
-		m_onlineCheckOnDiscovery = (boolean) _properties
-				.get(M_ONLINE_CHECK_ON_DISCOVERY);
-		m_unpairLostDevices = (boolean) _properties.get(M_UNPAIR_LOST_DEVICES);
-
-		if ((Integer) _properties.get(M_DISCOVERY_MODE) == 0)
-			m_discoveryMode = DiscoveryMode.GIAC;
-		else
-			m_discoveryMode = DiscoveryMode.LIAC;
+		extractRequiredConfigurations();
 
 		if (m_agent != null) {
 			return;
-		}
-
-		m_names = loadDeviceNames();
-
-		if (m_period == 0) {
-			m_period = 10; // Default to 10 seconds.
 		}
 
 		if (!isBluetoothStackSupported()) {
@@ -450,10 +409,62 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	}
 
 	/**
+	 * Extracting required configuration for the bluetooth device discovery
+	 */
+	private void extractRequiredConfigurations() {
+
+		m_logger.info("Extracting Required Configurations...");
+
+		m_period = (int) _properties.get(M_PERIOD);
+		m_ignoreUnnamedDevices = (boolean) _properties
+				.get(M_IGNORE_UNNAMED_DEVICES);
+		m_onlineCheckOnDiscovery = (boolean) _properties
+				.get(M_ONLINE_CHECK_ON_DISCOVERY);
+		m_unpairLostDevices = (boolean) _properties.get(M_UNPAIR_LOST_DEVICES);
+
+		if ((Integer) _properties.get(M_DISCOVERY_MODE) == 0)
+			m_discoveryMode = DiscoveryMode.GIAC;
+		else
+			m_discoveryMode = DiscoveryMode.LIAC;
+
+		// m_names = loadDeviceNames(); //Used for testing purposes
+		m_names = getListOfDevicesToBeDiscovered((String) _properties
+				.get(M_DEVICES));
+
+		if (m_period == 0) {
+			m_period = 10; // Default to 10 seconds.
+		}
+
+		m_logger.info("Configuration Extraction Complete");
+	}
+
+	/**
+	 * Used to parse configuration set to discover specified bluetooth enabled
+	 * devices
+	 * 
+	 * @param devices
+	 *            The Configuration input as Property K-V Format
+	 * @return the parsed input as properties
+	 */
+	private Properties getListOfDevicesToBeDiscovered(String devices) {
+		final Properties properties = new Properties();
+
+		if (devices == null) {
+			m_logger.error("No Bluetooth Enabled Device Addess Found");
+			return properties;
+		}
+		try {
+			properties.load(new StringReader(devices));
+		} catch (final IOException e) {
+			e.printStackTrace();
+		}
+		return properties;
+	}
+
+	/**
 	 * Stops the discovery.
 	 */
 	@Override
-	@Deactivate
 	public void stop() {
 		m_logger.info("Disabling Bluetooth...");
 		if (m_agent == null) {
@@ -465,7 +476,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		unregisterAll();
 		m_logger.info("Disabling Bluetooth...Done");
 		m_logger.info("Releasing all subscription...");
-		m_cloudClient.release();
+		getCloudApplicationClient().release();
 		m_logger.info("Releasing all subscription...done");
 
 	}
@@ -866,7 +877,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		m_logger.info("Connecting to Message Broker...");
 		try {
 			topic = (String) _properties.get(SUBSCRIBE_TOPICPREFIX_PROP_NAME);
-			m_cloudClient.controlSubscribe(topic + "#", QOS);
+			getCloudApplicationClient().controlSubscribe(topic + "#", QOS);
 			m_logger.info("Connecting to Message Broker...done");
 			m_logger.info("Subscribing to Topic {}...", topic);
 		} catch (final KuraTimeoutException e) {
@@ -910,17 +921,17 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 
 	@Override
 	public int getCriticalComponentTimeout() {
-		return 10;
+		return _TIMEOUT_COMPONENT;
 	}
 
 	@Override
 	protected void doExec(CloudletTopic reqTopic,
 			KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
 			throws KuraException {
-		if ("on".equals(reqTopic.getResources()[0])) {
+		if ("start".equals(reqTopic.getResources()[0])) {
 			start();
 		}
-		if ("off".equals(reqTopic.getResources()[0])) {
+		if ("stop".equals(reqTopic.getResources()[0])) {
 			start();
 		}
 	}
