@@ -151,6 +151,7 @@
 	<modules>
 		<module>../de.tum.in.bluecove</module>
 		<module>../de.tum.in.bluetooth</module>
+		<module>../de.tum.in.bluecove.fragment</module>
 	</modules>
 </project>
 
