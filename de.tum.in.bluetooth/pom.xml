@@ -153,4 +153,8 @@
 		</plugins>
 	</build>
 
+	<organization>
+		<name>Technical University of Munich</name>
+		<url>http://www.tum.de</url>
+	</organization>
 </project>

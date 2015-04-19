@@ -86,4 +86,8 @@
 
 		</plugins>
 	</build>
+	<organization>
+		<url>http://www.tum.de</url>
+		<name>Technical University of Munich</name>
+	</organization>
 </project>
