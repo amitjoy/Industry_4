@@ -14,8 +14,13 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
 import de.tum.in.bluetooth.devices.Device;
-import de.tum.in.bluetooth.discovery.BluetoothServiceDiscovery;
 
+/**
+ * Bluetooth Service Discovery Test Cases
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public class BluetoothServiceDiscoveryTest {
 
 	@Test

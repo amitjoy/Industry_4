@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Discovery Agent searching services for one specific device. If a matching
  * service is found, we publishes an ??
+ * 
+ * @author AMIT KUMAR MONDAL
  */
 class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 

@@ -6,12 +6,14 @@ import javax.bluetooth.RemoteDevice;
 import org.junit.After;
 import org.junit.Test;
 
-import de.tum.in.bluetooth.discovery.BluetoothDeviceDiscovery;
-import de.tum.in.bluetooth.discovery.DeviceDiscoveryAgent;
-import de.tum.in.bluetooth.discovery.Env;
 import de.tum.in.bluetooth.discovery.BluetoothDeviceDiscovery.DiscoveryMode;
 import de.tum.in.bluetooth.discovery.DeviceDiscoveryAgent.DeviceDiscoveryListener;
 
+/**
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public class DeviceDiscoveryAgentTest {
 
 	@After

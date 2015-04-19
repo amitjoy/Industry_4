@@ -19,6 +19,11 @@ import org.slf4j.LoggerFactory;
 
 import de.tum.in.bluetooth.discovery.BluetoothDeviceDiscovery.DiscoveryMode;
 
+/**
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public class DeviceDiscoveryAgent implements Runnable {
 
 	private final Logger m_logger = LoggerFactory.getLogger(this.getClass());

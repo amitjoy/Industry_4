@@ -6,8 +6,11 @@ import javax.bluetooth.DataElement;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 
-import de.tum.in.bluetooth.discovery.ServiceDiscoveryAgent;
-
+/**
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public class ServiceRecordStub implements ServiceRecord {
 
 	RemoteDevice remote;

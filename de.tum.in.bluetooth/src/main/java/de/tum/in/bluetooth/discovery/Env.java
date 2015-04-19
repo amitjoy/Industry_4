@@ -1,5 +1,10 @@
 package de.tum.in.bluetooth.discovery;
 
+/**
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public class Env {
 
 	public static boolean isTestEnvironmentEnabled() {

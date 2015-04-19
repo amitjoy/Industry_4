@@ -61,6 +61,7 @@
                             !android.os,
                             *
                         </Import-Package>
+                        <Bundle-Developer>Amit Kumar Mondal</Bundle-Developer>
                     </instructions>
                 </configuration>
             </plugin>

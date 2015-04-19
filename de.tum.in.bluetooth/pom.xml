@@ -123,6 +123,7 @@
 							de.tum.in.bluetooth.discovery,
 							de.tum.in.bluetooth
 						</Export-Package>
+						<Bundle-Developer>Amit Kumar Mondal</Bundle-Developer>
 					</instructions>
 				</configuration>
 			</plugin>

@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
  * <p/>
  * Bluetooth operation are submitted to this class which executed them when a
  * free slot if available.
+ * 
+ * @author AMIT KUMAR MONDAL
  */
 public class BluetoothThreadManager {
 

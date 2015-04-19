@@ -59,6 +59,8 @@ import de.tum.in.bluetooth.devices.DeviceList;
  * detected periodically. So interacting with a bluetooth device can throw
  * {@link IOException} at any time. If bluetooth is not available, the component
  * just stops. Inquiries can not be run concurrently.
+ * 
+ * @author AMIT KUMAR MONDAL
  */
 @Component
 @Service(value = { BluetoothDeviceDiscovery.class, BluetoothController.class })
@@ -909,7 +911,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 					throw new BluetoothException();
 			}
 		} catch (final BluetoothException e) {
-			e.printStackTrace();
+			m_logger.error(e.getMessage());
 		}
 
 	}

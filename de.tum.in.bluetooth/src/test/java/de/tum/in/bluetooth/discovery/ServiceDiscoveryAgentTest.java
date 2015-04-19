@@ -7,10 +7,11 @@ import javax.bluetooth.ServiceRecord;
 import org.junit.After;
 import org.junit.Test;
 
-import de.tum.in.bluetooth.discovery.BluetoothServiceDiscovery;
-import de.tum.in.bluetooth.discovery.Env;
-import de.tum.in.bluetooth.discovery.ServiceDiscoveryAgent;
-
+/**
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public class ServiceDiscoveryAgentTest {
 
 	@After

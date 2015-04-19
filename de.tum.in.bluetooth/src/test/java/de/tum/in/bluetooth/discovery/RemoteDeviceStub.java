@@ -4,6 +4,11 @@ import java.io.IOException;
 
 import javax.bluetooth.RemoteDevice;
 
+/**
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public class RemoteDeviceStub extends RemoteDevice {
 	public String address;
 

@@ -32,6 +32,8 @@ import de.tum.in.bluetooth.devices.DeviceList;
  * component consumes {@link RemoteDevice} services and gets all the bluetooth
  * services of the device. For each bluetooth service, it publishes a
  * {@link ServiceRecord}.
+ * 
+ * @author AMIT KUMAR MONDAL
  */
 @Component(immediate = true)
 public class BluetoothServiceDiscovery {

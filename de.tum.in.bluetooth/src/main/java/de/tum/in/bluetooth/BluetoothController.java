@@ -1,5 +1,11 @@
 package de.tum.in.bluetooth;
 
+/**
+ * All required services for Bluetooth Operation
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public interface BluetoothController {
 
 	final class BluetoothException extends Exception {

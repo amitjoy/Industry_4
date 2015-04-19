@@ -19,6 +19,11 @@ import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
+/**
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public class BundleContextStub implements BundleContext {
 
 	private final HashMap<Object, Dictionary> m_services = new HashMap<Object, Dictionary>();

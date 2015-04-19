@@ -7,6 +7,8 @@ import javax.microedition.io.Connection;
 
 /**
  * A class extending RemoteDevice but setting the friendly name.
+ * 
+ * @author AMIT KUMAR MONDAL
  */
 public class RemoteNamedDevice extends RemoteDevice {
 

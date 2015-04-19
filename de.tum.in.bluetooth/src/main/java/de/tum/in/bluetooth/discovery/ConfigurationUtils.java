@@ -7,6 +7,11 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+/**
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public class ConfigurationUtils {
 
 	public static <T> T unmarshal(Class<T> docClass, InputStream inputStream)

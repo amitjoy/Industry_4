@@ -2,6 +2,11 @@ package de.tum.in.bluetooth.discovery;
 
 import javax.bluetooth.UUID;
 
+/**
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public interface UUIDs {
 
 	public static final UUID SDP = new UUID(0x0001);
