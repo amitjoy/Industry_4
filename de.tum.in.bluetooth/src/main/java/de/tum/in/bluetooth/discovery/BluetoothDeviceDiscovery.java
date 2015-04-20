@@ -73,7 +73,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private static final String APP_ID = "bluetooth";
 
 	/**
-	 * Defines Application ID for Pi's bluetooth application
+	 * Defines Quality of Service for the bluetooth Application
 	 */
 	private static final int QOS = 5;
 
