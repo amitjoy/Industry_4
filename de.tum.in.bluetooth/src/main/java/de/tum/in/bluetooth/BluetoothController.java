@@ -10,6 +10,7 @@ public interface BluetoothController {
 
 	final class BluetoothException extends Exception {
 
+		private static final long serialVersionUID = 1L;
 		private static final String MESSAGE = "Bluetooth Initiation Failed";
 
 		public BluetoothException() {
