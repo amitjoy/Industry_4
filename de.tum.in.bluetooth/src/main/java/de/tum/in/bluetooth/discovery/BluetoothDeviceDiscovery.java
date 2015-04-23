@@ -35,7 +35,6 @@ import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.watchdog.CriticalComponent;
@@ -464,7 +463,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	}
 
 	/**
-	 * Stops the discovery.
+	 * Stops the bluetooth discovery
 	 */
 	@Override
 	public void stop() {
@@ -894,26 +893,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	@Override
 	public void onConnectionLost() {
 		m_logger.info("Disconnected from Message Broker");
-	}
-
-	@Override
-	public void onMessageArrived(String deviceId, String appTopic,
-			KuraPayload msg, int qos, boolean retain) {
-		m_logger.info("Subcription Message arriving...");
-		try {
-			m_logger.info("Subcription Message arriving...arrived");
-			if (topic.equals(appTopic)) {
-				if (msg.getMetric("command").equals("on"))
-					start();
-				else if (msg.getMetric("command").equals("off"))
-					stop();
-				else
-					throw new BluetoothException();
-			}
-		} catch (final BluetoothException e) {
-			m_logger.error(e.getMessage());
-		}
-
 	}
 
 	@Override

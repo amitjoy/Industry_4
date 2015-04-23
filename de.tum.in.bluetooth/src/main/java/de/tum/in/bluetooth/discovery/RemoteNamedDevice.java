@@ -6,8 +6,9 @@ import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.Connection;
 
 /**
- * A class extending RemoteDevice but setting the friendly name.
+ * A class extending {@link RemoteDevice} but setting the friendly name.
  * 
+ * @See {@link RemoteDevice}
  * @author AMIT KUMAR MONDAL
  */
 public class RemoteNamedDevice extends RemoteDevice {

@@ -28,9 +28,10 @@ import de.tum.in.bluetooth.devices.Device;
 import de.tum.in.bluetooth.devices.DeviceList;
 
 /**
- * Component publishing a {@link ServiceRecord} for all bluetooth services. This
- * component consumes {@link RemoteDevice} services and gets all the bluetooth
- * services of the device. For each bluetooth service, it publishes a
+ * Component publishing {@link ServiceRecord} for all bluetooth services. This
+ * component consumes {@link RemoteDevice} services i.e all discovered bluetooth
+ * devices and gets all the bluetooth service profiles of each and every
+ * discovered device. For each bluetooth service profile, it publishes a
  * {@link ServiceRecord}.
  * 
  * @author AMIT KUMAR MONDAL

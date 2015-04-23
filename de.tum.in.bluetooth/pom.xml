@@ -45,8 +45,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.ow2.chameleon.bluetooth</groupId>
-			<artifactId>bluecove-for-osgi</artifactId>
+			<groupId>de.tum.in</groupId>
+			<artifactId>de.tum.in.bluecove</artifactId>
+			<version>2.1.0</version>
 		</dependency>
 
 		<dependency>

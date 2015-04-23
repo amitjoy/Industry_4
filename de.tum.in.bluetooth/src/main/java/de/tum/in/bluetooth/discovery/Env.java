@@ -1,6 +1,8 @@
 package de.tum.in.bluetooth.discovery;
 
 /**
+ * System Property Utility classes to determine whether bluetooth application
+ * will be used for testing purposes or production purposes
  * 
  * @author AMIT KUMAR MONDAL
  *
