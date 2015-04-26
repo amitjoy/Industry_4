@@ -6,9 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -514,8 +514,8 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 
 		// Detect devices that have left
 		// We must create a copy of the list to avoid concurrent modifications
-		Set<RemoteDevice> presents = new HashSet<RemoteDevice>(
-				m_devices.keySet());
+		Set<RemoteDevice> presents = Collections.unmodifiableSet(m_devices
+				.keySet());
 		for (final RemoteDevice old : presents) {
 			m_logger.info("Did we lost contact with "
 					+ old.getBluetoothAddress() + " => "
@@ -559,7 +559,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			if (cachedDevices == null || cachedDevices.length == 0) {
 				return;
 			}
-			presents = new HashSet<RemoteDevice>(m_devices.keySet());
+			presents = Collections.unmodifiableSet(m_devices.keySet());
 			for (final RemoteDevice cached : cachedDevices) {
 				if (!contains(presents, cached)) {
 					final ServiceCheckAgent serviceCheckAgent = new ServiceCheckAgent(
