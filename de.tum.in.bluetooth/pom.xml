@@ -13,7 +13,7 @@
 	<artifactId>de.tum.in.bluetooth</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Bluetooth OSGi Service</name>
-	<description>Bundle exposing OSGi services from discovered bluetooth devices and services</description>
+	<description>Bundle exposing OSGi services from discovered bluetooth devices and services. Apart from this, it also registers a Connection Factory Implementation for Bluetooth Serial Port Profile</description>
 	<packaging>bundle</packaging>
 
 	<licenses>
@@ -123,6 +123,7 @@
 				<configuration>
 					<instructions>
 						<Bundle-Vendor>TU Munich</Bundle-Vendor>
+						<Bundle-Activator>de.tum.in.bluetooth.Activator</Bundle-Activator>
 						<Import-Package>
 							org.apache.felix.service.command;resolution:=optional,
 							*
