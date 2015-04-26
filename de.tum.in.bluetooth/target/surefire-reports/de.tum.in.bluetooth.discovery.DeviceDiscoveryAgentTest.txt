@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: de.tum.in.bluetooth.discovery.DeviceDiscoveryAgentTest
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.272 sec - in de.tum.in.bluetooth.discovery.DeviceDiscoveryAgentTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.16 sec - in de.tum.in.bluetooth.discovery.DeviceDiscoveryAgentTest

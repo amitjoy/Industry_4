@@ -27,8 +27,6 @@
 	<classpathentry kind="var" path="M2_REPO/org/apache/felix/org.apache.felix.ipojo.annotations/1.10.1/org.apache.felix.ipojo.annotations-1.10.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/osgi/org.osgi.compendium/4.3.1/org.osgi.compendium-4.3.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/osgi/org.osgi.core/5.0.0/org.osgi.core-5.0.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/ow2/chameleon/bluetooth/bluecove-for-osgi/2.1.0/bluecove-for-osgi-2.1.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/net/sf/bluecove/bluecove/2.1.0/bluecove-2.1.0.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-api/1.6.6/slf4j-api-1.6.6.jar"/>
 	<classpathentry kind="var" path="M2_REPO/junit/junit/4.11/junit-4.11.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"/>
