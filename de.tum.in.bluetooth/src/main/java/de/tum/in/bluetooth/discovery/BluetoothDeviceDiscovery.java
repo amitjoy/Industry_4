@@ -211,9 +211,10 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private File m_deviceNameFile;
 
 	/**
-	 * Map storing the MAC address to name association. It avoids ignoring
-	 * unnamed devices, as once we get a name, it is stored in this list. This
-	 * map can be persisted if the device name file is set.
+	 * Map storing the MAC address to name association (ex.
+	 * AXERWSD3452U=MY_BLUETOOTH_NAME). It avoids ignoring unnamed devices, as
+	 * once we get a name, it is stored in this list. This map can be persisted
+	 * if the device name file is set.
 	 */
 	private Properties m_names = new Properties();
 
