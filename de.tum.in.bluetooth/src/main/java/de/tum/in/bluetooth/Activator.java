@@ -25,7 +25,7 @@ public class Activator implements BundleActivator {
 	private static final String SCHEMA = "btspp";
 
 	// The ConnectionFactory Service implementation
-	private ConnectionFactory connectionFactory;
+	private ConnectionFactory m_connectionFactory;
 
 	/**
 	 * slf4j Logger
@@ -36,15 +36,15 @@ public class Activator implements BundleActivator {
 	/**
 	 * slf4j Marker to keep track of bundle
 	 */
-	public static final Marker m_bundleMarker = createBundleMarker();
+	private static final Marker m_bundleMarker = createBundleMarker();
 
 	@Override
 	public void start(BundleContext context) throws Exception {
 		final Hashtable<String, String[]> properties = new Hashtable<String, String[]>();
 		properties.put(ConnectionFactory.IO_SCHEME, new String[] { SCHEMA });
-		connectionFactory = new ConnectionFactoryImpl();
+		m_connectionFactory = new ConnectionFactoryImpl();
 		context.registerService(ConnectionFactory.class.getName(),
-				connectionFactory, properties);
+				m_connectionFactory, properties);
 		m_logger.debug(m_bundleMarker, "Started Bundle");
 	}
 
@@ -61,7 +61,7 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		connectionFactory = null;
+		m_connectionFactory = null;
 		m_logger.debug(m_bundleMarker, "Stopped Bundle");
 	}
 

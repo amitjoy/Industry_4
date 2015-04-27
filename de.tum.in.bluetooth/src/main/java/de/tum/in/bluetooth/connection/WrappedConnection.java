@@ -21,14 +21,14 @@ public class WrappedConnection implements InputConnection {
 	 */
 	private final Logger m_logger = LoggerFactory
 			.getLogger(WrappedConnection.class);
-	private final InputConnection connection;
+	private final InputConnection m_connection;
 
-	private DataInputStream dataInputStream = null;
-	private InputStream inputStream = null;
+	private DataInputStream m_dataInputStream;
+	private InputStream m_inputStream;
 
 	public WrappedConnection(InputConnection connection) {
 		m_logger.debug("Constructing wrapped connection");
-		this.connection = connection;
+		this.m_connection = connection;
 	}
 
 	@Override
@@ -36,14 +36,14 @@ public class WrappedConnection implements InputConnection {
 
 		try {
 			m_logger.debug("Closing connection");
-			connection.close();
-			if (dataInputStream != null) {
+			m_connection.close();
+			if (m_dataInputStream != null) {
 				m_logger.debug("Closing dataInputStream");
-				dataInputStream.close();
+				m_dataInputStream.close();
 			}
-			if (inputStream != null) {
+			if (m_inputStream != null) {
 				m_logger.debug("Closing inputStream");
-				inputStream.close();
+				m_inputStream.close();
 			}
 		} catch (final IOException e) {
 			m_logger.error("Failed to close connection", e);
@@ -56,8 +56,8 @@ public class WrappedConnection implements InputConnection {
 	public DataInputStream openDataInputStream() throws IOException {
 		m_logger.info("Opening DataInputStream connection");
 		try {
-			dataInputStream = connection.openDataInputStream();
-			return dataInputStream;
+			m_dataInputStream = m_connection.openDataInputStream();
+			return m_dataInputStream;
 		} catch (final IOException e) {
 			m_logger.error("Failed to open connection", e);
 			throw e;
@@ -68,8 +68,8 @@ public class WrappedConnection implements InputConnection {
 	public InputStream openInputStream() throws IOException {
 		m_logger.debug("Opening InputStream connection");
 		try {
-			inputStream = connection.openInputStream();
-			return inputStream;
+			m_inputStream = m_connection.openInputStream();
+			return m_inputStream;
 		} catch (final IOException e) {
 			m_logger.error("Failed to open connection", e);
 			throw e;
