@@ -81,6 +81,12 @@
 			<groupId>net.sf.bluecove</groupId>
 			<artifactId>bluecove</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>18.0</version>
+			<type>bundle</type>
+		</dependency>
 	</dependencies>
 
 

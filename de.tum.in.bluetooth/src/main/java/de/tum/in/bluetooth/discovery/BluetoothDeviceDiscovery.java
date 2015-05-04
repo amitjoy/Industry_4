@@ -15,6 +15,8 @@
  *******************************************************************************/
 package de.tum.in.bluetooth.discovery;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -259,7 +261,9 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 */
 	public BluetoothDeviceDiscovery(BundleContext context) {
 		super(APP_ID);
-		m_context = context;
+		m_context = checkNotNull(context,
+				"Bluetooth Bundle Context must not be null");
+		;
 	}
 
 	public void setAutopairingConfiguration(File file) throws IOException {

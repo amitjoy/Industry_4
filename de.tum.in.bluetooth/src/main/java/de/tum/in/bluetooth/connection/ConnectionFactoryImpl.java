@@ -15,6 +15,8 @@
  *******************************************************************************/
 package de.tum.in.bluetooth.connection;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 
 import javax.microedition.io.Connection;
@@ -52,6 +54,8 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 	@Override
 	public Connection createConnection(String name, int mode, boolean timeouts)
 			throws IOException {
+		name = checkNotNull(name, "Connection URI must not be null");
+		mode = checkNotNull(mode, "Connection Mode must not be null");
 
 		return new WrappedConnection(
 				(InputConnection) MicroeditionConnector.open(name, mode,
