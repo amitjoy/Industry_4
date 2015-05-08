@@ -44,11 +44,14 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraTimeoutException;
+import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -78,8 +81,8 @@ import de.tum.in.bluetooth.devices.DeviceList;
  * 
  * @author AMIT KUMAR MONDAL
  */
-@Component
-@Service(value = { BluetoothDeviceDiscovery.class, BluetoothController.class })
+@Component(policy = ConfigurationPolicy.REQUIRE, name = "de.tum.in.bluetooth")
+@Service(value = { BluetoothDeviceDiscovery.class })
 public class BluetoothDeviceDiscovery extends Cloudlet implements
 		BluetoothController, ConfigurableComponent, CriticalComponent {
 
@@ -205,6 +208,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private final BundleContext m_context;
 
 	/**
+	 * Kura Cloud Service Injection
+	 */
+	@Reference
+	private volatile CloudService m_cloudService;
+
+	/**
 	 * Map storing the currently exposed bluetooth device.
 	 */
 	private final Map<RemoteDevice, ServiceRegistration> m_devices = new HashMap<RemoteDevice, ServiceRegistration>();
@@ -264,6 +273,25 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		m_context = checkNotNull(context,
 				"Bluetooth Bundle Context must not be null");
 		;
+	}
+
+	/**
+	 * Kura Cloud Service Binding Callback
+	 */
+	@Override
+	public void setCloudService(CloudService cloudService) {
+		if (m_cloudService == null) {
+			super.setCloudService(m_cloudService = cloudService);
+		}
+	}
+
+	/**
+	 * Kura Cloud Service Callback while deregistering
+	 */
+	@Override
+	public void unsetCloudService(CloudService cloudService) {
+		if (m_cloudService == cloudService)
+			super.setCloudService(m_cloudService = null);
 	}
 
 	public void setAutopairingConfiguration(File file) throws IOException {
@@ -381,6 +409,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	protected void activate(ComponentContext context,
 			Map<String, Object> properties) {
 		m_logger.info("Activating Bluetooth....");
+		super.setCloudService(m_cloudService);
 		super.activate(context);
 		_properties = properties;
 		m_logger.info("Activating Bluetooth... Done.");

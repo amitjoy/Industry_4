@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1431001847254
+Bnd-LastModified: 1431110985701
 Build-Jdk: 1.8.0_45
 Built-By: AMIT
 Bundle-ClassPath: .,bluecove-2.1.0.jar
