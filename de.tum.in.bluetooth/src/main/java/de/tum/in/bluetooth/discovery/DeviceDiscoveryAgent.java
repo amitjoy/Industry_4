@@ -35,12 +35,16 @@ import org.slf4j.LoggerFactory;
 import de.tum.in.bluetooth.discovery.BluetoothDeviceDiscovery.DiscoveryMode;
 
 /**
+ * Agent used to search for bluetooth devices
  * 
  * @author AMIT KUMAR MONDAL
  *
  */
 public class DeviceDiscoveryAgent implements Runnable {
 
+	/**
+	 * Logger.
+	 */
 	private final Logger m_logger = LoggerFactory.getLogger(this.getClass());
 
 	private final Object m_lock = new Object();

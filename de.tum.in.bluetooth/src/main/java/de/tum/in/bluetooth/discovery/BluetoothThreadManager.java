@@ -22,6 +22,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -36,6 +37,12 @@ import org.slf4j.LoggerFactory;
 public class BluetoothThreadManager {
 
 	/**
+	 * Logger.
+	 */
+	private static final Logger s_logger = LoggerFactory
+			.getLogger(BluetoothThreadManager.class);
+
+	/**
 	 * Customization of the thread factory to avoid letting a uncaught exception
 	 * blowing up. The exception is just logged.
 	 */
@@ -44,14 +51,12 @@ public class BluetoothThreadManager {
 		@Override
 		public Thread newThread(final Runnable target) {
 			final Thread thread = new Thread(target);
-			LoggerFactory.getLogger(BluetoothThreadManager.class).debug(
-					"Creating new worker thread");
+			s_logger.debug("Creating new worker thread");
 			thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 
 				@Override
 				public void uncaughtException(Thread t, Throwable e) {
-					LoggerFactory.getLogger(BluetoothThreadManager.class)
-							.error("Uncaught Exception thrown by " + target, e);
+					s_logger.error("Uncaught Exception thrown by " + target, e);
 				}
 
 			});
@@ -77,15 +82,12 @@ public class BluetoothThreadManager {
 	 */
 	public static void scheduleJob(Runnable runnable, int period) {
 		try {
-			LoggerFactory.getLogger(BluetoothThreadManager.class).info(
-					"Submitting periodic task " + runnable);
+			s_logger.info("Submitting periodic task " + runnable);
 			m_pool.scheduleWithFixedDelay(runnable, 0, period, TimeUnit.SECONDS);
-			LoggerFactory.getLogger(BluetoothThreadManager.class).info(
-					runnable + " submitted - waiting queue "
-							+ m_pool.getQueue().size());
+			s_logger.info(runnable + " submitted - waiting queue "
+					+ m_pool.getQueue().size());
 		} catch (final RejectedExecutionException e) {
-			LoggerFactory.getLogger(BluetoothThreadManager.class).error(
-					"Cannot submit task", e);
+			s_logger.error("Cannot submit task", e);
 		}
 	}
 
@@ -98,15 +100,12 @@ public class BluetoothThreadManager {
 	 */
 	public static void submit(Runnable runnable) {
 		try {
-			LoggerFactory.getLogger(BluetoothThreadManager.class).info(
-					"Submitting one-shot task " + runnable);
+			s_logger.info("Submitting one-shot task " + runnable);
 			m_pool.submit(runnable);
-			LoggerFactory.getLogger(BluetoothThreadManager.class).info(
-					runnable + " submitted - waiting queue "
-							+ m_pool.getQueue().size());
+			s_logger.info(runnable + " submitted - waiting queue "
+					+ m_pool.getQueue().size());
 		} catch (final RejectedExecutionException e) {
-			LoggerFactory.getLogger(BluetoothThreadManager.class).error(
-					"Cannot submit task", e);
+			s_logger.error("Cannot submit task", e);
 		}
 	}
 
@@ -123,16 +122,13 @@ public class BluetoothThreadManager {
 	 */
 	public static <V> Future<V> submit(Callable<V> task) {
 		try {
-			LoggerFactory.getLogger(BluetoothThreadManager.class).info(
-					"Submitting one-shot task " + task);
+			s_logger.info("Submitting one-shot task " + task);
 			final Future<V> future = m_pool.submit(task);
-			LoggerFactory.getLogger(BluetoothThreadManager.class).info(
-					task + " submitted - waiting queue "
-							+ m_pool.getQueue().size());
+			s_logger.info(task + " submitted - waiting queue "
+					+ m_pool.getQueue().size());
 			return future;
 		} catch (final RejectedExecutionException e) {
-			LoggerFactory.getLogger(BluetoothThreadManager.class).error(
-					"Cannot submit task", e);
+			s_logger.error("Cannot submit task", e);
 			return null;
 		}
 	}
@@ -141,14 +137,12 @@ public class BluetoothThreadManager {
 	 * Shutdowns the pool. No task can be submitted once this method is called.
 	 */
 	public static void stopScheduler() {
-		LoggerFactory.getLogger(BluetoothThreadManager.class).info(
-				"Shutdown scheduler");
+		s_logger.info("Shutdown scheduler");
 		try {
 			m_pool.shutdownNow();
 		} catch (final Throwable e) {
 			// Ignore.
-			LoggerFactory.getLogger(BluetoothThreadManager.class).info(
-					"Exception during shutdown : ", e);
+			s_logger.info("Exception during shutdown : ", e);
 		}
 	}
 

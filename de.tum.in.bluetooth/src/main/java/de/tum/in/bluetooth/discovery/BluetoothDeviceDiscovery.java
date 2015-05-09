@@ -16,6 +16,7 @@
 package de.tum.in.bluetooth.discovery;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -497,16 +498,25 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * @return the parsed input as properties
 	 */
 	private Properties getListOfDevicesToBeDiscovered(String devices) {
-		final Properties properties = new Properties();
+		final String SEPARATOR = ";";
+		final String[] deviceList = devices.split(SEPARATOR);
 
-		if (devices == null) {
+		final Properties properties = new Properties();
+		final StringBuffer devicesListBuffer = new StringBuffer();
+
+		for (int i = 0; i < deviceList.length; i++) {
+			devicesListBuffer.append(deviceList[i]);
+			devicesListBuffer.append("\n");
+		}
+
+		if (isNullOrEmpty(devicesListBuffer.toString())) {
 			m_logger.error("No Bluetooth Enabled Device Addess Found");
 			return properties;
 		}
 		try {
-			properties.load(new StringReader(devices));
+			properties.load(new StringReader(devicesListBuffer.toString()));
 		} catch (final IOException e) {
-			e.printStackTrace();
+			m_logger.error("Error while parsing list of input bluetooth devices");
 		}
 		return properties;
 	}

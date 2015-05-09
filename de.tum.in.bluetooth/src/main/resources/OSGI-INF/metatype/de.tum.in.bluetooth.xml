@@ -8,7 +8,7 @@
 			size="32" />
 			
 		<AD id="bluetooh.discovery.devices" name="bluetooh.discovery.devices" type="String"
-			cardinality="0" required="true" default="DrillerMW=0003C92DB48F"
+			cardinality="0" required="true" default="DrillerMW=0003C92DB48F;RTS=0015C94DA14A;HVAC=0246BBADA53B"
 			description="Configurable property to set list of bluetooth enabled devices to be discovered" />
 
 		<AD id="bluetooth.discovery.mode" name="bluetooth.discovery.mode"
