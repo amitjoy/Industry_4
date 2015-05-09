@@ -107,19 +107,19 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * many inquiries flood the network and block correct discovery. A too big
 	 * period, makes the device dynamism hard to track.
 	 */
-	private static final String M_PERIOD = "bluetooth.discovery.period";
+	private static final String PERIOD = "bluetooth.discovery.period";
 
 	/**
 	 * Configurable property to set list of bluetooth enabled devices to be
 	 * discovered
 	 */
-	private static final String M_DEVICES = "bluetooh.discovery.devices";
+	private static final String DEVICES = "bluetooh.discovery.devices";
 
 	/**
 	 * Configuration property enabling the support of unnamed devices. Unnamed
 	 * devices do not communicate their name.
 	 */
-	private static final String M_IGNORE_UNNAMED_DEVICES = "bluetooth.ignore.unnamed.devices";
+	private static final String IGNORE_UNNAMED_DEVICES = "bluetooth.ignore.unnamed.devices";
 
 	/**
 	 * This configuration property enables the online check when a device is
@@ -129,23 +129,23 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * cached device on every discovery search). It should be used in
 	 * combination with <tt>bluetooth.discovery.unpairOnDeparture</tt>.
 	 */
-	private static final String M_ONLINE_CHECK_ON_DISCOVERY = "bluetooth.discovery.onlinecheck";
+	private static final String ONLINE_CHECK_ON_DISCOVERY = "bluetooth.discovery.onlinecheck";
 
 	/**
 	 * Configuration property enabling the unpairing of matching devices (filter
 	 * given in the fleet description) when they are not reachable anymore.
 	 */
-	private static final String M_UNPAIR_LOST_DEVICES = "bluetooth.discovery.unpairOnDeparture";
+	private static final String UNPAIR_LOST_DEVICES = "bluetooth.discovery.unpairOnDeparture";
 
 	/**
 	 * Configurable property specifying the discovery mode among GIAC and LIAC.
 	 */
-	private static final String M_DISCOVERY_MODE = "bluetooth.discovery.mode";
+	private static final String DISCOVERY_MODE = "bluetooth.discovery.mode";
 
 	/**
 	 * Watchdog Critical Timeout Component
 	 */
-	private static final int _TIMEOUT_COMPONENT = 10;
+	private static final int TIMEOUT_COMPONENT = 10;
 
 	/**
 	 * All the supported bluetooth stacks in Service Gateway
@@ -156,7 +156,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	/**
 	 * Configurable Properties set using Metatype Configuration Management
 	 */
-	private Map<String, Object> _properties;
+	private Map<String, Object> m_properties;
 
 	/**
 	 * Placeholder for M_IGNORE_UNNAMED_DEVICES
@@ -181,7 +181,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	/**
 	 * Placeholder for SUBSCRIBE_TOPICPREFIX_PROP_NAME
 	 */
-	private String topic;
+	private String m_topic;
 
 	/**
 	 * Bluetooth discovery mode (inquiry).
@@ -411,7 +411,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		m_logger.info("Activating Bluetooth....");
 		super.setCloudService(m_cloudService);
 		super.activate(context);
-		_properties = properties;
+		m_properties = properties;
 		m_logger.info("Activating Bluetooth... Done.");
 	}
 
@@ -465,21 +465,21 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 
 		m_logger.info("Extracting Required Configurations...");
 
-		m_period = (int) _properties.get(M_PERIOD);
-		m_ignoreUnnamedDevices = (boolean) _properties
-				.get(M_IGNORE_UNNAMED_DEVICES);
-		m_onlineCheckOnDiscovery = (boolean) _properties
-				.get(M_ONLINE_CHECK_ON_DISCOVERY);
-		m_unpairLostDevices = (boolean) _properties.get(M_UNPAIR_LOST_DEVICES);
+		m_period = (int) m_properties.get(PERIOD);
+		m_ignoreUnnamedDevices = (boolean) m_properties
+				.get(IGNORE_UNNAMED_DEVICES);
+		m_onlineCheckOnDiscovery = (boolean) m_properties
+				.get(ONLINE_CHECK_ON_DISCOVERY);
+		m_unpairLostDevices = (boolean) m_properties.get(UNPAIR_LOST_DEVICES);
 
-		if ((Integer) _properties.get(M_DISCOVERY_MODE) == 0)
+		if ((Integer) m_properties.get(DISCOVERY_MODE) == 0)
 			m_discoveryMode = DiscoveryMode.GIAC;
 		else
 			m_discoveryMode = DiscoveryMode.LIAC;
 
 		// m_names = loadDeviceNames(); //Used for testing purposes
-		m_names = getListOfDevicesToBeDiscovered((String) _properties
-				.get(M_DEVICES));
+		m_names = getListOfDevicesToBeDiscovered((String) m_properties
+				.get(DEVICES));
 
 		if (m_period == 0) {
 			m_period = 10; // Default to 10 seconds.
@@ -926,10 +926,11 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	public void onConnectionEstablished() {
 		m_logger.info("Connecting to Message Broker...");
 		try {
-			topic = (String) _properties.get(SUBSCRIBE_TOPICPREFIX_PROP_NAME);
-			getCloudApplicationClient().controlSubscribe(topic + "#", QOS);
+			m_topic = (String) m_properties
+					.get(SUBSCRIBE_TOPICPREFIX_PROP_NAME);
+			getCloudApplicationClient().controlSubscribe(m_topic + "#", QOS);
 			m_logger.info("Connecting to Message Broker...done");
-			m_logger.info("Subscribing to Topic {}...", topic);
+			m_logger.info("Subscribing to Topic {}...", m_topic);
 		} catch (final KuraTimeoutException e) {
 			e.printStackTrace();
 		} catch (final KuraNotConnectedException e) {
@@ -951,7 +952,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 
 	@Override
 	public int getCriticalComponentTimeout() {
-		return _TIMEOUT_COMPONENT;
+		return TIMEOUT_COMPONENT;
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
 	localization="en_us">
-	<OCD id="de.tum.in.bluetooth" name="Bluetooth Configuration"
+	<OCD id="de.tum.in.bluetooth" name="Bluetooth"
 		description="Settings for the bluetooth application.">
 
 		<Icon resource="http://icons.iconarchive.com/icons/xenatt/the-circle/512/App-Bluetooth-icon.png"
@@ -45,7 +45,7 @@
 
 		<AD id="publish.appTopicPrefix" name="publish.appTopicPrefix" type="String"
 			cardinality="0" required="true" default="iot/tum/"
-			description="Prefix of topic to publish/receive commands to start and stop" />
+			description="Prefix of topic to publish real time data" />
 
 	</OCD>
 	<Designate pid="de.tum.in.bluetooth">
