@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import javax.bluetooth.DataElement;
@@ -38,6 +39,8 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Throwables;
 
 import de.tum.in.bluetooth.devices.Device;
 import de.tum.in.bluetooth.devices.DeviceList;
@@ -151,6 +154,16 @@ public class BluetoothServiceDiscovery {
 		}
 	}
 
+	/**
+	 * Is used to register {@link ServiceRecord} as an OSGi Service for each and
+	 * every {@link RemoteDevice} found as OSGi Service in the Service Registry.
+	 * 
+	 * @param remote
+	 *            The Bluetooth Device found
+	 * @param serviceRecord
+	 * @param device
+	 * @param url
+	 */
 	private synchronized void register(RemoteDevice remote,
 			ServiceRecord serviceRecord, Device device, String url) {
 		if (!m_servicesRecord.containsKey(remote)) {
@@ -171,7 +184,7 @@ public class BluetoothServiceDiscovery {
 		if (device != null) {
 			props.put("fleet.device", device);
 		}
-		final ServiceRegistration sr = m_context.registerService(
+		final ServiceRegistration<?> sr = m_context.registerService(
 				ServiceRecord.class.getName(), serviceRecord, props);
 		m_servicesRecord.get(remote).put(serviceRecord, sr);
 	}
@@ -216,7 +229,7 @@ public class BluetoothServiceDiscovery {
 	 * @param discoveredServices
 	 *            the list of ServiceRecord
 	 */
-	public void discovered(RemoteDevice remote,
+	public void discovered(final RemoteDevice remote,
 			List<ServiceRecord> discoveredServices) {
 		if (discoveredServices == null || discoveredServices.isEmpty()) {
 			unregister(remote);
@@ -272,17 +285,18 @@ public class BluetoothServiceDiscovery {
 
 	}
 
-	private void incrementAttempt(RemoteDevice remote) {
-		Integer attempt = m_attempts.get(remote);
+	@SuppressWarnings("unused")
+	private void incrementAttempt(final RemoteDevice remote) {
+		final AtomicInteger attempt = new AtomicInteger(m_attempts.get(remote));
 		if (attempt == null) {
-			attempt = 1;
-			m_attempts.put(remote, attempt);
+			attempt.set(1);
+			m_attempts.put(remote, attempt.get());
 		} else {
-			m_attempts.put(remote, ++attempt);
+			m_attempts.put(remote, attempt.incrementAndGet());
 		}
 	}
 
-	private boolean retry(RemoteDevice remote) {
+	private boolean retry(final RemoteDevice remote) {
 		final Device device = findDeviceFromFleet(remote);
 		if (device == null) {
 			return true;
@@ -299,7 +313,7 @@ public class BluetoothServiceDiscovery {
 			max = mr.intValue();
 		}
 
-		return device.isRetry() && max >= numberOfTries;
+		return (device.isRetry() && max >= numberOfTries);
 	}
 
 	Device findDeviceFromFleet(RemoteDevice remote) {
@@ -309,7 +323,8 @@ public class BluetoothServiceDiscovery {
 			try {
 				sn = remote.getFriendlyName(false);
 			} catch (final IOException e) {
-				// ignore the exception
+				// ignore the exception. Just warn it.
+				m_logger.warn(Throwables.getStackTraceAsString(e));
 			}
 
 			for (int i = 0; i < m_fleet.getDevices().size(); i++) {

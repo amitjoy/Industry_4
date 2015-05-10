@@ -15,6 +15,8 @@
  *******************************************************************************/
 package de.tum.in.bluetooth;
 
+import com.google.common.base.Throwables;
+
 /**
  * All required services for Bluetooth Operation
  * 
@@ -30,7 +32,11 @@ public interface BluetoothController {
 
 		public BluetoothException() {
 			super(MESSAGE);
-			// TO-DO Refactor this exception class
+		}
+
+		public BluetoothException(Throwable cause) {
+			this();
+			Throwables.propagateIfPossible(cause);
 		}
 	}
 

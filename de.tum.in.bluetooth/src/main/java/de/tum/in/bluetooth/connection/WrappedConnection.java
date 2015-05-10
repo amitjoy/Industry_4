@@ -41,11 +41,13 @@ public class WrappedConnection implements InputConnection {
 	private DataInputStream m_dataInputStream;
 	private InputStream m_inputStream;
 
+	/** Constructor */
 	public WrappedConnection(InputConnection connection) {
 		m_logger.debug("Constructing wrapped connection");
 		this.m_connection = connection;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void close() throws IOException {
 
@@ -67,6 +69,7 @@ public class WrappedConnection implements InputConnection {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public DataInputStream openDataInputStream() throws IOException {
 		m_logger.info("Opening DataInputStream connection");
@@ -79,6 +82,7 @@ public class WrappedConnection implements InputConnection {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public InputStream openInputStream() throws IOException {
 		m_logger.debug("Opening InputStream connection");

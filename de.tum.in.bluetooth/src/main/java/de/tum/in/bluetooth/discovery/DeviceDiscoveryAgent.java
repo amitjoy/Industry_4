@@ -32,6 +32,8 @@ import javax.bluetooth.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Throwables;
+
 import de.tum.in.bluetooth.discovery.BluetoothDeviceDiscovery.DiscoveryMode;
 
 /**
@@ -106,11 +108,12 @@ public class DeviceDiscoveryAgent implements Runnable {
 			// Wait until the inquiry is done.
 			try {
 				synchronized (m_lock) {
-					// TODO Define a timeout.
+					// TO-DO Define a timeout.
 					m_lock.wait();
 				}
 			} catch (final InterruptedException e) {
-				// Ignore.
+				// Ignore but warning
+				m_logger.warn(Throwables.getStackTraceAsString(e));
 			}
 			final Set<RemoteDevice> discoveredDevices = m_listener
 					.getDiscoveredDevices();

@@ -274,8 +274,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	/**
 	 * Kura Cloud Service Binding Callback
 	 */
-	@Override
-	public void setCloudService(CloudService cloudService) {
+	public synchronized void bindCloudService(CloudService cloudService) {
 		if (m_cloudService == null) {
 			super.setCloudService(m_cloudService = cloudService);
 		}
@@ -284,8 +283,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	/**
 	 * Kura Cloud Service Callback while deregistering
 	 */
-	@Override
-	public void unsetCloudService(CloudService cloudService) {
+	public synchronized void unbindCloudService(CloudService cloudService) {
 		if (m_cloudService == cloudService)
 			super.setCloudService(m_cloudService = null);
 	}
