@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Throwables;
+
 /**
  * This static class manages the Bluetooth action. It ensures that only one
  * bluetooth action is executed at a time.
@@ -39,24 +41,25 @@ public class BluetoothThreadManager {
 	/**
 	 * Logger.
 	 */
-	private static final Logger s_logger = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(BluetoothThreadManager.class);
 
 	/**
 	 * Customization of the thread factory to avoid letting a uncaught exception
 	 * blowing up. The exception is just logged.
 	 */
-	private static final ThreadFactory m_factory = new ThreadFactory() {
+	private static final ThreadFactory THREAD_FACTORY = new ThreadFactory() {
 
 		@Override
 		public Thread newThread(final Runnable target) {
 			final Thread thread = new Thread(target);
-			s_logger.debug("Creating new worker thread");
+			LOGGER.debug("Creating new worker thread");
 			thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 
 				@Override
 				public void uncaughtException(Thread t, Throwable e) {
-					s_logger.error("Uncaught Exception thrown by " + target, e);
+					LOGGER.error("Uncaught Exception thrown by " + target,
+							Throwables.getStackTraceAsString(e));
 				}
 
 			});
@@ -69,8 +72,8 @@ public class BluetoothThreadManager {
 	 * The thread pool executing the action. the thread pool size is limited to
 	 * 1.
 	 */
-	private static ScheduledThreadPoolExecutor m_pool = new ScheduledThreadPoolExecutor(
-			1, m_factory);
+	private static ScheduledThreadPoolExecutor s_pool = new ScheduledThreadPoolExecutor(
+			1, THREAD_FACTORY);
 
 	/**
 	 * Schedules a periodic job such as the Device Inquiry
@@ -82,12 +85,13 @@ public class BluetoothThreadManager {
 	 */
 	public static void scheduleJob(Runnable runnable, int period) {
 		try {
-			s_logger.info("Submitting periodic task " + runnable);
-			m_pool.scheduleWithFixedDelay(runnable, 0, period, TimeUnit.SECONDS);
-			s_logger.info(runnable + " submitted - waiting queue "
-					+ m_pool.getQueue().size());
+			LOGGER.info("Submitting periodic task " + runnable);
+			s_pool.scheduleWithFixedDelay(runnable, 0, period, TimeUnit.SECONDS);
+			LOGGER.info(runnable + " submitted - waiting queue "
+					+ s_pool.getQueue().size());
 		} catch (final RejectedExecutionException e) {
-			s_logger.error("Cannot submit task", e);
+			LOGGER.error("Cannot submit task",
+					Throwables.getStackTraceAsString(e));
 		}
 	}
 
@@ -100,12 +104,13 @@ public class BluetoothThreadManager {
 	 */
 	public static void submit(Runnable runnable) {
 		try {
-			s_logger.info("Submitting one-shot task " + runnable);
-			m_pool.submit(runnable);
-			s_logger.info(runnable + " submitted - waiting queue "
-					+ m_pool.getQueue().size());
+			LOGGER.info("Submitting one-shot task " + runnable);
+			s_pool.submit(runnable);
+			LOGGER.info(runnable + " submitted - waiting queue "
+					+ s_pool.getQueue().size());
 		} catch (final RejectedExecutionException e) {
-			s_logger.error("Cannot submit task", e);
+			LOGGER.error("Cannot submit task",
+					Throwables.getStackTraceAsString(e));
 		}
 	}
 
@@ -122,13 +127,14 @@ public class BluetoothThreadManager {
 	 */
 	public static <V> Future<V> submit(Callable<V> task) {
 		try {
-			s_logger.info("Submitting one-shot task " + task);
-			final Future<V> future = m_pool.submit(task);
-			s_logger.info(task + " submitted - waiting queue "
-					+ m_pool.getQueue().size());
+			LOGGER.info("Submitting one-shot task " + task);
+			final Future<V> future = s_pool.submit(task);
+			LOGGER.info(task + " submitted - waiting queue "
+					+ s_pool.getQueue().size());
 			return future;
 		} catch (final RejectedExecutionException e) {
-			s_logger.error("Cannot submit task", e);
+			LOGGER.error("Cannot submit task",
+					Throwables.getStackTraceAsString(e));
 			return null;
 		}
 	}
@@ -137,12 +143,13 @@ public class BluetoothThreadManager {
 	 * Shutdowns the pool. No task can be submitted once this method is called.
 	 */
 	public static void stopScheduler() {
-		s_logger.info("Shutdown scheduler");
+		LOGGER.info("Shutdown scheduler");
 		try {
-			m_pool.shutdownNow();
+			s_pool.shutdownNow();
 		} catch (final Throwable e) {
-			// Ignore.
-			s_logger.info("Exception during shutdown : ", e);
+			// Ignore but warn
+			LOGGER.warn("Exception during shutdown : ",
+					Throwables.getStackTraceAsString(e));
 		}
 	}
 

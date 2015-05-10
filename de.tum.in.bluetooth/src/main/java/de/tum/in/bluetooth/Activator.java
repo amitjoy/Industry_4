@@ -45,7 +45,7 @@ public class Activator implements BundleActivator {
 	/**
 	 * slf4j Logger
 	 */
-	private final static Logger m_logger = LoggerFactory
+	private final static Logger LOGGER = LoggerFactory
 			.getLogger(Activator.class);
 
 	/**
@@ -60,7 +60,7 @@ public class Activator implements BundleActivator {
 		m_connectionFactory = new ConnectionFactoryImpl();
 		context.registerService(ConnectionFactory.class.getName(),
 				m_connectionFactory, properties);
-		m_logger.debug(m_bundleMarker, "Started Bundle");
+		LOGGER.debug(m_bundleMarker, "Started Bundle");
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class Activator implements BundleActivator {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		m_connectionFactory = null;
-		m_logger.debug(m_bundleMarker, "Stopped Bundle");
+		LOGGER.debug(m_bundleMarker, "Stopped Bundle");
 	}
 
 }

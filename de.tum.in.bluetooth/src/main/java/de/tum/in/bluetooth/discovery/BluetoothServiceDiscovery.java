@@ -32,15 +32,17 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.xml.bind.JAXBException;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 
 import de.tum.in.bluetooth.devices.Device;
 import de.tum.in.bluetooth.devices.DeviceList;
@@ -64,18 +66,20 @@ public class BluetoothServiceDiscovery {
 	/**
 	 * Bundle Context.
 	 */
-	private final BundleContext m_context;
+	private BundleContext m_context;
 
 	/**
 	 * Logger.
 	 */
-	private final Logger m_logger = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(BluetoothServiceDiscovery.class);
 
 	/**
 	 * Map storing the currently registered ServiceRecord(with their
 	 * ServiceRegistration) by RemoteDevice
 	 */
-	private final Map<RemoteDevice, Map<ServiceRecord, ServiceRegistration>> m_servicesRecord = new HashMap<RemoteDevice, Map<ServiceRecord, ServiceRegistration>>();
+	private final Map<RemoteDevice, Map<ServiceRecord, ServiceRegistration>> m_servicesRecord = Maps
+			.newHashMap();
 
 	/**
 	 * Set of devices loaded from the <tt>devices.xml</tt> file. This file
@@ -86,43 +90,56 @@ public class BluetoothServiceDiscovery {
 	/**
 	 * List of device under attempts.
 	 */
-	private final Map<RemoteDevice, Integer> m_attempts = new HashMap<RemoteDevice, Integer>();
+	private final Map<RemoteDevice, Integer> m_attempts = Maps.newHashMap();
 
 	/**
-	 * Creates a {@link BluetoothServiceDiscovery}.
+	 * Default Constructor Required for DS.
 	 */
 	public BluetoothServiceDiscovery() {
-		m_context = FrameworkUtil.getBundle(getClass()).getBundleContext();
 	}
 
 	/**
-	 * Creates a {@link BluetoothServiceDiscovery}.
+	 * Creates a {@link BluetoothServiceDiscovery}. Mainly used for testing
+	 * environment.
 	 *
 	 * @param context
-	 *            the context
+	 *            the Bundle context
 	 */
 	public BluetoothServiceDiscovery(BundleContext context) {
 		m_context = context;
-		m_logger.info("Bluetooth Tracker Started");
+		LOGGER.info("Bluetooth Tracker Started");
+	}
+
+	/**
+	 * Callback during registration of this DS Service Component
+	 * 
+	 * @param context
+	 *            The injected reference for this DS Service Component
+	 */
+	@Activate
+	protected synchronized void activate(ComponentContext context) {
+		LOGGER.info("Activating Bluetooth Service Discovery....");
+		m_context = context.getBundleContext();
+		LOGGER.info("Activating Bluetooth Service Discovery....Done");
 	}
 
 	public void setDeviceFile(File file) throws IOException {
 		if (!file.exists()) {
 			m_fleet = null;
-			m_logger.warn("No devices.xml file found, ignoring authentication");
+			LOGGER.warn("No devices.xml file found, ignoring authentication");
 		} else {
 			try {
 				final FileInputStream fis = new FileInputStream(file);
 				m_fleet = ConfigurationUtils.unmarshal(DeviceList.class, fis);
-				m_logger.info(m_fleet.getDevices().size()
+				LOGGER.info(m_fleet.getDevices().size()
 						+ " devices loaded from devices.xml");
 				fis.close();
 			} catch (final JAXBException e) {
-				m_logger.error(
+				LOGGER.error(
 						"Cannot unmarshall devices from "
 								+ file.getAbsolutePath(), e);
 			} catch (final IOException e) {
-				m_logger.error(
+				LOGGER.error(
 						"Cannot read devices from " + file.getAbsolutePath(), e);
 			}
 		}
@@ -149,7 +166,7 @@ public class BluetoothServiceDiscovery {
 		if (services == null) {
 			return;
 		}
-		for (final ServiceRegistration sr : services.values()) {
+		for (final ServiceRegistration<?> sr : services.values()) {
 			sr.unregister();
 		}
 	}
@@ -170,9 +187,11 @@ public class BluetoothServiceDiscovery {
 			m_servicesRecord.put(remote,
 					new HashMap<ServiceRecord, ServiceRegistration>());
 		}
+
 		final Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("device.id", remote.getBluetoothAddress());
 		final int[] attributeIDs = serviceRecord.getAttributeIDs();
+
 		if (attributeIDs != null && attributeIDs.length > 0) {
 			final Map<Integer, DataElement> attrs = new HashMap<Integer, DataElement>();
 			for (final int attrID : attributeIDs) {
@@ -203,9 +222,10 @@ public class BluetoothServiceDiscovery {
 					device);
 			BluetoothThreadManager.submit(agent);
 		} catch (final Exception e) {
-			m_logger.error(
+			LOGGER.error(
 					"Cannot discover services from "
-							+ device.getBluetoothAddress(), e);
+							+ device.getBluetoothAddress(),
+					Throwables.getStackTraceAsString(e));
 		}
 	}
 
@@ -222,7 +242,7 @@ public class BluetoothServiceDiscovery {
 
 	/**
 	 * Callback receiving the set of discovered service from the given
-	 * RemoteDevice.
+	 * {@link RemoteDevice}.
 	 *
 	 * @param remote
 	 *            the RemoteDevice
@@ -235,7 +255,7 @@ public class BluetoothServiceDiscovery {
 			unregister(remote);
 
 			if (retry(remote)) {
-				m_logger.info("Retrying service discovery for device "
+				LOGGER.info("Retrying service discovery for device "
 						+ remote.getBluetoothAddress() + " - "
 						+ m_attempts.get(remote));
 				incrementAttempt(remote);
@@ -249,7 +269,7 @@ public class BluetoothServiceDiscovery {
 			}
 			return;
 		}
-		m_logger.info("Agent has discovered " + discoveredServices.size()
+		LOGGER.info("Agent has discovered " + discoveredServices.size()
 				+ " services from " + remote.getBluetoothAddress() + ".");
 
 		// Service discovery successful, we reset the number of attempts.
@@ -267,17 +287,17 @@ public class BluetoothServiceDiscovery {
 			}
 
 			if (url == null) {
-				m_logger.warn("Can't compute the service url for device "
+				LOGGER.warn("Can't compute the service url for device "
 						+ remote.getBluetoothAddress()
 						+ " - Ignoring service record");
 			} else {
 				final DataElement serviceName = record
 						.getAttributeValue(SERVICE_NAME_ATTRIBUTE);
 				if (serviceName != null) {
-					m_logger.info("Service " + serviceName.getValue()
-							+ " found " + url);
+					LOGGER.info("Service " + serviceName.getValue() + " found "
+							+ url);
 				} else {
-					m_logger.info("Service found " + url);
+					LOGGER.info("Service found " + url);
 				}
 				register(remote, record, device, url);
 			}
@@ -324,7 +344,7 @@ public class BluetoothServiceDiscovery {
 				sn = remote.getFriendlyName(false);
 			} catch (final IOException e) {
 				// ignore the exception. Just warn it.
-				m_logger.warn(Throwables.getStackTraceAsString(e));
+				LOGGER.warn(Throwables.getStackTraceAsString(e));
 			}
 
 			for (int i = 0; i < m_fleet.getDevices().size(); i++) {

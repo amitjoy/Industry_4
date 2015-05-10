@@ -47,7 +47,8 @@ public class DeviceDiscoveryAgent implements Runnable {
 	/**
 	 * Logger.
 	 */
-	private final Logger m_logger = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(DeviceDiscoveryAgent.class);
 
 	private final Object m_lock = new Object();
 
@@ -69,17 +70,17 @@ public class DeviceDiscoveryAgent implements Runnable {
 	@Override
 	public void run() {
 		try {
-			m_logger.info("Running Device Discovery Agent");
+			LOGGER.info("Running Device Discovery Agent");
 			final LocalDevice local = initialize();
 			if (!LocalDevice.isPowerOn() || local == null) {
-				m_logger.info("Device discovery aborted - cannot get the local device");
+				LOGGER.info("Device discovery aborted - cannot get the local device");
 				m_parent.discovered(null);
 				return;
 			}
 
 			doInquiry(local);
 		} catch (final Throwable e) {
-			m_logger.error("Unexpected exception during device inquiry", e);
+			LOGGER.error("Unexpected exception during device inquiry", e);
 		}
 	}
 
@@ -94,14 +95,14 @@ public class DeviceDiscoveryAgent implements Runnable {
 
 	void doInquiry(LocalDevice local) {
 		try {
-			m_logger.info("Starting device inquiry...");
+			LOGGER.info("Starting device inquiry...");
 
 			if (!Env.isTestEnvironmentEnabled()) {
 				final DiscoveryAgent agent = local.getDiscoveryAgent();
 				m_listener = new DeviceDiscoveryListener(agent);
 				agent.startInquiry(getDiscoveryMode(), m_listener);
 			} else {
-				m_logger.warn("=== TEST ENVIRONMENT ENABLED ===");
+				LOGGER.warn("=== TEST ENVIRONMENT ENABLED ===");
 				m_listener = new DeviceDiscoveryListener(null);
 			}
 
@@ -113,15 +114,15 @@ public class DeviceDiscoveryAgent implements Runnable {
 				}
 			} catch (final InterruptedException e) {
 				// Ignore but warning
-				m_logger.warn(Throwables.getStackTraceAsString(e));
+				LOGGER.warn(Throwables.getStackTraceAsString(e));
 			}
 			final Set<RemoteDevice> discoveredDevices = m_listener
 					.getDiscoveredDevices();
-			m_logger.info("Injecting found devices " + discoveredDevices
+			LOGGER.info("Injecting found devices " + discoveredDevices
 					+ " to the parent");
 			m_parent.discovered(discoveredDevices);
 		} catch (final BluetoothStateException e1) {
-			m_logger.error("Device discovery aborted", e1);
+			LOGGER.error("Device discovery aborted", e1);
 			m_parent.discovered(null);
 		} finally {
 			m_listener = null;
@@ -133,11 +134,11 @@ public class DeviceDiscoveryAgent implements Runnable {
 		LocalDevice local;
 		try {
 			local = LocalDevice.getLocalDevice();
-			m_logger.info("Initialize : " + "Address: "
+			LOGGER.info("Initialize : " + "Address: "
 					+ local.getBluetoothAddress() + " ; " + "Name: "
 					+ local.getFriendlyName());
 		} catch (final BluetoothStateException e) {
-			m_logger.error("Bluetooth Adapter not started.");
+			LOGGER.error("Bluetooth Adapter not started.");
 			return null;
 		}
 		return local;
@@ -185,7 +186,7 @@ public class DeviceDiscoveryAgent implements Runnable {
 		public void deviceDiscovered(RemoteDevice remote, DeviceClass clazz) {
 			synchronized (this) {
 				try {
-					m_logger.info("Device discovered : "
+					LOGGER.info("Device discovered : "
 							+ remote.getBluetoothAddress() + " "
 							+ remote.getFriendlyName(false));
 					if (m_onlineCheckOnDiscovery) {
@@ -195,7 +196,7 @@ public class DeviceDiscoveryAgent implements Runnable {
 						// bug in the Windows stack:
 						// http://code.google.com/p/bluecove/issues/detail?id=51
 						// Paired devices are kept forever.
-						m_logger.info("Start service discovery on : "
+						LOGGER.info("Start service discovery on : "
 								+ remote.getBluetoothAddress()
 								+ " to ensure availability");
 						final int transId = m_agent.searchServices(null,
@@ -203,11 +204,11 @@ public class DeviceDiscoveryAgent implements Runnable {
 						m_serviceDiscoveryInProgress.put(transId, remote);
 					} else {
 						// We add the device.
-						m_logger.info("Device discovery completed successfully, injecting device (no online check)");
+						LOGGER.info("Device discovery completed successfully, injecting device (no online check)");
 						m_discoveredDevices.add(remote);
 					}
 				} catch (final Throwable e) {
-					m_logger.error(
+					LOGGER.error(
 							"Something really bad happened during the device discovery",
 							e);
 				}
@@ -216,9 +217,9 @@ public class DeviceDiscoveryAgent implements Runnable {
 
 		@Override
 		public void inquiryCompleted(int result) {
-			m_logger.info("Inquiry completed : " + result);
+			LOGGER.info("Inquiry completed : " + result);
 			if (result == INQUIRY_ERROR || result == INQUIRY_TERMINATED) {
-				m_logger.info("The inquiry was not successfully completed");
+				LOGGER.info("The inquiry was not successfully completed");
 				m_discoveredDevices.clear();
 			}
 			m_inquiryCompleted = true;
@@ -226,11 +227,11 @@ public class DeviceDiscoveryAgent implements Runnable {
 			// so it's empty.
 			if (m_serviceDiscoveryInProgress.isEmpty()) {
 				synchronized (m_lock) {
-					m_logger.info("Device inquiry and online check done, releasing lock");
+					LOGGER.info("Device inquiry and online check done, releasing lock");
 					m_lock.notifyAll();
 				}
 			} else {
-				m_logger.info("Waiting for "
+				LOGGER.info("Waiting for "
 						+ m_serviceDiscoveryInProgress.size()
 						+ " service discovery to complete");
 			}
@@ -252,33 +253,33 @@ public class DeviceDiscoveryAgent implements Runnable {
 			synchronized (this) {
 				remote = m_serviceDiscoveryInProgress.remove(transID);
 				if (remote == null) {
-					m_logger.warn("No remote device associated with the transaction id : "
+					LOGGER.warn("No remote device associated with the transaction id : "
 							+ transID);
 					return;
 				}
 			}
 
-			m_logger.info("Service search completed for "
+			LOGGER.info("Service search completed for "
 					+ remote.getBluetoothAddress() + " with result : "
 					+ respCode);
 			if (respCode == DiscoveryListener.SERVICE_SEARCH_COMPLETED
 					|| respCode == DiscoveryListener.SERVICE_SEARCH_NO_RECORDS) {
-				m_logger.info("Service discovery completed successfully, injecting device");
+				LOGGER.info("Service discovery completed successfully, injecting device");
 				m_discoveredDevices.add(remote);
 			} else if (respCode == DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE) {
-				m_logger.warn("Device " + remote + " not reachable");
+				LOGGER.warn("Device " + remote + " not reachable");
 			} else {
-				m_logger.warn("Device " + remote
+				LOGGER.warn("Device " + remote
 						+ " has not terminated successfully: " + respCode);
 			}
 
 			if (m_inquiryCompleted && m_serviceDiscoveryInProgress.isEmpty()) {
 				synchronized (m_lock) {
-					m_logger.info("Device inquiry and online check done, releasing lock");
+					LOGGER.info("Device inquiry and online check done, releasing lock");
 					m_lock.notifyAll();
 				}
 			} else {
-				m_logger.info("Waiting for "
+				LOGGER.info("Waiting for "
 						+ m_serviceDiscoveryInProgress.size()
 						+ " service discovery to complete "
 						+ "(device inquiry completed: " + m_inquiryCompleted

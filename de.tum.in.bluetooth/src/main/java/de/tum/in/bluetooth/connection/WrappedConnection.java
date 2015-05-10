@@ -24,6 +24,8 @@ import javax.microedition.io.InputConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Throwables;
+
 /**
  * Used to wrap Bluetooth Serial Profile Connection stream
  * 
@@ -34,7 +36,7 @@ public class WrappedConnection implements InputConnection {
 	/**
 	 * slf4j Logger
 	 */
-	private final Logger m_logger = LoggerFactory
+	private static final Logger LOGGER = LoggerFactory
 			.getLogger(WrappedConnection.class);
 	private final InputConnection m_connection;
 
@@ -43,7 +45,7 @@ public class WrappedConnection implements InputConnection {
 
 	/** Constructor */
 	public WrappedConnection(InputConnection connection) {
-		m_logger.debug("Constructing wrapped connection");
+		LOGGER.debug("Constructing wrapped connection");
 		this.m_connection = connection;
 	}
 
@@ -52,18 +54,19 @@ public class WrappedConnection implements InputConnection {
 	public void close() throws IOException {
 
 		try {
-			m_logger.debug("Closing connection");
+			LOGGER.debug("Closing connection");
 			m_connection.close();
 			if (m_dataInputStream != null) {
-				m_logger.debug("Closing dataInputStream");
+				LOGGER.debug("Closing dataInputStream");
 				m_dataInputStream.close();
 			}
 			if (m_inputStream != null) {
-				m_logger.debug("Closing inputStream");
+				LOGGER.debug("Closing inputStream");
 				m_inputStream.close();
 			}
 		} catch (final IOException e) {
-			m_logger.error("Failed to close connection", e);
+			LOGGER.error("Failed to close connection",
+					Throwables.getStackTraceAsString(e));
 			throw e;
 		}
 
@@ -72,12 +75,13 @@ public class WrappedConnection implements InputConnection {
 	/** {@inheritDoc} */
 	@Override
 	public DataInputStream openDataInputStream() throws IOException {
-		m_logger.info("Opening DataInputStream connection");
+		LOGGER.info("Opening DataInputStream connection");
 		try {
 			m_dataInputStream = m_connection.openDataInputStream();
 			return m_dataInputStream;
 		} catch (final IOException e) {
-			m_logger.error("Failed to open connection", e);
+			LOGGER.error("Failed to open connection",
+					Throwables.getStackTraceAsString(e));
 			throw e;
 		}
 	}
@@ -85,12 +89,13 @@ public class WrappedConnection implements InputConnection {
 	/** {@inheritDoc} */
 	@Override
 	public InputStream openInputStream() throws IOException {
-		m_logger.debug("Opening InputStream connection");
+		LOGGER.debug("Opening InputStream connection");
 		try {
 			m_inputStream = m_connection.openInputStream();
 			return m_inputStream;
 		} catch (final IOException e) {
-			m_logger.error("Failed to open connection", e);
+			LOGGER.error("Failed to open connection",
+					Throwables.getStackTraceAsString(e));
 			throw e;
 
 		}

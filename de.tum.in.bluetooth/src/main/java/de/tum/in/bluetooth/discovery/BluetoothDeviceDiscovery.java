@@ -26,7 +26,6 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +57,6 @@ import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -66,6 +64,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Maps;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
 import de.tum.in.bluetooth.BluetoothController;
@@ -201,7 +200,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	/**
 	 * Bundle Context.
 	 */
-	private final BundleContext m_context;
+	private BundleContext m_context;
 
 	/**
 	 * Kura Cloud Service Injection
@@ -212,12 +211,14 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	/**
 	 * Map storing the currently exposed bluetooth device.
 	 */
-	private final Map<RemoteDevice, ServiceRegistration> m_devices = new HashMap<RemoteDevice, ServiceRegistration>();
+	private final Map<RemoteDevice, ServiceRegistration> m_devices = Maps
+			.newHashMap();
 
 	/**
 	 * Logger.
 	 */
-	private final Logger m_logger = LoggerFactory.getLogger(this.getClass());
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(BluetoothDeviceDiscovery.class);
 
 	/**
 	 * Set of devices loaded from the <tt>devices.xml</tt> file. This file
@@ -255,7 +256,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 */
 	public BluetoothDeviceDiscovery() {
 		super(APP_ID);
-		m_context = FrameworkUtil.getBundle(getClass()).getBundleContext();
 	}
 
 	/**
@@ -291,7 +291,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	public void setAutopairingConfiguration(File file) throws IOException {
 		if (!file.exists()) {
 			m_fleet = null;
-			m_logger.warn("No devices.xml file found, ignoring auto-pairing and device filter");
+			LOGGER.warn("No devices.xml file found, ignoring auto-pairing and device filter");
 		} else {
 			try {
 				final FileInputStream fis = new FileInputStream(file);
@@ -302,22 +302,21 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 					m_filter = Pattern.compile(filter);
 				}
 
-				m_logger.info(m_fleet.getDevices().size()
+				LOGGER.info(m_fleet.getDevices().size()
 						+ " devices loaded from devices.xml");
 				if (m_filter != null) {
-					m_logger.info("Device filter set to : "
-							+ m_filter.pattern());
+					LOGGER.info("Device filter set to : " + m_filter.pattern());
 				} else {
-					m_logger.info("No device filter set - Accepting all devices");
+					LOGGER.info("No device filter set - Accepting all devices");
 				}
 
 				fis.close();
 			} catch (final JAXBException e) {
-				m_logger.error(
+				LOGGER.error(
 						"Cannot unmarshall devices from "
 								+ file.getAbsolutePath(), e);
 			} catch (final IOException e) {
-				m_logger.error(
+				LOGGER.error(
 						"Cannot read devices from " + file.getAbsolutePath(), e);
 			}
 		}
@@ -334,7 +333,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 */
 	public void setDeviceNameFile(String name) {
 		if (name == null || name.equals("null") || name.trim().length() == 0) {
-			m_logger.warn("No device name file set, disabling persistent support");
+			LOGGER.warn("No device name file set, disabling persistent support");
 			return;
 		}
 		m_deviceNameFile = new File(name);
@@ -346,12 +345,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		final Properties properties = new Properties();
 
 		if (m_deviceNameFile == null) {
-			m_logger.error("No device name files, ignoring persistent support");
+			LOGGER.error("No device name files, ignoring persistent support");
 			return properties;
 		}
 
 		if (!m_deviceNameFile.exists()) {
-			m_logger.error("The device name file does not exist, ignoring ("
+			LOGGER.error("The device name file does not exist, ignoring ("
 					+ m_deviceNameFile.getAbsolutePath() + ")");
 			return properties;
 		}
@@ -360,10 +359,10 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			final FileInputStream fis = new FileInputStream(m_deviceNameFile);
 			properties.load(fis);
 			fis.close();
-			m_logger.info("Device name file loaded, " + properties.size()
+			LOGGER.info("Device name file loaded, " + properties.size()
 					+ " devices read");
 		} catch (final IOException e) {
-			m_logger.error("Cannot load the device name file ("
+			LOGGER.error("Cannot load the device name file ("
 					+ m_deviceNameFile.getAbsolutePath() + ")", e);
 		}
 
@@ -387,7 +386,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			properties.store(fos, "Mac to Name file");
 			fos.close();
 		} catch (final IOException e) {
-			m_logger.error(
+			LOGGER.error(
 					"Cannot store the 'names' in "
 							+ m_deviceNameFile.getAbsolutePath(), e);
 		}
@@ -400,13 +399,14 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 *            the service configuration properties
 	 */
 	@Activate
-	protected void activate(ComponentContext context,
+	protected synchronized void activate(ComponentContext context,
 			Map<String, Object> properties) {
-		m_logger.info("Activating Bluetooth....");
+		LOGGER.info("Activating Bluetooth....");
 		super.setCloudService(m_cloudService);
 		super.activate(context);
 		m_properties = properties;
-		m_logger.info("Activating Bluetooth... Done.");
+		m_context = context.getBundleContext();
+		LOGGER.info("Activating Bluetooth... Done.");
 	}
 
 	/**
@@ -417,7 +417,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 */
 	@Deactivate
 	@Override
-	protected void deactivate(ComponentContext componentContext) {
+	protected synchronized void deactivate(ComponentContext componentContext) {
 		super.deactivate(componentContext);
 		stop();
 	}
@@ -427,7 +427,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 */
 	@Override
 	public void start() {
-		m_logger.info("Enabling Bluetooth...");
+		LOGGER.info("Enabling Bluetooth...");
 
 		extractRequiredConfigurations();
 
@@ -436,13 +436,13 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		}
 
 		if (!isBluetoothStackSupported()) {
-			m_logger.error("The Bluetooth stack " + getBluetoothStack()
+			LOGGER.error("The Bluetooth stack " + getBluetoothStack()
 					+ " is not supported (" + SUPPORTED_STACKS + ")");
 			return;
 		}
 
 		if ("winsock".equals(getBluetoothStack())) {
-			m_logger.info("Winsock stack detected, forcing online check and lost device unpairing");
+			LOGGER.info("Winsock stack detected, forcing online check and lost device unpairing");
 			m_onlineCheckOnDiscovery = true;
 			m_unpairLostDevices = true;
 		}
@@ -457,7 +457,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 */
 	private void extractRequiredConfigurations() {
 
-		m_logger.info("Extracting Required Configurations...");
+		LOGGER.info("Extracting Required Configurations...");
 
 		m_period = (int) m_properties.get(PERIOD);
 		m_ignoreUnnamedDevices = (boolean) m_properties
@@ -479,7 +479,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			m_period = 10; // Default to 10 seconds.
 		}
 
-		m_logger.info("Configuration Extraction Complete");
+		LOGGER.info("Configuration Extraction Complete");
 	}
 
 	/**
@@ -504,14 +504,14 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 				.join(splitter.splitToList(devices));
 
 		if (isNullOrEmpty(deviceAsPropertiesFormat.toString())) {
-			m_logger.error("No Bluetooth Enabled Device Addess Found");
+			LOGGER.error("No Bluetooth Enabled Device Addess Found");
 			return properties;
 		}
 
 		try {
 			properties.load(new StringReader(deviceAsPropertiesFormat));
 		} catch (final IOException e) {
-			m_logger.error("Error while parsing list of input bluetooth devices");
+			LOGGER.error("Error while parsing list of input bluetooth devices");
 		}
 		return properties;
 	}
@@ -521,7 +521,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 */
 	@Override
 	public void stop() {
-		m_logger.info("Disabling Bluetooth...");
+		LOGGER.info("Disabling Bluetooth...");
 		if (m_agent == null) {
 			return;
 		}
@@ -529,10 +529,10 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		m_agent = null;
 		BluetoothThreadManager.stopScheduler();
 		unregisterAll();
-		m_logger.info("Disabling Bluetooth...Done");
-		m_logger.info("Releasing all subscription...");
+		LOGGER.info("Disabling Bluetooth...Done");
+		LOGGER.info("Releasing all subscription...");
 		getCloudApplicationClient().release();
-		m_logger.info("Releasing all subscription...done");
+		LOGGER.info("Releasing all subscription...done");
 
 	}
 
@@ -560,7 +560,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	public void discovered(Set<RemoteDevice> discovered) {
 		if (discovered == null) {
 			// Bluetooth error, we unregister all devices
-			m_logger.warn("Bluetooth error detected, unregistering all devices");
+			LOGGER.warn("Bluetooth error detected, unregistering all devices");
 			unregisterAll();
 			return;
 		}
@@ -570,9 +570,8 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		Set<RemoteDevice> presents = Collections.unmodifiableSet(m_devices
 				.keySet());
 		for (final RemoteDevice old : presents) {
-			m_logger.info("Did we lost contact with "
-					+ old.getBluetoothAddress() + " => "
-					+ (!contains(discovered, old)));
+			LOGGER.info("Did we lost contact with " + old.getBluetoothAddress()
+					+ " => " + (!contains(discovered, old)));
 			if (!contains(discovered, old)) {
 				final ServiceCheckAgent serviceCheckAgent = new ServiceCheckAgent(
 						old, SERVICECHECK_UNREGISTER_IF_NOT_HERE);
@@ -584,14 +583,14 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		for (final RemoteDevice remote : discovered) {
 			if (!m_devices.containsKey(remote)) {
 				if (matchesDeviceFilter(remote)) {
-					m_logger.info("New device found ("
+					LOGGER.info("New device found ("
 							+ remote.getBluetoothAddress() + ")");
 					register(remote); // register the service as RemoteDevice
 				} else {
-					m_logger.info("Device ignored because it does not match the device filter");
+					LOGGER.info("Device ignored because it does not match the device filter");
 				}
 			} else {
-				m_logger.info("Already known device "
+				LOGGER.info("Already known device "
 						+ remote.getBluetoothAddress());
 			}
 		}
@@ -605,7 +604,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			try {
 				local = LocalDevice.getLocalDevice();
 			} catch (final BluetoothStateException e) {
-				m_logger.error("Bluetooth Adapter not started.");
+				LOGGER.error("Bluetooth Adapter not started.");
 			}
 			final RemoteDevice[] cachedDevices = local.getDiscoveryAgent()
 					.retrieveDevices(DiscoveryAgent.CACHED);
@@ -663,16 +662,16 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			try {
 				name = device.getFriendlyName(false);
 				if (name != null && name.length() != 0) {
-					m_logger.info("New device name discovered : "
+					LOGGER.info("New device name discovered : "
 							+ device.getBluetoothAddress() + " => " + name);
 					m_names.setProperty(device.getBluetoothAddress(), name);
 				}
 			} catch (final IOException e) {
-				m_logger.info("Not able to get the device friendly name of "
+				LOGGER.info("Not able to get the device friendly name of "
 						+ device.getBluetoothAddress(), e);
 			}
 		} else {
-			m_logger.info("Found the device name in memory : "
+			LOGGER.info("Found the device name in memory : "
 					+ device.getBluetoothAddress() + " => " + name);
 		}
 		return name;
@@ -712,18 +711,18 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			device = new RemoteNamedDevice(device, name);
 			props.put("device.name", name);
 		} else if (m_ignoreUnnamedDevices) {
-			m_logger.warn("Ignoring device " + device.getBluetoothAddress()
+			LOGGER.warn("Ignoring device " + device.getBluetoothAddress()
 					+ " - discovery set to ignore " + "unnamed devices");
 			return;
 		}
 
-		m_logger.info("Registering new service for "
+		LOGGER.info("Registering new service for "
 				+ device.getBluetoothAddress() + " with properties " + props);
 
 		// check autopairing
 		if (!device.isAuthenticated()) {
 			if (!pair(device)) {
-				m_logger.warn("Aborting registering for "
+				LOGGER.warn("Aborting registering for "
 						+ device.getBluetoothAddress());
 				return;
 			}
@@ -740,7 +739,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			try {
 				RemoteDeviceHelper.removeAuthentication(device);
 			} catch (final IOException e) {
-				m_logger.error(
+				LOGGER.error(
 						"Can't unpair device " + device.getBluetoothAddress(),
 						e);
 			}
@@ -756,7 +755,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 */
 	boolean pair(final RemoteDevice device) {
 		if (m_fleet == null || m_fleet.getDevices() == null) {
-			m_logger.info("Ignoring autopairing - no fleet configured");
+			LOGGER.info("Ignoring autopairing - no fleet configured");
 			return true;
 		}
 
@@ -764,7 +763,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		final String name = getDeviceName(device);
 
 		if (name == null && m_ignoreUnnamedDevices) {
-			m_logger.warn("Pairing not attempted, ignoring unnamed devices");
+			LOGGER.warn("Pairing not attempted, ignoring unnamed devices");
 			return false;
 		}
 
@@ -774,14 +773,14 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			final String pin = model.getPin();
 			if (Pattern.matches(regex, address)
 					|| (name != null && Pattern.matches(regex, name))) {
-				m_logger.info("Paring pattern match for " + address + " / "
+				LOGGER.info("Paring pattern match for " + address + " / "
 						+ name + " with " + regex);
 				try {
 					RemoteDeviceHelper.authenticate(device, pin);
-					m_logger.info("Device " + address + " paired");
+					LOGGER.info("Device " + address + " paired");
 					return true;
 				} catch (final IOException e) {
-					m_logger.error(
+					LOGGER.error(
 							"Cannot authenticate device despite it match the regex "
 									+ regex, e);
 				}
@@ -929,12 +928,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 
 	@Override
 	public void onConnectionEstablished() {
-		m_logger.info("Connected to Message Broker");
+		LOGGER.info("Connected to Message Broker");
 	}
 
 	@Override
 	public void onConnectionLost() {
-		m_logger.info("Disconnected from Message Broker");
+		LOGGER.info("Disconnected from Message Broker");
 	}
 
 	@Override
