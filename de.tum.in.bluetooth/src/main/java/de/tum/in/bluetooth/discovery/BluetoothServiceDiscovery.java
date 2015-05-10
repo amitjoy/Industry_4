@@ -272,7 +272,7 @@ public class BluetoothServiceDiscovery {
 						+ " - Ignoring service record");
 			} else {
 				final DataElement serviceName = record
-						.getAttributeValue(BluetoothServiceDiscovery.SERVICE_NAME_ATTRIBUTE);
+						.getAttributeValue(SERVICE_NAME_ATTRIBUTE);
 				if (serviceName != null) {
 					m_logger.info("Service " + serviceName.getValue()
 							+ " found " + url);
