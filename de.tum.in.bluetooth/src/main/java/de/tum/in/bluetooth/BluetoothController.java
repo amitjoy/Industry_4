@@ -30,6 +30,7 @@ public interface BluetoothController {
 
 		public BluetoothException() {
 			super(MESSAGE);
+			// TO-DO Refactor this exception class
 		}
 	}
 

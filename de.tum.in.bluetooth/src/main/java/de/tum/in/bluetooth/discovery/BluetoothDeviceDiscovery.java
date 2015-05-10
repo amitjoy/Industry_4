@@ -50,8 +50,6 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraNotConnectedException;
-import org.eclipse.kura.KuraTimeoutException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
@@ -66,6 +64,8 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
 import de.tum.in.bluetooth.BluetoothController;
@@ -96,11 +96,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * Defines Quality of Service for the bluetooth Application
 	 */
 	private static final int QOS = 5;
-
-	/**
-	 * Configurable Property needed to control the bluetooth in Service Gateway
-	 */
-	private static final String SUBSCRIBE_TOPICPREFIX_PROP_NAME = "publish.appTopicPrefix";
 
 	/**
 	 * Configurable Property specifying the time between two inquiries. This
@@ -479,7 +474,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			m_discoveryMode = DiscoveryMode.LIAC;
 
 		// m_names = loadDeviceNames(); //Used for testing purposes
-		m_names = getListOfDevicesToBeDiscovered((String) m_properties
+		m_names = loadListOfDevicesToBeDiscovered((String) m_properties
 				.get(DEVICES));
 
 		if (m_period == 0) {
@@ -497,24 +492,26 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 *            The Configuration input as Property K-V Format
 	 * @return the parsed input as properties
 	 */
-	private Properties getListOfDevicesToBeDiscovered(String devices) {
+	private Properties loadListOfDevicesToBeDiscovered(String devices) {
 		final String SEPARATOR = ";";
-		final String[] deviceList = devices.split(SEPARATOR);
+		final String NEW_LINE = "\n";
+
+		final Splitter splitter = Splitter.on(SEPARATOR).omitEmptyStrings()
+				.trimResults();
+		final Joiner stringDevicesJoiner = Joiner.on(NEW_LINE).skipNulls();
 
 		final Properties properties = new Properties();
-		final StringBuffer devicesListBuffer = new StringBuffer();
 
-		for (int i = 0; i < deviceList.length; i++) {
-			devicesListBuffer.append(deviceList[i]);
-			devicesListBuffer.append("\n");
-		}
+		final String deviceAsPropertiesFormat = stringDevicesJoiner
+				.join(splitter.splitToList(devices));
 
-		if (isNullOrEmpty(devicesListBuffer.toString())) {
+		if (isNullOrEmpty(deviceAsPropertiesFormat.toString())) {
 			m_logger.error("No Bluetooth Enabled Device Addess Found");
 			return properties;
 		}
+
 		try {
-			properties.load(new StringReader(devicesListBuffer.toString()));
+			properties.load(new StringReader(deviceAsPropertiesFormat));
 		} catch (final IOException e) {
 			m_logger.error("Error while parsing list of input bluetooth devices");
 		}
@@ -740,7 +737,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 
 	}
 
-	void unpair(RemoteDevice device) {
+	void unpair(final RemoteDevice device) {
 		if (matchesDeviceFilter(device) && m_unpairLostDevices) {
 			try {
 				RemoteDeviceHelper.removeAuthentication(device);
@@ -934,20 +931,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 
 	@Override
 	public void onConnectionEstablished() {
-		m_logger.info("Connecting to Message Broker...");
-		try {
-			m_topic = (String) m_properties
-					.get(SUBSCRIBE_TOPICPREFIX_PROP_NAME);
-			getCloudApplicationClient().controlSubscribe(m_topic + "#", QOS);
-			m_logger.info("Connecting to Message Broker...done");
-			m_logger.info("Subscribing to Topic {}...", m_topic);
-		} catch (final KuraTimeoutException e) {
-			e.printStackTrace();
-		} catch (final KuraNotConnectedException e) {
-			e.printStackTrace();
-		} catch (final KuraException e) {
-			e.printStackTrace();
-		}
+		m_logger.info("Connected to Message Broker");
 	}
 
 	@Override
