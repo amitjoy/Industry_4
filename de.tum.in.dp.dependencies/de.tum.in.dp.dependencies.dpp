@@ -1,0 +1,22 @@
+#Deployment Plugin Project File
+#Tue May 12 00:18:57 CEST 2015
+build.ant.name=<.>/de.tum.in.dp.dependencies_build.xml
+build.dp.file=<.>/de.tum.in.dp.dependencies.dp
+build.location=
+bundles.0.bundle_path=<.>/lib/guava-18.0.jar
+bundles.0.customizer=false
+bundles.0.headers.count=0
+bundles.0.missing=false
+bundles.0.name=bundles/guava-18.0.jar
+bundles.0.symbolic_name=com.google.guava
+bundles.0.version=18.0.0
+bundles.count=1
+certificates.count=0
+general.signbundles=false
+headers.contact.address=admin@amitinside.com
+headers.copyright=Amit Kumar Mondal
+headers.other.headers=DeploymentPackage-Name\:Required Dependencies OSGi Bundles
+headers.symbolic.name=de.tum.in.dp.dependencies
+headers.version=1.0.0
+resources.count=0
+
