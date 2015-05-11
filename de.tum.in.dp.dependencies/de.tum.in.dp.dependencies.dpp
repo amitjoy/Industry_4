@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Tue May 12 00:18:57 CEST 2015
+#Tue May 12 00:21:00 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.dependencies_build.xml
 build.dp.file=<.>/de.tum.in.dp.dependencies.dp
 build.location=
@@ -12,7 +12,7 @@ bundles.0.symbolic_name=com.google.guava
 bundles.0.version=18.0.0
 bundles.count=1
 certificates.count=0
-general.signbundles=false
+general.signbundles=true
 headers.contact.address=admin@amitinside.com
 headers.copyright=Amit Kumar Mondal
 headers.other.headers=DeploymentPackage-Name\:Required Dependencies OSGi Bundles
