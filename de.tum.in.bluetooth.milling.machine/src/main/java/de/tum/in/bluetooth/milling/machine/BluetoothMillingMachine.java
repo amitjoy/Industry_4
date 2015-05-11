@@ -17,8 +17,11 @@ package de.tum.in.bluetooth.milling.machine;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.bluetooth.ServiceRecord;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -38,8 +41,11 @@ import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.io.ConnectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 @Component(immediate = false, name = "de.tum.in.bluetooth.milling.machine")
 @Service(value = { BluetoothMillingMachine.class })
@@ -77,6 +83,14 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	@Reference
 	private volatile ConfigurationService m_configurationService;
 
+	@Reference
+	private volatile ServiceRecord m_serviceRecord;
+
+	@Reference
+	private volatile ConnectorService m_connectorService;
+
+	private List<ServiceRecord> m_serviceRecords;
+
 	private volatile CloudClient m_cloudClient;
 
 	private float m_temperature;
@@ -86,55 +100,76 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		super(APP_ID);
 	}
 
+	public synchronized void setServiceRecord(ServiceRecord serviceRecord) {
+		if (m_serviceRecords.size() == 0) {
+			m_serviceRecords.add(serviceRecord);
+		}
+	}
+
+	public synchronized void unsetServiceRecord(ServiceRecord serviceRecord) {
+		if (m_serviceRecords.size() > 0)
+			m_serviceRecords.clear();
+	}
+
+	public synchronized void setConnectorService(
+			ConnectorService connectorService) {
+		if (m_connectorService == null)
+			m_connectorService = connectorService;
+	}
+
+	public synchronized void unsetConnectorService(
+			ConnectorService connectorService) {
+		if (m_connectorService != null)
+			m_connectorService = null;
+	}
+
 	@Override
-	public void setCloudService(CloudService cloudService) {
+	public synchronized void setCloudService(CloudService cloudService) {
 		if (m_cloudService == null) {
 			super.setCloudService(m_cloudService = cloudService);
 		}
 	}
 
 	@Override
-	public void unsetCloudService(CloudService cloudService) {
+	public synchronized void unsetCloudService(CloudService cloudService) {
 		if (m_cloudService == cloudService)
 			super.setCloudService(m_cloudService = null);
 	}
 
-	public void setConfigurationService(
+	public synchronized void setConfigurationService(
 			ConfigurationService configurationService) {
 		if (m_cloudService == null) {
 			m_configurationService = configurationService;
 		}
 	}
 
-	public void unsetConfigurationService(
+	public synchronized void unsetConfigurationService(
 			ConfigurationService configurationService) {
 		if (m_configurationService == configurationService)
 			m_configurationService = null;
 	}
 
-	public void setSystemService(SystemService systemService) {
+	public synchronized void setSystemService(SystemService systemService) {
 		if (m_systemService == null)
 			m_systemService = systemService;
 	}
 
-	public void unsetSystemService(SystemService systemService) {
+	public synchronized void unsetSystemService(SystemService systemService) {
 		if (m_systemService == systemService)
 			m_systemService = null;
 	}
 
 	@Activate
-	protected void activate(ComponentContext componentContext,
+	protected synchronized void activate(ComponentContext componentContext,
 			Map<String, Object> properties) {
-		LOGGER.info("Activating HVAC Component...");
+		LOGGER.info("Activating Bluetooth Milling Machine Component...");
 
 		m_properties = properties;
-		for (final String s : properties.keySet()) {
-			LOGGER.info("Activate - " + s + ": " + properties.get(s));
-		}
+		m_serviceRecords = Lists.newCopyOnWriteArrayList();
 
 		super.setCloudService(m_cloudService);
 		super.activate(componentContext);
-		LOGGER.info("Activating HVAC... Done.");
+		LOGGER.info("Activating Bluetooth Milling Machine... Done.");
 
 		doPublish();
 	}
