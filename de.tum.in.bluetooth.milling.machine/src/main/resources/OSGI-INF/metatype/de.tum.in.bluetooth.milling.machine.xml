@@ -15,7 +15,7 @@
 
 		<AD id="program.setPoint" name="program.setPoint" type="Float"
 			cardinality="0" required="false" default="20.5" min="5.0" max="40.0"
-			description="Temperature Set Point in Celsius for the heating cycle with the operating mode is Program." />
+			description="Configurable Property to check the setpoint speed for milling machines." />
 
 		<AD id="publish.rate" name="publish.rate" type="Integer"
 			cardinality="0" required="true" default="6" min="1"
@@ -23,7 +23,7 @@
 
 		<AD id="publish.semanticTopic" name="publish.semanticTopic" type="String"
 			cardinality="0" required="true" default="data"
-			description="Default semantic topic to publish the messages to." />
+			description="Default semantic topic to publish the realtime messages to." />
 
 	</OCD>
 
