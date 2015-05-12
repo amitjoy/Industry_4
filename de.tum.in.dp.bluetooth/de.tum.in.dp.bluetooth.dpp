@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Tue May 12 07:50:23 CEST 2015
+#Tue May 12 09:24:53 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.bluetooth_build.xml
 build.dp.file=<.>/de.tum.in.dp.bluetooth.dp
 build.location=
@@ -7,21 +7,21 @@ bundles.0.bundle_path=<..>/de.tum.in.bluecove.fragment/target/de.tum.in.bluecove
 bundles.0.customizer=false
 bundles.0.headers.count=0
 bundles.0.missing=false
-bundles.0.name=bundles/de.tum.in.bluecove.fragment-1.0-SNAPSHOT.jar
+bundles.0.name=de.tum.in.bluecove.fragment-1.0-SNAPSHOT.jar
 bundles.0.symbolic_name=de.tum.in.de.tum.in.bluecove.fragment
 bundles.0.version=1.0.0.SNAPSHOT
 bundles.1.bundle_path=<..>/de.tum.in.bluecove/target/de.tum.in.bluecove-2.1.0.jar
 bundles.1.customizer=false
 bundles.1.headers.count=0
 bundles.1.missing=false
-bundles.1.name=bundles/de.tum.in.bluecove-2.1.0.jar
+bundles.1.name=de.tum.in.bluecove-2.1.0.jar
 bundles.1.symbolic_name=de.tum.in.bluecove
 bundles.1.version=2.1.0
 bundles.2.bundle_path=<..>/de.tum.in.bluetooth/target/de.tum.in.bluetooth-0.0.1-SNAPSHOT.jar
 bundles.2.customizer=false
 bundles.2.headers.count=0
 bundles.2.missing=false
-bundles.2.name=bundles/de.tum.in.bluetooth-0.0.1-SNAPSHOT.jar
+bundles.2.name=de.tum.in.bluetooth-0.0.1-SNAPSHOT.jar
 bundles.2.symbolic_name=de.tum.in.bluetooth
 bundles.2.version=0.0.1.SNAPSHOT
 bundles.count=3

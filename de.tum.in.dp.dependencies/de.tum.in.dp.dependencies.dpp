@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Tue May 12 07:53:37 CEST 2015
+#Tue May 12 09:24:30 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.dependencies_build.xml
 build.dp.file=<.>/de.tum.in.dp.dependencies.dp
 build.location=
@@ -7,28 +7,28 @@ bundles.0.bundle_path=<.>/lib/guava-18.0.jar
 bundles.0.customizer=false
 bundles.0.headers.count=0
 bundles.0.missing=false
-bundles.0.name=bundles/guava-18.0.jar
+bundles.0.name=guava-18.0.jar
 bundles.0.symbolic_name=com.google.guava
 bundles.0.version=18.0.0
 bundles.1.bundle_path=<.>/lib/camel-core-2.15.2.jar
 bundles.1.customizer=false
 bundles.1.headers.count=0
 bundles.1.missing=false
-bundles.1.name=bundles/camel-core-2.15.2.jar
+bundles.1.name=camel-core-2.15.2.jar
 bundles.1.symbolic_name=org.apache.camel.camel-core
 bundles.1.version=2.15.2
 bundles.2.bundle_path=<.>/lib/camel-kura-2.15.2.jar
 bundles.2.customizer=false
 bundles.2.headers.count=0
 bundles.2.missing=false
-bundles.2.name=bundles/camel-kura-2.15.2.jar
+bundles.2.name=camel-kura-2.15.2.jar
 bundles.2.symbolic_name=org.apache.camel.camel-kura
 bundles.2.version=2.15.2
 bundles.3.bundle_path=<.>/lib/camel-mongodb-2.15.2.jar
 bundles.3.customizer=false
 bundles.3.headers.count=0
 bundles.3.missing=false
-bundles.3.name=bundles/camel-mongodb-2.15.2.jar
+bundles.3.name=camel-mongodb-2.15.2.jar
 bundles.3.symbolic_name=org.apache.camel.camel-mongodb
 bundles.3.version=2.15.2
 bundles.count=4
