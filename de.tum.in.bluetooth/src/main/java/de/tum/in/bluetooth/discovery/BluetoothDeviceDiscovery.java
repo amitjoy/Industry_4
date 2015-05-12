@@ -216,7 +216,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	/**
 	 * Map storing the currently exposed bluetooth device.
 	 */
-	private final Map<RemoteDevice, ServiceRegistration> m_devices = Maps
+	private final Map<RemoteDevice, ServiceRegistration<?>> m_devices = Maps
 			.newHashMap();
 
 	/**
@@ -630,6 +630,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			} catch (final BluetoothStateException e) {
 				LOGGER.error("Bluetooth Adapter not started.");
 			}
+			local = checkNotNull(local, "Local Device can not be null");
 			final RemoteDevice[] cachedDevices = local.getDiscoveryAgent()
 					.retrieveDevices(DiscoveryAgent.CACHED);
 			if (cachedDevices == null || cachedDevices.length == 0) {
@@ -702,7 +703,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	}
 
 	private synchronized void unregisterAll() {
-		for (final Map.Entry<RemoteDevice, ServiceRegistration> entry : m_devices
+		for (final Map.Entry<RemoteDevice, ServiceRegistration<?>> entry : m_devices
 				.entrySet()) {
 			entry.getValue().unregister();
 			unpair(entry.getKey());
