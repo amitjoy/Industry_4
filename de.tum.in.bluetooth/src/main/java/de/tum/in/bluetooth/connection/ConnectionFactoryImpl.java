@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.IOException;
 
 import javax.microedition.io.Connection;
-import javax.microedition.io.InputConnection;
+import javax.microedition.io.StreamConnection;
 
 import org.osgi.service.io.ConnectionFactory;
 
@@ -58,7 +58,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 		mode = checkNotNull(mode, "Connection Mode must not be null");
 
 		return new WrappedConnection(
-				(InputConnection) MicroeditionConnector.open(name, mode,
+				(StreamConnection) MicroeditionConnector.open(name, mode,
 						timeouts));
 
 	}

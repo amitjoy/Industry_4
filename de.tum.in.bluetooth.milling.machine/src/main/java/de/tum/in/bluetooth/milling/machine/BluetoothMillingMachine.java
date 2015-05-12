@@ -15,11 +15,14 @@
  *******************************************************************************/
 package de.tum.in.bluetooth.milling.machine;
 
-import java.util.Arrays;
-import java.util.Iterator;
+import static com.google.common.base.Strings.isNullOrEmpty;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +31,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 
 import org.apache.commons.io.IOUtils;
@@ -35,12 +39,12 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
-import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.message.KuraRequestPayload;
@@ -52,14 +56,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+
+import de.tum.in.bluetooth.milling.machine.data.RealtimeData;
 
 /**
  * Used to consume all the service record provided by all the paired Bluetooth
  * Enabled Milling Machines
- * 
- * TO-DO Refactor and Deploy
  * 
  * @author AMIT KUMAR MONDAL
  *
@@ -112,31 +118,31 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Eclipse Kura Cloud Service Dependency
 	 */
-	@Reference
+	@Reference(bind = "bindCloudService", unbind = "unbindCloudService")
 	private volatile CloudService m_cloudService;
 
 	/**
 	 * Eclipse Kura System Service Dependency
 	 */
-	@Reference
+	@Reference(bind = "bindSystemService", unbind = "unbindSystemService")
 	private volatile SystemService m_systemService;
 
 	/**
 	 * Eclipse Kura Configuration Service Dependency
 	 */
-	@Reference
+	@Reference(bind = "bindConfigurationService", unbind = "unbindConfigurationService")
 	private volatile ConfigurationService m_configurationService;
 
 	/**
 	 * Bluetooth Service Record Dependency for paired bluetooth devices
 	 */
-	@Reference
+	@Reference(bind = "bindServiceRecord", unbind = "unbindServiceRecord", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 	private volatile ServiceRecord m_serviceRecord;
 
 	/**
 	 * Connection Service Dependency
 	 */
-	@Reference
+	@Reference(bind = "bindConnectorService", unbind = "unbindConnectorService")
 	private volatile ConnectorService m_connectorService;
 
 	/**
@@ -150,9 +156,19 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	private float m_speed;
 
 	/**
+	 * Place holder for all the {@link ServiceRecord} needed for this component
+	 */
+	private Properties m_devices;
+
+	/**
 	 * Map to store list of configurations
 	 */
 	private Map<String, Object> m_properties;
+
+	/**
+	 * Holds List of results retrieved by all the paired devices
+	 */
+	private List<? extends RealtimeData> m_realTimeData;
 
 	/* Constructor */
 	public BluetoothMillingMachine() {
@@ -162,16 +178,17 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Callback to be used while {@link ServiceRecord} is registering
 	 */
-	public synchronized void setServiceRecord(ServiceRecord serviceRecord) {
-		if (!m_serviceRecords.contains(serviceRecord)) {
-			m_serviceRecords.add(serviceRecord);
-		}
+	public synchronized void bindServiceRecord(ServiceRecord serviceRecord) {
+		if (m_serviceRecords.size() > 0)
+			if (!m_serviceRecords.contains(serviceRecord)) {
+				m_serviceRecords.add(serviceRecord);
+			}
 	}
 
 	/**
 	 * Callback to be used while {@link ServiceRecord} is deregistering
 	 */
-	public synchronized void unsetServiceRecord(ServiceRecord serviceRecord) {
+	public synchronized void unbindServiceRecord(ServiceRecord serviceRecord) {
 		if (m_serviceRecords.size() > 0)
 			m_serviceRecords.clear();
 	}
@@ -179,7 +196,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Callback to be used while {@link ConnectorService} is registering
 	 */
-	public synchronized void setConnectorService(
+	public synchronized void bindConnectorService(
 			ConnectorService connectorService) {
 		if (m_connectorService == null)
 			m_connectorService = connectorService;
@@ -188,7 +205,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Callback to be used while {@link ConnectorService} is deregistering
 	 */
-	public synchronized void unsetConnectorService(
+	public synchronized void unbindConnectorService(
 			ConnectorService connectorService) {
 		if (m_connectorService != null)
 			m_connectorService = null;
@@ -197,8 +214,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Callback to be used while {@link CloudService} is registering
 	 */
-	@Override
-	public synchronized void setCloudService(CloudService cloudService) {
+	public synchronized void bindCloudService(CloudService cloudService) {
 		if (m_cloudService == null) {
 			super.setCloudService(m_cloudService = cloudService);
 		}
@@ -207,8 +223,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Callback to be used while {@link CloudService} is deregistering
 	 */
-	@Override
-	public synchronized void unsetCloudService(CloudService cloudService) {
+	public synchronized void unbindCloudService(CloudService cloudService) {
 		if (m_cloudService == cloudService)
 			super.setCloudService(m_cloudService = null);
 	}
@@ -216,7 +231,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Callback to be used while {@link ConfigurationService} is registering
 	 */
-	public synchronized void setConfigurationService(
+	public synchronized void bindConfigurationService(
 			ConfigurationService configurationService) {
 		if (m_cloudService == null) {
 			m_configurationService = configurationService;
@@ -226,7 +241,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Callback to be used while {@link ConfigurationService} is deregistering
 	 */
-	public synchronized void unsetConfigurationService(
+	public synchronized void unbindConfigurationService(
 			ConfigurationService configurationService) {
 		if (m_configurationService == configurationService)
 			m_configurationService = null;
@@ -235,7 +250,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Callback to be used while {@link SystemService} is registering
 	 */
-	public synchronized void setSystemService(SystemService systemService) {
+	public synchronized void bindSystemService(SystemService systemService) {
 		if (m_systemService == null)
 			m_systemService = systemService;
 	}
@@ -243,7 +258,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Callback to be used while {@link SystemService} is deregistering
 	 */
-	public synchronized void unsetSystemService(SystemService systemService) {
+	public synchronized void unbindSystemService(SystemService systemService) {
 		if (m_systemService == systemService)
 			m_systemService = null;
 	}
@@ -258,30 +273,74 @@ public class BluetoothMillingMachine extends Cloudlet implements
 
 		m_properties = properties;
 		m_serviceRecords = Lists.newCopyOnWriteArrayList();
+		m_realTimeData = Lists.newCopyOnWriteArrayList();
 
 		super.setCloudService(m_cloudService);
 		super.activate(componentContext);
+
+		m_devices = loadMillingMachines(BLUETOOH_ENABLED_MILLING_MACHINES);
+
 		LOGGER.info("Activating Bluetooth Milling Machine Component... Done.");
 
 		for (final ServiceRecord serviceRecord : m_serviceRecords) {
-			doPublish(serviceRecord);
+			// If the device is mentioned in the configuration of this
+			// component, then we have to publish the realtime data
+			if (m_devices.contains(serviceRecord.getHostDevice()
+					.getBluetoothAddress()))
+				doPublishRealtimeDataAndStoreInCache(serviceRecord);
 		}
 	}
 
 	/**
-	 * Used to publish realtime data retrieved from all the milling machines
+	 * Used to parse configuration set to discover specified bluetooth enabled
+	 * devices
+	 * 
+	 * @param devices
+	 *            The Configuration input as Property K-V Format
+	 * @return the parsed input as properties
 	 */
-	private void doPublish(ServiceRecord serviceRecord) {
+	private Properties loadMillingMachines(String devices) {
+		final String SEPARATOR = ";";
+		final String NEW_LINE = "\n";
+
+		final Splitter splitter = Splitter.on(SEPARATOR).omitEmptyStrings()
+				.trimResults();
+		final Joiner stringDevicesJoiner = Joiner.on(NEW_LINE).skipNulls();
+
+		final Properties properties = new Properties();
+
+		final String deviceAsPropertiesFormat = stringDevicesJoiner
+				.join(splitter.splitToList(devices));
+
+		if (isNullOrEmpty(deviceAsPropertiesFormat.toString())) {
+			LOGGER.error("No Bluetooth Enabled Device Addess Found");
+			return properties;
+		}
+
+		try {
+			properties.load(new StringReader(deviceAsPropertiesFormat));
+		} catch (final IOException e) {
+			LOGGER.error("Error while parsing list of input bluetooth devices");
+		}
+		return properties;
+	}
+
+	/**
+	 * Used to publish realtime data retrieved from all the milling machines and
+	 * cache it
+	 */
+	private void doPublishRealtimeDataAndStoreInCache(
+			ServiceRecord serviceRecord) {
+		final String remoteDeviceAddress = serviceRecord.getHostDevice()
+				.getBluetoothAddress();
 
 		final BluetoothConnector bluetoothConnector = new BluetoothConnector.Builder()
 				.setConnectorService(m_connectorService)
 				.setServiceRecord(serviceRecord).build();
+
 		bluetoothConnector.connect();
 
-		// TO-DO Refactor Logic while publishing realtime data
-		// TO-DO Add logic to refactor topic for each paired device
 		String realtimeData = null;
-		final int readByte = 1;
 		final Callable<String> readTask = new Callable<String>() {
 			@Override
 			public String call() throws Exception {
@@ -293,11 +352,17 @@ public class BluetoothMillingMachine extends Cloudlet implements
 			final Future<String> future = m_executorService.submit(readTask);
 			try {
 				realtimeData = future.get(1000, TimeUnit.MILLISECONDS);
+				m_realTimeData.add(wrapData(remoteDeviceAddress, realtimeData));
+				// TO-DO Add camel connector to dump to mongo db
+				// TO-DO Add camel connector for scheduling
 				final String topic = (String) m_properties
 						.get(PUBLISH_TOPIC_PROP_NAME);
-				final String payload = Integer.toString(readByte);
+				final String payload = realtimeData;
 				try {
-					getCloudApplicationClient().controlPublish("DEVICE", topic,
+					// will publish data to
+					// $EDC/app_id/client_id/milling_machine/{some_bluetooth_address}
+					getCloudApplicationClient().controlPublish(
+							"milling_machine", remoteDeviceAddress,
 							payload.getBytes(), DFLT_PUB_QOS, DFLT_RETAIN,
 							DFLT_PRIORITY);
 				} catch (final KuraException e) {
@@ -307,9 +372,25 @@ public class BluetoothMillingMachine extends Cloudlet implements
 					| TimeoutException e) {
 				LOGGER.error(Throwables.getStackTraceAsString(e));
 			}
-			if (readByte >= 0)
-				System.out.println("Read: " + readByte);
 		}
+	}
+
+	/**
+	 * Used to wrap data for the predefined format needed
+	 * 
+	 * @param bluetoothAddress
+	 *            the bluetooth address of the {@link RemoteDevice}
+	 * @param realtimeData
+	 *            The data retrieved from the input stream
+	 * @return
+	 */
+	private <T extends RealtimeData> T wrapData(String bluetoothAddress,
+			String realtimeData) {
+		// for temporary purposes, it is hardcoded to be a default predefined
+		// format
+		final RealtimeData data = new RealtimeData(bluetoothAddress,
+				realtimeData);
+		return (T) data;
 	}
 
 	/**
@@ -345,21 +426,29 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	@Override
 	protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
 			KuraResponsePayload respPayload) throws KuraException {
-		LOGGER.info("Bluetooth Milling Machine Component GET handler"
-				+ m_configurationService);
-		// TO-DO Add logic to retrieve the list of devices paired with RPi
-		final ComponentConfiguration configuration = m_configurationService
-				.getComponentConfiguration("de.tum.in.bluetooth.milling.machine");
-		final Iterator<?> entries = configuration.getConfigurationProperties()
-				.entrySet().iterator();
-		while (entries.hasNext()) {
-			final Entry thisEntry = (Entry) entries.next();
-			final Object key = thisEntry.getKey();
-			final Object value = thisEntry.getValue();
-			respPayload.addMetric((String) key, value);
+		LOGGER.info("Bluetooth Milling Machine Component GET handler");
+
+		// if the communication is not in progress and the client asks for list
+		// of paired bluetooth devices, it must return nothing
+		if (!m_executorService.isShutdown()) {
+			final String devicesAsString = storeDevicelist();
+			respPayload.setBody(devicesAsString.getBytes());
 		}
-		System.out.println(Arrays.asList(reqTopic.getResources()));
+
 		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+	}
+
+	/**
+	 * Returns the list of devices paired with this component
+	 */
+	private String storeDevicelist() {
+		final StringWriter writer = new StringWriter();
+		try {
+			m_devices.store(writer, "");
+		} catch (final IOException e) {
+			LOGGER.error(Throwables.getStackTraceAsString(e));
+		}
+		return writer.getBuffer().toString();
 	}
 
 	/** {@inheritDoc} */
@@ -367,7 +456,13 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	protected void doExec(CloudletTopic reqTopic,
 			KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
 			throws KuraException {
-		LOGGER.info("Bluetooth Milling Machine Component EXEC handler");
-		// TO-DO add logic to stop reading data from devices
+		LOGGER.info("Bluetooth Milling Machine Communication Termination Started...");
+
+		if ("terminate".equals(reqTopic.getResources()[0])) {
+			if (!m_executorService.isShutdown())
+				m_executorService.shutdown();
+		}
+
+		LOGGER.info("Bluetooth Milling Machine Communication Termination Done");
 	}
 }

@@ -205,7 +205,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	/**
 	 * Kura Cloud Service Injection
 	 */
-	@Reference
+	@Reference(bind = "bindCloudService", unbind = "unbindCloudService")
 	private volatile CloudService m_cloudService;
 
 	/**
