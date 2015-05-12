@@ -42,6 +42,8 @@ import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.collections.IterableMap;
+import org.apache.commons.collections.MapIterator;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -52,7 +54,9 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.watchdog.CriticalComponent;
@@ -89,7 +93,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	/**
 	 * Defines Application ID for Pi's bluetooth application
 	 */
-	private static final String APP_ID = "Bluetooth-V1";
+	private static final String APP_ID = "BLUETOOTH-V1";
+
+	/**
+	 * Defines Application Configuration Metatype Id
+	 */
+	private static final String APP_CONF_ID = "de.tum.in.bluetooth";
 
 	/**
 	 * Defines Quality of Service for the bluetooth Application
@@ -209,6 +218,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private volatile CloudService m_cloudService;
 
 	/**
+	 * Eclipse Kura Configuration Service Dependency
+	 */
+	@Reference(bind = "bindConfigurationService", unbind = "unbindConfigurationService")
+	private volatile ConfigurationService m_configurationService;
+
+	/**
 	 * Map storing the currently exposed bluetooth device.
 	 */
 	private final Map<RemoteDevice, ServiceRegistration> m_devices = Maps
@@ -286,6 +301,25 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	public synchronized void unbindCloudService(CloudService cloudService) {
 		if (m_cloudService == cloudService)
 			super.setCloudService(m_cloudService = null);
+	}
+
+	/**
+	 * Callback to be used while {@link ConfigurationService} is registering
+	 */
+	public synchronized void bindConfigurationService(
+			ConfigurationService configurationService) {
+		if (m_configurationService == null) {
+			m_configurationService = configurationService;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link ConfigurationService} is deregistering
+	 */
+	public synchronized void unbindConfigurationService(
+			ConfigurationService configurationService) {
+		if (m_configurationService == configurationService)
+			m_configurationService = null;
 	}
 
 	public void setAutopairingConfiguration(File file) throws IOException {
@@ -926,26 +960,31 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void onConnectionEstablished() {
 		LOGGER.info("Connected to Message Broker");
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void onConnectionLost() {
 		LOGGER.info("Disconnected from Message Broker");
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getCriticalComponentName() {
 		return APP_ID;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public int getCriticalComponentTimeout() {
 		return TIMEOUT_COMPONENT;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	protected void doExec(CloudletTopic reqTopic,
 			KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
@@ -954,7 +993,50 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			start();
 		}
 		if ("stop".equals(reqTopic.getResources()[0])) {
-			start();
+			stop();
 		}
+		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
+			KuraResponsePayload respPayload) throws KuraException {
+		LOGGER.info("Bluetooth Configuration Retrieving...");
+		// Retrieve the configurations
+		if ("configurations".equals(reqTopic.getResources()[0])) {
+			final ComponentConfiguration configuration = m_configurationService
+					.getComponentConfiguration(APP_CONF_ID);
+
+			final IterableMap map = (IterableMap) configuration
+					.getConfigurationProperties();
+			final MapIterator it = map.mapIterator();
+
+			while (it.hasNext()) {
+				final Object key = it.next();
+				final Object value = it.getValue();
+
+				respPayload.addMetric((String) key, value);
+			}
+
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		}
+		LOGGER.info("Bluetooth Configuration Retrieved");
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void doPut(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
+			KuraResponsePayload respPayload) throws KuraException {
+		LOGGER.info("Bluetooth Configuration Updating...");
+
+		// Update the configurations
+		if ("configurations".equals(reqTopic.getResources()[0])) {
+			m_configurationService.updateConfiguration(APP_CONF_ID,
+					reqPayload.metrics());
+
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		}
+		LOGGER.info("Bluetooth Configuration Updated");
 	}
 }

@@ -34,6 +34,8 @@ import java.util.concurrent.TimeoutException;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 
+import org.apache.commons.collections.IterableMap;
+import org.apache.commons.collections.MapIterator;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -45,6 +47,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.message.KuraRequestPayload;
@@ -84,7 +87,12 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Application Identifier
 	 */
-	private static final String APP_ID = "Bluetooth-Milling-Machine-V1";
+	private static final String APP_ID = "MILLING-V1";
+
+	/**
+	 * Defines Application Configuration Metatype Id
+	 */
+	private static final String APP_CONF_ID = "de.tum.in.bluetooth.milling.machine";
 
 	/**
 	 * Used to control thread while maintaining connections between devices and
@@ -233,7 +241,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	 */
 	public synchronized void bindConfigurationService(
 			ConfigurationService configurationService) {
-		if (m_cloudService == null) {
+		if (m_configurationService == null) {
 			m_configurationService = configurationService;
 		}
 	}
@@ -428,20 +436,49 @@ public class BluetoothMillingMachine extends Cloudlet implements
 			KuraResponsePayload respPayload) throws KuraException {
 		LOGGER.info("Bluetooth Milling Machine Component GET handler");
 
-		// if the communication is not in progress and the client asks for list
-		// of paired bluetooth devices, it must return nothing
-		if (!m_executorService.isShutdown()) {
-			final String devicesAsString = storeDevicelist();
-			respPayload.setBody(devicesAsString.getBytes());
+		// Retrieve the configurations
+		if ("configurations".equals(reqTopic.getResources()[0])) {
+			LOGGER.info("Bluetooth Milling Machine Configuration Retrieval Started...");
+
+			final ComponentConfiguration configuration = m_configurationService
+					.getComponentConfiguration(APP_CONF_ID);
+
+			final IterableMap map = (IterableMap) configuration
+					.getConfigurationProperties();
+			final MapIterator it = map.mapIterator();
+
+			while (it.hasNext()) {
+				final Object key = it.next();
+				final Object value = it.getValue();
+
+				respPayload.addMetric((String) key, value);
+			}
+
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+
+			LOGGER.info("Bluetooth Milling Machine Configuration Retrieval Finished");
 		}
 
-		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		// Retrieve the list of paired bluetooth devices
+		if ("devices".equals(reqTopic.getResources()[0])) {
+			LOGGER.info("Bluetooth Milling Machine Paired Device List Retrieval Started...");
+			// if the communication is not in progress and the client asks for
+			// list
+			// of paired bluetooth devices, it must return nothing
+			if (!m_executorService.isShutdown()) {
+				final String devicesAsString = getDevicelist();
+				respPayload.setBody(devicesAsString.getBytes());
+				respPayload
+						.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+			}
+			LOGGER.info("Bluetooth Milling Machine Paired Device List Retrieval Finished");
+		}
 	}
 
 	/**
 	 * Returns the list of devices paired with this component
 	 */
-	private String storeDevicelist() {
+	private String getDevicelist() {
 		final StringWriter writer = new StringWriter();
 		try {
 			m_devices.store(writer, "");
@@ -458,11 +495,31 @@ public class BluetoothMillingMachine extends Cloudlet implements
 			throws KuraException {
 		LOGGER.info("Bluetooth Milling Machine Communication Termination Started...");
 
+		// Terminate bluetooth communication
 		if ("terminate".equals(reqTopic.getResources()[0])) {
 			if (!m_executorService.isShutdown())
 				m_executorService.shutdown();
 		}
+		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 
 		LOGGER.info("Bluetooth Milling Machine Communication Termination Done");
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void doPut(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
+			KuraResponsePayload respPayload) throws KuraException {
+
+		LOGGER.info("Bluetooth Milling Machine Configuration Updating...");
+
+		// Update the configurations
+		if ("configurations".equals(reqTopic.getResources()[0])) {
+			m_configurationService.updateConfiguration(APP_CONF_ID,
+					reqPayload.metrics());
+
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		}
+
+		LOGGER.info("Bluetooth Milling Machine Configuration Updated");
 	}
 }
