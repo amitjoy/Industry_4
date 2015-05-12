@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Tue May 12 22:17:23 CEST 2015
+#Wed May 13 01:02:50 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.dependencies_build.xml
 build.dp.file=<.>/de.tum.in.dp.dependencies.dp
 build.location=
@@ -38,7 +38,14 @@ bundles.4.missing=false
 bundles.4.name=camel-mongodb-2.15.2.jar
 bundles.4.symbolic_name=org.apache.camel.camel-mongodb
 bundles.4.version=2.15.2
-bundles.count=5
+bundles.5.bundle_path=<.>/lib/commons-collections4-4.0.jar
+bundles.5.customizer=false
+bundles.5.headers.count=0
+bundles.5.missing=false
+bundles.5.name=commons-collections4-4.0.jar
+bundles.5.symbolic_name=org.apache.commons.collections4
+bundles.5.version=4.0.0
+bundles.count=6
 certificates.count=0
 general.signbundles=true
 headers.contact.address=admin@amitinside.com

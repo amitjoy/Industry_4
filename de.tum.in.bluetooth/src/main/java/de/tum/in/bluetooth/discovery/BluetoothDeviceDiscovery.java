@@ -101,11 +101,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private static final String APP_CONF_ID = "de.tum.in.bluetooth";
 
 	/**
-	 * Defines Quality of Service for the bluetooth Application
-	 */
-	private static final int QOS = 5;
-
-	/**
 	 * Configurable Property specifying the time between two inquiries. This
 	 * time is specified in <b>second</b>, and should be carefully chosen. Too
 	 * many inquiries flood the network and block correct discovery. A too big
@@ -181,11 +176,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * Placeholder for M_PERIOD
 	 */
 	private int m_period;
-
-	/**
-	 * Placeholder for SUBSCRIBE_TOPICPREFIX_PROP_NAME
-	 */
-	private String m_topic;
 
 	/**
 	 * Bluetooth discovery mode (inquiry).
@@ -721,7 +711,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	}
 
 	private synchronized void unregister(RemoteDevice device) {
-		final ServiceRegistration reg = m_devices.remove(device);
+		final ServiceRegistration<?> reg = m_devices.remove(device);
 		if (reg != null) {
 			reg.unregister();
 		}
