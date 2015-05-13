@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
@@ -180,6 +181,11 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	 */
 	private ConcurrentMap<String, RealtimeData> m_realTimeData;
 
+	/**
+	 * Cache Initial Capacity
+	 */
+	private static final int CACHE_INITAL_CAPACITY = 50000;
+
 	/* Constructor */
 	public BluetoothMillingMachine() {
 		super(APP_ID);
@@ -289,7 +295,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 
 		m_devices = loadMillingMachines(BLUETOOH_ENABLED_MILLING_MACHINES);
 		m_realTimeData = new MapMaker().concurrencyLevel(2).weakValues()
-				.initialCapacity(50000).makeMap();
+				.initialCapacity(CACHE_INITAL_CAPACITY).makeMap();
 
 		LOGGER.info("Activating Bluetooth Milling Machine Component... Done.");
 
@@ -359,7 +365,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 						Charsets.UTF_8.name());
 			}
 		};
-		while (m_realTimeData.size() < 10000) {
+		while (m_realTimeData.size() < CACHE_INITAL_CAPACITY) {
 			final ListenableFuture<String> future = m_executorService
 					.submit(readRealtimeData);
 			try {
@@ -371,7 +377,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 
 					@Override
 					public void run() {
-						// TO-DO Logic to run after every future task processing
+						// TO-DO Logic to run after every future task
 					}
 				}, m_executorService);
 
@@ -394,6 +400,10 @@ public class BluetoothMillingMachine extends Cloudlet implements
 				LOGGER.error(Throwables.getStackTraceAsString(e));
 			}
 		}
+
+		Preconditions
+				.checkState(m_realTimeData.size() >= CACHE_INITAL_CAPACITY);
+		m_realTimeData.clear();
 	}
 
 	/**
