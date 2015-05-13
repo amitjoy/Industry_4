@@ -381,8 +381,6 @@ public class BluetoothMillingMachine extends Cloudlet implements
 					}
 				}, m_executorService);
 
-				// TO-DO Add camel connector to dump to mongo db
-				// TO-DO Add camel connector for scheduling
 				final String topic = (String) m_properties
 						.get(PUBLISH_TOPIC_PROP_NAME);
 				final String payload = realtimeData;
@@ -403,6 +401,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 
 		Preconditions
 				.checkState(m_realTimeData.size() >= CACHE_INITAL_CAPACITY);
+		// TO-DO Check Connection to MongoDB Server and Dump to DB
 		m_realTimeData.clear();
 	}
 
