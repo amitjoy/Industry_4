@@ -24,12 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
@@ -63,6 +60,10 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import de.tum.in.bluetooth.milling.machine.data.RealtimeData;
 
@@ -98,8 +99,8 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	 * Used to control thread while maintaining connections between devices and
 	 * RPi
 	 */
-	private final ExecutorService m_executorService = Executors
-			.newFixedThreadPool(5);
+	private final ListeningExecutorService m_executorService = MoreExecutors
+			.listeningDecorator(Executors.newFixedThreadPool(5));
 
 	/**
 	 * Configurable Property for getting list of paired bluetooth enabled
@@ -174,9 +175,10 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	private Map<String, Object> m_properties;
 
 	/**
-	 * Holds List of results retrieved by all the paired devices
+	 * Holds List of results retrieved by all the paired devices (used as cache
+	 * storage)
 	 */
-	private List<? extends RealtimeData> m_realTimeData;
+	private ConcurrentMap<String, RealtimeData> m_realTimeData;
 
 	/* Constructor */
 	public BluetoothMillingMachine() {
@@ -281,12 +283,13 @@ public class BluetoothMillingMachine extends Cloudlet implements
 
 		m_properties = properties;
 		m_serviceRecords = Lists.newCopyOnWriteArrayList();
-		m_realTimeData = Lists.newCopyOnWriteArrayList();
 
 		super.setCloudService(m_cloudService);
 		super.activate(componentContext);
 
 		m_devices = loadMillingMachines(BLUETOOH_ENABLED_MILLING_MACHINES);
+		m_realTimeData = new MapMaker().concurrencyLevel(2).weakValues()
+				.initialCapacity(50000).makeMap();
 
 		LOGGER.info("Activating Bluetooth Milling Machine Component... Done.");
 
@@ -349,18 +352,29 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		bluetoothConnector.connect();
 
 		String realtimeData = null;
-		final Callable<String> readTask = new Callable<String>() {
+		final Callable<String> readRealtimeData = new Callable<String>() {
 			@Override
 			public String call() throws Exception {
 				return IOUtils.toString(bluetoothConnector.getInputStream(),
 						Charsets.UTF_8.name());
 			}
 		};
-		while (true) {
-			final Future<String> future = m_executorService.submit(readTask);
+		while (m_realTimeData.size() < 10000) {
+			final ListenableFuture<String> future = m_executorService
+					.submit(readRealtimeData);
 			try {
-				realtimeData = future.get(1000, TimeUnit.MILLISECONDS);
-				m_realTimeData.add(wrapData(remoteDeviceAddress, realtimeData));
+				realtimeData = future.get();
+				m_realTimeData.put(remoteDeviceAddress,
+						wrapData(remoteDeviceAddress, realtimeData));
+
+				future.addListener(new Runnable() {
+
+					@Override
+					public void run() {
+						// TO-DO Logic to run after every future task processing
+					}
+				}, m_executorService);
+
 				// TO-DO Add camel connector to dump to mongo db
 				// TO-DO Add camel connector for scheduling
 				final String topic = (String) m_properties
@@ -376,8 +390,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 				} catch (final KuraException e) {
 					LOGGER.error(Throwables.getStackTraceAsString(e));
 				}
-			} catch (InterruptedException | ExecutionException
-					| TimeoutException e) {
+			} catch (InterruptedException | ExecutionException e) {
 				LOGGER.error(Throwables.getStackTraceAsString(e));
 			}
 		}
@@ -398,7 +411,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		// format
 		final RealtimeData data = new RealtimeData(bluetoothAddress,
 				realtimeData);
-		return (T) data;
+		return ((T) data);
 	}
 
 	/**
