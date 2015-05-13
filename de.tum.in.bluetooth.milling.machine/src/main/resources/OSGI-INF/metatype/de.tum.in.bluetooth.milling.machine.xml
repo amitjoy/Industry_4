@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
 	localization="en_us">
-	<OCD id="de.tum.in.bluetooth.milling.machine" name="Bluetooth Milling Machine"
-		description="This is a simulator for an heater gateway application. Its configuration options will be passed down the smart heater. ">
+	<OCD id="de.tum.in.bluetooth.milling.machine" name="Milling Machine"
+		description="This is used to consume all the mentioned bluetooth enabled milling machines for communciating with Raspberry Pi ">
 
 		<Icon
 			resource="http://icons.iconarchive.com/icons/thiago-silva/palm/128/Settings-Bluetooth-icon.png"
