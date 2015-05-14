@@ -358,13 +358,10 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		bluetoothConnector.connect();
 
 		String realtimeData = null;
-		final Callable<String> readRealtimeData = new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return IOUtils.toString(bluetoothConnector.getInputStream(),
-						Charsets.UTF_8.name());
-			}
-		};
+
+		final Callable<String> readRealtimeData = () -> IOUtils.toString(
+				bluetoothConnector.getInputStream(), Charsets.UTF_8.name());
+
 		while (m_realTimeData.size() < CACHE_INITAL_CAPACITY) {
 			final ListenableFuture<String> future = m_executorService
 					.submit(readRealtimeData);
@@ -373,13 +370,9 @@ public class BluetoothMillingMachine extends Cloudlet implements
 				m_realTimeData.put(remoteDeviceAddress,
 						wrapData(remoteDeviceAddress, realtimeData));
 
-				future.addListener(new Runnable() {
-
-					@Override
-					public void run() {
-						// TO-DO Logic to run after every future task
-					}
-				}, m_executorService);
+				future.addListener(() -> {
+					// TO-DO Logic to run after every future task
+					}, m_executorService);
 
 				final String topic = (String) m_properties
 						.get(PUBLISH_TOPIC_PROP_NAME);

@@ -43,14 +43,14 @@
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.api</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
+			<version>1.0.4-SNAPSHOT</version>
 		</dependency>
 		
 
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.core</artifactId>
-			<version>1.0.3-SNAPSHOT</version>
+			<version>1.0.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.bluecove</groupId>
@@ -74,7 +74,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>2.3.5</version>
+				<version>2.5.3</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
@@ -95,7 +95,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-scr-plugin</artifactId>
-				<version>1.17.0</version>
+				<version>1.21.0</version>
 				<executions>
 					<execution>
 						<id>generate-scr-scrdescriptor</id>
