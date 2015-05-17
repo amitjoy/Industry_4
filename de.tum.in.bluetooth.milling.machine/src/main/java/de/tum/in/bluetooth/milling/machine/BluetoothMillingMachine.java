@@ -23,17 +23,13 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 
 import org.apache.commons.collections.IterableMap;
 import org.apache.commons.collections.MapIterator;
-import org.apache.commons.io.IOUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -55,18 +51,14 @@ import org.osgi.service.io.ConnectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-
-import de.tum.in.bluetooth.milling.machine.data.RealtimeData;
 
 /**
  * Used to consume all the service record provided by all the paired Bluetooth
@@ -100,8 +92,38 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	 * Used to control thread while maintaining connections between devices and
 	 * RPi
 	 */
-	private final ListeningExecutorService m_executorService = MoreExecutors
-			.listeningDecorator(Executors.newFixedThreadPool(5));
+	private final ExecutorService m_deletegate = Executors
+			.newFixedThreadPool(5);
+
+	/**
+	 * Used to control threads while for asynchronous operation of getting data
+	 * from paired bluetooth milling machines
+	 */
+	private final ExecutorService m_deletegateForAsyncFunction = Executors
+			.newFixedThreadPool(5);
+
+	/**
+	 * Represents the thread pool for initiating data retrieval from bluetooth
+	 * devices
+	 */
+	private final ListeningExecutorService m_pool = MoreExecutors
+			.listeningDecorator(m_deletegate);
+
+	/**
+	 * Represents the thread pool to operate async operation
+	 */
+	private final ListeningExecutorService m_poolForAsyncFunction = MoreExecutors
+			.listeningDecorator(m_deletegateForAsyncFunction);
+
+	/**
+	 * The intermediary result retrieved before the async operation
+	 */
+	private ListenableFuture<String> m_resultFromWorker;
+
+	/**
+	 * The final result computed after the async operation
+	 */
+	private ListenableFuture<String> finalResult;
 
 	/**
 	 * Configurable Property for getting list of paired bluetooth enabled
@@ -174,17 +196,6 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	 * Map to store list of configurations
 	 */
 	private Map<String, Object> m_properties;
-
-	/**
-	 * Holds List of results retrieved by all the paired devices (used as cache
-	 * storage)
-	 */
-	private ConcurrentMap<String, RealtimeData> m_realTimeData;
-
-	/**
-	 * Cache Initial Capacity
-	 */
-	private static final int CACHE_INITAL_CAPACITY = 50000;
 
 	/* Constructor */
 	public BluetoothMillingMachine() {
@@ -294,8 +305,6 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		super.activate(componentContext);
 
 		m_devices = loadMillingMachines(BLUETOOH_ENABLED_MILLING_MACHINES);
-		m_realTimeData = new MapMaker().concurrencyLevel(2).weakValues()
-				.initialCapacity(CACHE_INITAL_CAPACITY).makeMap();
 
 		LOGGER.info("Activating Bluetooth Milling Machine Component... Done.");
 
@@ -348,6 +357,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	 */
 	private void doPublishRealtimeDataAndStoreInCache(
 			ServiceRecord serviceRecord) {
+
 		final String remoteDeviceAddress = serviceRecord.getHostDevice()
 				.getBluetoothAddress();
 
@@ -357,63 +367,23 @@ public class BluetoothMillingMachine extends Cloudlet implements
 
 		bluetoothConnector.connect();
 
-		String realtimeData = null;
+		// first retrieve the data from the worker thread
+		m_resultFromWorker = m_pool.submit(new DataRetrieverWorker(
+				bluetoothConnector));
 
-		final Callable<String> readRealtimeData = () -> IOUtils.toString(
-				bluetoothConnector.getInputStream(), Charsets.UTF_8.name());
+		// next do the async operation to operate on the result retrieved by the
+		// data retriever thread
+		finalResult = Futures.transform(m_resultFromWorker, new AsyncOperation(
+				m_poolForAsyncFunction));
 
-		while (m_realTimeData.size() < CACHE_INITAL_CAPACITY) {
-			final ListenableFuture<String> future = m_executorService
-					.submit(readRealtimeData);
-			try {
-				realtimeData = future.get();
-				m_realTimeData.put(remoteDeviceAddress,
-						wrapData(remoteDeviceAddress, realtimeData));
+		final String topic = (String) m_properties.get(PUBLISH_TOPIC_PROP_NAME);
 
-				future.addListener(() -> {
-					// TO-DO Logic to run after every future task
-					}, m_executorService);
+		// finally push the final transformed result to our listenable thread
+		// callback
+		Futures.addCallback(finalResult, new MyFutureCallback(
+				getCloudApplicationClient(), "topic/" + remoteDeviceAddress,
+				DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY));
 
-				final String topic = (String) m_properties
-						.get(PUBLISH_TOPIC_PROP_NAME);
-				final String payload = realtimeData;
-				try {
-					// will publish data to
-					// $EDC/app_id/client_id/milling_machine/{some_bluetooth_address}
-					getCloudApplicationClient().controlPublish(
-							"milling_machine", remoteDeviceAddress,
-							payload.getBytes(), DFLT_PUB_QOS, DFLT_RETAIN,
-							DFLT_PRIORITY);
-				} catch (final KuraException e) {
-					LOGGER.error(Throwables.getStackTraceAsString(e));
-				}
-			} catch (InterruptedException | ExecutionException e) {
-				LOGGER.error(Throwables.getStackTraceAsString(e));
-			}
-		}
-
-		Preconditions
-				.checkState(m_realTimeData.size() >= CACHE_INITAL_CAPACITY);
-		// TO-DO Check Connection to MongoDB Server and Dump to DB
-		m_realTimeData.clear();
-	}
-
-	/**
-	 * Used to wrap data for the predefined format needed
-	 * 
-	 * @param bluetoothAddress
-	 *            the bluetooth address of the {@link RemoteDevice}
-	 * @param realtimeData
-	 *            The data retrieved from the input stream
-	 * @return
-	 */
-	private <T extends RealtimeData> T wrapData(String bluetoothAddress,
-			String realtimeData) {
-		// for temporary purposes, it is hardcoded to be a default predefined
-		// format
-		final RealtimeData data = new RealtimeData(bluetoothAddress,
-				realtimeData);
-		return ((T) data);
 	}
 
 	/**
@@ -426,7 +396,8 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		LOGGER.info("Releasing CloudApplicationClient for {}...", APP_ID);
 
 		super.deactivate(context);
-		m_executorService.shutdown();
+		m_pool.shutdown();
+		m_poolForAsyncFunction.shutdown();
 
 		LOGGER.debug("Deactivating Bluetooth Milling Machine Component... Done.");
 	}
@@ -480,7 +451,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 			// if the communication is not in progress and the client asks for
 			// list
 			// of paired bluetooth devices, it must return nothing
-			if (!m_executorService.isShutdown()) {
+			if (!m_pool.isShutdown()) {
 				final String devicesAsString = getDevicelist();
 				respPayload.setBody(devicesAsString.getBytes());
 				respPayload
@@ -494,7 +465,9 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	 * Returns the list of devices paired with this component
 	 */
 	private String getDevicelist() {
+
 		final StringWriter writer = new StringWriter();
+
 		try {
 			m_devices.store(writer, "");
 		} catch (final IOException e) {
@@ -512,8 +485,10 @@ public class BluetoothMillingMachine extends Cloudlet implements
 
 		// Terminate bluetooth communication
 		if ("terminate".equals(reqTopic.getResources()[0])) {
-			if (!m_executorService.isShutdown())
-				m_executorService.shutdown();
+			if (!m_pool.isShutdown()) {
+				m_pool.shutdown();
+				m_poolForAsyncFunction.shutdown();
+			}
 		}
 		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 

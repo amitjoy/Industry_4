@@ -45,12 +45,12 @@ public final class BluetoothConnector {
 	/**
 	 * OSGi Connector Service
 	 */
-	private static ConnectorService m_connectorService;
+	private static ConnectorService s_connectorService;
 
 	/**
 	 * Paired Bluetooth Device Serial Port Profile Service
 	 */
-	private static ServiceRecord m_serviceRecord;
+	private static ServiceRecord s_serviceRecord;
 
 	/**
 	 * Stream connection between paired bluetooth device and RPi
@@ -80,7 +80,7 @@ public final class BluetoothConnector {
 		 * Setter to set bluetooth Service record for paired device
 		 */
 		public Builder setServiceRecord(ServiceRecord record) {
-			m_serviceRecord = record;
+			s_serviceRecord = record;
 			return this;
 		}
 
@@ -88,7 +88,7 @@ public final class BluetoothConnector {
 		 * Setter to set OSGi Connector Service
 		 */
 		public Builder setConnectorService(ConnectorService connectorService) {
-			m_connectorService = connectorService;
+			s_connectorService = connectorService;
 			return this;
 		}
 
@@ -105,23 +105,25 @@ public final class BluetoothConnector {
 	 * Used to establish connection between the paired bluetooth device and RPi
 	 */
 	public void connect() {
-		LOGGER.info("Bluetooth Connection initiating...");
-		final String connectionURL = m_serviceRecord.getConnectionURL(0, false);
+		LOGGER.info("Bluetooth Connection initiating for ... "
+				+ s_serviceRecord.getHostDevice().getBluetoothAddress());
+
+		final String connectionURL = s_serviceRecord.getConnectionURL(0, false);
 		try {
 			LOGGER.info("Connecting to..."
-					+ m_serviceRecord.getHostDevice().getBluetoothAddress());
-			m_streamConnection = (StreamConnection) m_connectorService
-					.open(connectionURL);
+					+ s_serviceRecord.getHostDevice().getBluetoothAddress());
+			m_streamConnection = (StreamConnection) s_connectorService.open(
+					connectionURL, ConnectorService.READ, true);
 		} catch (final IOException e) {
 			LOGGER.error("Not able to connect to the remote device",
 					Throwables.getStackTraceAsString(e));
 		}
 
 		LOGGER.info("Connection Established with "
-				+ m_serviceRecord.getHostDevice().getBluetoothAddress());
+				+ s_serviceRecord.getHostDevice().getBluetoothAddress());
 		try {
 			LOGGER.info("Getting IO Streams for "
-					+ m_serviceRecord.getHostDevice().getBluetoothAddress());
+					+ s_serviceRecord.getHostDevice().getBluetoothAddress());
 			m_inputStream = m_streamConnection.openInputStream();
 			m_outputStream = m_streamConnection.openOutputStream();
 		} catch (final IOException e) {
