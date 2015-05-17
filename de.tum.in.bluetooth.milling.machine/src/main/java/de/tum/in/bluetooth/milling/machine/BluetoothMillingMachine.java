@@ -123,7 +123,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * The final result computed after the async operation
 	 */
-	private ListenableFuture<String> finalResult;
+	private ListenableFuture<String> m_finalResult;
 
 	/**
 	 * Configurable Property for getting list of paired bluetooth enabled
@@ -180,7 +180,8 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	/**
 	 * Holds List of Service Record for all the paired devices
 	 */
-	private List<ServiceRecord> m_serviceRecords;
+	private final List<ServiceRecord> m_serviceRecords = Lists
+			.newCopyOnWriteArrayList();;
 
 	/**
 	 * Place holder for the milling machine speed
@@ -206,18 +207,18 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	 * Callback to be used while {@link ServiceRecord} is registering
 	 */
 	public synchronized void bindServiceRecord(ServiceRecord serviceRecord) {
-		if (m_serviceRecords.size() > 0)
-			if (!m_serviceRecords.contains(serviceRecord)) {
-				m_serviceRecords.add(serviceRecord);
-			}
+		if (!m_serviceRecords.contains(serviceRecord)) {
+			m_serviceRecords.add(serviceRecord);
+		}
 	}
 
 	/**
 	 * Callback to be used while {@link ServiceRecord} is deregistering
 	 */
 	public synchronized void unbindServiceRecord(ServiceRecord serviceRecord) {
-		if (m_serviceRecords.size() > 0)
-			m_serviceRecords.clear();
+		if (m_serviceRecords.size() > 0
+				&& m_serviceRecords.contains(serviceRecord))
+			m_serviceRecords.remove(serviceRecord);
 	}
 
 	/**
@@ -299,7 +300,6 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		LOGGER.info("Activating Bluetooth Milling Machine Component...");
 
 		m_properties = properties;
-		m_serviceRecords = Lists.newCopyOnWriteArrayList();
 
 		super.setCloudService(m_cloudService);
 		super.activate(componentContext);
@@ -313,7 +313,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 			// component, then we have to publish the realtime data
 			if (m_devices.contains(serviceRecord.getHostDevice()
 					.getBluetoothAddress()))
-				doPublishRealtimeData(serviceRecord);
+				doPublish(serviceRecord);
 		}
 	}
 
@@ -355,7 +355,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	 * Used to publish realtime data retrieved from all the milling machines and
 	 * cache it
 	 */
-	private void doPublishRealtimeData(ServiceRecord serviceRecord) {
+	private void doPublish(ServiceRecord serviceRecord) {
 
 		final String remoteDeviceAddress = serviceRecord.getHostDevice()
 				.getBluetoothAddress();
@@ -366,21 +366,23 @@ public class BluetoothMillingMachine extends Cloudlet implements
 
 		bluetoothConnector.connect();
 
-		// first retrieve the data from the worker thread
+		// first retrieve the bluetooth realtime data from the data retriever
+		// thread
 		m_resultFromWorker = m_pool.submit(new DataRetrieverWorker(
 				bluetoothConnector));
 
-		// next do the async operation to operate on the result retrieved by the
+		// next do the async operation to save the result to cache retrieved by
+		// the
 		// data retriever thread
-		finalResult = Futures.transform(m_resultFromWorker, new AsyncOperation(
-				m_poolForAsyncFunction));
+		m_finalResult = Futures.transform(m_resultFromWorker,
+				new DataCacheAsyncOperation(m_poolForAsyncFunction));
 
 		final String topic = (String) m_properties.get(PUBLISH_TOPIC_PROP_NAME);
 
-		// finally push the final transformed result to our listenable thread
+		// finally publish the final transformed result to our listenable thread
 		// callback
-		Futures.addCallback(finalResult, new MyFutureCallback(
-				getCloudApplicationClient(), "topic/" + remoteDeviceAddress,
+		Futures.addCallback(m_finalResult, new FuturePublishDataCallback(
+				getCloudApplicationClient(), topic + "/" + remoteDeviceAddress,
 				DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY));
 
 	}
@@ -397,6 +399,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		super.deactivate(context);
 		m_pool.shutdown();
 		m_poolForAsyncFunction.shutdown();
+		m_serviceRecords.clear();
 
 		LOGGER.debug("Deactivating Bluetooth Milling Machine Component... Done.");
 	}

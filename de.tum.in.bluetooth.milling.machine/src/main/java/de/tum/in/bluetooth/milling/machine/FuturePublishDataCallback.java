@@ -30,13 +30,13 @@ import com.google.common.util.concurrent.ListenableFuture;
  * @author AMIT KUMAR MONDAL
  *
  */
-public final class MyFutureCallback implements FutureCallback<String> {
+public final class FuturePublishDataCallback implements FutureCallback<String> {
 
 	/**
 	 * Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(MyFutureCallback.class);
+			.getLogger(FuturePublishDataCallback.class);
 
 	/**
 	 * Cloud Application Client
@@ -66,7 +66,7 @@ public final class MyFutureCallback implements FutureCallback<String> {
 	/**
 	 * Constructor
 	 */
-	public MyFutureCallback(CloudClient cloudApplicationClient,
+	public FuturePublishDataCallback(CloudClient cloudApplicationClient,
 			String remoteDeviceAddress, int dfltPubQos, boolean dfltRetain,
 			int dfltPriority) {
 		this.m_cloudApplicationClient = cloudApplicationClient;

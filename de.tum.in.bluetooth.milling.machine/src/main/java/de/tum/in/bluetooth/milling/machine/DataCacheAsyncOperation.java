@@ -36,13 +36,14 @@ import de.tum.in.bluetooth.milling.machine.data.RealtimeData;
  * @author AMIT KUMAR MONDAL
  *
  */
-public final class AsyncOperation implements AsyncFunction<String, String> {
+public final class DataCacheAsyncOperation implements
+		AsyncFunction<String, String> {
 
 	/**
 	 * Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(MyFutureCallback.class);
+			.getLogger(DataCacheAsyncOperation.class);
 
 	/**
 	 * Holds List of results retrieved by all the paired devices (used as cache
@@ -63,7 +64,7 @@ public final class AsyncOperation implements AsyncFunction<String, String> {
 	/**
 	 * Constructor
 	 */
-	public AsyncOperation(ListeningExecutorService poolToRunFunctionIn) {
+	public DataCacheAsyncOperation(ListeningExecutorService poolToRunFunctionIn) {
 		this.poolToRunFunctionIn = poolToRunFunctionIn;
 		this.m_realTimeData = new MapMaker().concurrencyLevel(2).weakValues()
 				.initialCapacity(CACHE_INITAL_CAPACITY).makeMap();

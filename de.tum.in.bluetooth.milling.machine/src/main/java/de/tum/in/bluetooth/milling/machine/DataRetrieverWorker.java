@@ -16,7 +16,9 @@
 package de.tum.in.bluetooth.milling.machine;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,7 @@ public final class DataRetrieverWorker implements Callable<String> {
 	 * Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(MyFutureCallback.class);
+			.getLogger(DataRetrieverWorker.class);
 
 	/**
 	 * The Bluetooth Communication Stream Connection
@@ -58,8 +60,15 @@ public final class DataRetrieverWorker implements Callable<String> {
 
 		final byte buffer[] = new byte[8];
 		try {
-			final int bytes_read = m_bluetoothConnector.getInputStream().read(
-					buffer, 0, 8);
+			final InputStream inputStream = m_bluetoothConnector
+					.getInputStream();
+			int bytes_read = inputStream.available();
+
+			if (bytes_read > 0)
+				bytes_read = inputStream.read(buffer, 0, 8);
+			else
+				TimeUnit.SECONDS.sleep(1);
+
 			final String received = new String(buffer, 0, bytes_read);
 
 			return Strings.isNullOrEmpty(received) ? "" : received;
