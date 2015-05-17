@@ -313,7 +313,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 			// component, then we have to publish the realtime data
 			if (m_devices.contains(serviceRecord.getHostDevice()
 					.getBluetoothAddress()))
-				doPublishRealtimeDataAndStoreInCache(serviceRecord);
+				doPublishRealtimeData(serviceRecord);
 		}
 	}
 
@@ -355,8 +355,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	 * Used to publish realtime data retrieved from all the milling machines and
 	 * cache it
 	 */
-	private void doPublishRealtimeDataAndStoreInCache(
-			ServiceRecord serviceRecord) {
+	private void doPublishRealtimeData(ServiceRecord serviceRecord) {
 
 		final String remoteDeviceAddress = serviceRecord.getHostDevice()
 				.getBluetoothAddress();
