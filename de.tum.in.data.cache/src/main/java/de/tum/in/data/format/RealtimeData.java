@@ -38,11 +38,26 @@ public abstract class RealtimeData {
 	 */
 	private final String m_timestamp;
 
+	/**
+	 * Extra Information if needed can be provided
+	 */
+	private final Object m_extraBody;
+
 	/* Constructor */
 	public RealtimeData(String deviceAddress, Object value, String timeStamp) {
 		m_deviceAddress = deviceAddress;
 		m_value = value;
 		m_timestamp = timeStamp;
+		m_extraBody = null;
+	}
+
+	/* Constructor */
+	public RealtimeData(String deviceAddress, Object value, String timeStamp,
+			Object extraBody) {
+		m_deviceAddress = deviceAddress;
+		m_value = value;
+		m_timestamp = timeStamp;
+		m_extraBody = extraBody;
 	}
 
 	/**
@@ -64,5 +79,12 @@ public abstract class RealtimeData {
 	 */
 	public String getTimestamp() {
 		return m_timestamp;
+	}
+
+	/**
+	 * The getter for the extra body
+	 */
+	public Object getExtraBody() {
+		return m_extraBody;
 	}
 }

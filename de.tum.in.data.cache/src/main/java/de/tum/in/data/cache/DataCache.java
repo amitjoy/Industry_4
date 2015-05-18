@@ -17,18 +17,21 @@ package de.tum.in.data.cache;
 
 import java.util.concurrent.TimeUnit;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 import de.tum.in.data.format.MillingMachineData;
 import de.tum.in.data.format.RealtimeData;
-import de.tum.in.data.util.CacheUtil;
 
 /**
  * OSGi Event Listener to cache the data in a Concurrent Map
@@ -74,10 +77,31 @@ public class DataCache implements EventHandler {
 	 * The cache to store data
 	 */
 	@SuppressWarnings("unchecked")
-	private static final Cache<String, Object> CACHE = CacheBuilder
-			.newBuilder().concurrencyLevel(5).weakValues().maximumSize(50000)
-			.expireAfterWrite(5, TimeUnit.HOURS)
-			.removalListener(new RemoveRealtimeDataListener()).build();
+	private Cache<String, Object> m_cache;
+
+	/**
+	 * The callback while the component gets registered in the service registry
+	 */
+	@Activate
+	protected synchronized void activate(ComponentContext componentContext) {
+		LOGGER.info("Activating Caching Component...");
+		m_cache = CacheBuilder.newBuilder().concurrencyLevel(5).weakValues()
+				.maximumSize(50000).expireAfterWrite(2, TimeUnit.HOURS)
+				.removalListener(new RemoveRealtimeDataListener()).build();
+		LOGGER.info("Activating Caching Component...Done");
+	}
+
+	/**
+	 * The callback while the component gets deregistered in the service
+	 * registry
+	 */
+	@Deactivate
+	protected synchronized void deactivate(ComponentContext componentContext) {
+		LOGGER.info("Deactivating Caching Component...");
+		m_cache.cleanUp();
+		m_cache = null;
+		LOGGER.info("Deactivating Caching Component...Done");
+	}
 
 	/** {@inheritDoc} */
 	@SuppressWarnings("unchecked")
@@ -85,25 +109,25 @@ public class DataCache implements EventHandler {
 	public void handleEvent(Event event) {
 		LOGGER.debug("Cache Event Handler starting....");
 
+		Preconditions.checkNotNull(event);
 		if (DATA_CACHE_TOPIC.startsWith(event.getTopic())) {
 			LOGGER.debug("Cache Event Handler caching....");
 
+			// Extract all the event properties
 			m_dataFormatClass = ((Class<RealtimeData>) event
 					.getProperty("class"));
 			m_deviceAddress = (String) event.getProperty("device.id");
 			m_timestamp = (String) event.getProperty("timestamp");
 			m_realtimeData = (String) event.getProperty("data");
 
-			final MillingMachineData data = new MillingMachineData(
-					m_deviceAddress, m_realtimeData, m_timestamp);
+			// Prepare the data and wrap it
+			final RealtimeData data = new MillingMachineData(m_deviceAddress,
+					m_realtimeData, m_timestamp);
 
-			final RealtimeData format = CacheUtil.convert(data,
-					m_dataFormatClass);
-
-			CACHE.put(String.valueOf(System.currentTimeMillis()), format);
+			// Now put the data in the cache
+			m_cache.put(String.valueOf(System.currentTimeMillis()), data);
 
 			LOGGER.debug("Cache Event Handler Caching...done");
 		}
 	}
-
 }
