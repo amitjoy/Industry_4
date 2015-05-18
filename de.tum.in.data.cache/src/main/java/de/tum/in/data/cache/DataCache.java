@@ -31,6 +31,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 import de.tum.in.data.format.RealtimeData;
+import de.tum.in.events.EventConstants;
 
 /**
  * OSGi Event Listener to cache the data in a Concurrent Map
@@ -48,11 +49,6 @@ public class DataCache implements EventHandler {
 			.getLogger(DataCache.class);
 
 	/**
-	 * Common OSGi Topic Placeholder to cache data
-	 */
-	private static final String DATA_CACHE_TOPIC = "de/tum/in/device/cache/*";
-
-	/**
 	 * Placeholder to store the device address from the event properties
 	 */
 	private String m_deviceAddress;
@@ -68,6 +64,11 @@ public class DataCache implements EventHandler {
 	private String m_realtimeData;
 
 	/**
+	 * Placeholder to store the extra information from the event properties
+	 */
+	private String m_extraInformation;
+
+	/**
 	 * The cache to store data
 	 */
 	@SuppressWarnings("unchecked")
@@ -79,9 +80,11 @@ public class DataCache implements EventHandler {
 	@Activate
 	protected synchronized void activate(ComponentContext componentContext) {
 		LOGGER.info("Activating Caching Component...");
+
 		m_cache = CacheBuilder.newBuilder().concurrencyLevel(5).weakValues()
 				.maximumSize(50000).expireAfterWrite(2, TimeUnit.HOURS)
 				.removalListener(new RemoveRealtimeDataListener()).build();
+
 		LOGGER.info("Activating Caching Component...Done");
 	}
 
@@ -104,18 +107,20 @@ public class DataCache implements EventHandler {
 		LOGGER.debug("Cache Event Handler starting....");
 
 		Preconditions.checkNotNull(event);
-		if (DATA_CACHE_TOPIC.startsWith(event.getTopic())) {
+		if (EventConstants.DATA_CACHE.equals(event.getTopic())) {
 			LOGGER.debug("Cache Event Handler caching....");
 
 			// Extract all the event properties
 			m_deviceAddress = (String) event.getProperty("device.id");
 			m_timestamp = (String) event.getProperty("timestamp");
 			m_realtimeData = (String) event.getProperty("data");
+			m_extraInformation = (String) event.getProperty("extra.info");
 
 			// Prepare the data and wrap it
 			final RealtimeData data = new RealtimeData.Builder()
 					.setDeviceAddress(m_deviceAddress)
-					.setTimestamp(m_timestamp).setValue(m_realtimeData).build();
+					.setTimestamp(m_timestamp).setValue(m_realtimeData)
+					.setExtraBody(m_extraInformation).build();
 
 			// Now put the data in the cache
 			m_cache.put(String.valueOf(System.currentTimeMillis()), data);

@@ -28,6 +28,6 @@ public interface EventConstants {
 	/**
 	 * Used to cache data retrieved from the bluetooth enabled milling machine
 	 */
-	public static final String MILLING_MACHINE_DATA_CACHE = "de/tum/in/device/cache/milling/machine";
+	public static final String DATA_CACHE = "de/tum/in/device/data/cache";
 
 }

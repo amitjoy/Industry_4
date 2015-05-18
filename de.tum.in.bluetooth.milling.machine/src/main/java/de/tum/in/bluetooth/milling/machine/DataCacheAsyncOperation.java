@@ -107,9 +107,9 @@ public final class DataCacheAsyncOperation implements
 					String.valueOf(System.currentTimeMillis()));
 			properties.put("data", input);
 
-			final Event cacheEvent = new Event(
-					EventConstants.MILLING_MACHINE_DATA_CACHE, properties);
-			m_eventAdmin.sendEvent(cacheEvent);
+			final Event cacheEvent = new Event(EventConstants.DATA_CACHE,
+					properties);
+			m_eventAdmin.postEvent(cacheEvent);
 
 			return input;
 		}
