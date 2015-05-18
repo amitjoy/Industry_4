@@ -47,6 +47,7 @@ import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.io.ConnectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,6 +149,12 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	private static final String PUBLISH_TOPIC_PROP_NAME = "publish.semanticTopic";
 
 	/**
+	 * OSGi Event Admin Service Dependency
+	 */
+	@Reference(bind = "bindEventAdmin", unbind = "unbindEventAdmin")
+	private volatile EventAdmin m_eventAdmin;
+
+	/**
 	 * Eclipse Kura Cloud Service Dependency
 	 */
 	@Reference(bind = "bindCloudService", unbind = "unbindCloudService")
@@ -237,6 +244,23 @@ public class BluetoothMillingMachine extends Cloudlet implements
 			ConnectorService connectorService) {
 		if (m_connectorService != null)
 			m_connectorService = null;
+	}
+
+	/**
+	 * Callback to be used while {@link EventAdmin} is registering
+	 */
+	public synchronized void bindEventAdmin(EventAdmin eventAdmin) {
+		if (m_eventAdmin == null) {
+			m_eventAdmin = eventAdmin;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link EventAdmin} is deregistering
+	 */
+	public synchronized void unbindEventAdmin(EventAdmin eventAdmin) {
+		if (m_cloudService == eventAdmin)
+			m_eventAdmin = null;
 	}
 
 	/**
@@ -375,7 +399,8 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		// the
 		// data retriever thread
 		m_finalResult = Futures.transform(m_resultFromWorker,
-				new DataCacheAsyncOperation(m_poolForAsyncFunction));
+				new DataCacheAsyncOperation(m_poolForAsyncFunction,
+						m_eventAdmin, remoteDeviceAddress));
 
 		final String topic = (String) m_properties.get(PUBLISH_TOPIC_PROP_NAME);
 

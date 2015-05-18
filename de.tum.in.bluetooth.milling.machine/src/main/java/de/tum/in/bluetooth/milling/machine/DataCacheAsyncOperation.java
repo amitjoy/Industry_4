@@ -15,20 +15,20 @@
  *******************************************************************************/
 package de.tum.in.bluetooth.milling.machine;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentMap;
 
-import javax.bluetooth.RemoteDevice;
-
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.MapMaker;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
-import de.tum.in.bluetooth.milling.machine.data.RealtimeData;
+import de.tum.in.events.EventConstants;
 
 /**
  * Asynchronous Operation to save the data to a cache
@@ -46,40 +46,44 @@ public final class DataCacheAsyncOperation implements
 			.getLogger(DataCacheAsyncOperation.class);
 
 	/**
-	 * Holds List of results retrieved by all the paired devices (used as cache
-	 * storage)
-	 */
-	private static ConcurrentMap<String, RealtimeData> m_realTimeData;
-
-	/**
-	 * Cache Initial Capacity
-	 */
-	private static final int CACHE_INITAL_CAPACITY = 50000;
-
-	/**
 	 * The Thread Pool to run the function inside
 	 */
-	private final ListeningExecutorService poolToRunFunctionIn;
+	private final ListeningExecutorService m_poolToRunFunctionIn;
+
+	/**
+	 * OSGi Event Admin Service Reference
+	 */
+	private final EventAdmin m_eventAdmin;
+
+	/**
+	 * OSGi
+	 */
+	private final String m_deviceAddress;
 
 	/**
 	 * Constructor
+	 * 
+	 * @param eventAdmin
+	 * @param remoteDeviceAddress
 	 */
-	public DataCacheAsyncOperation(ListeningExecutorService poolToRunFunctionIn) {
-		this.poolToRunFunctionIn = poolToRunFunctionIn;
-		this.m_realTimeData = new MapMaker().concurrencyLevel(2).weakValues()
-				.initialCapacity(CACHE_INITAL_CAPACITY).makeMap();
+	public DataCacheAsyncOperation(
+			ListeningExecutorService poolToRunFunctionIn,
+			EventAdmin eventAdmin, String remoteDeviceAddress) {
+		this.m_poolToRunFunctionIn = poolToRunFunctionIn;
+		this.m_eventAdmin = eventAdmin;
+		this.m_deviceAddress = remoteDeviceAddress;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public ListenableFuture<String> apply(String input) throws Exception {
-		return poolToRunFunctionIn.submit(new FunctionWorker(input));
+		return m_poolToRunFunctionIn.submit(new FunctionWorker(input));
 	}
 
 	/**
 	 * 'worker' for the AsyncFunction
 	 */
-	private static final class FunctionWorker implements Callable<String> {
+	private final class FunctionWorker implements Callable<String> {
 		/**
 		 * The input data
 		 */
@@ -96,27 +100,18 @@ public final class DataCacheAsyncOperation implements
 		@Override
 		public String call() throws Exception {
 			LOGGER.debug("Asynchronous Operation starting...");
-			// TO-DO Add async operation to save to cache
+
+			final Dictionary<String, String> properties = new Hashtable<String, String>();
+			properties.put("device.id", m_deviceAddress);
+			properties.put("timestamp",
+					String.valueOf(System.currentTimeMillis()));
+
+			final Event cacheEvent = new Event(
+					EventConstants.MILLING_MACHINE_DATA_CACHE, properties);
+			m_eventAdmin.sendEvent(cacheEvent);
+
 			return input;
 		}
-	}
-
-	/**
-	 * Used to wrap data for the predefined format needed
-	 * 
-	 * @param bluetoothAddress
-	 *            the bluetooth address of the {@link RemoteDevice}
-	 * @param realtimeData
-	 *            The data retrieved from the input stream
-	 * @return
-	 */
-	private static <T extends RealtimeData> T wrapData(String bluetoothAddress,
-			String realtimeData) {
-		// for temporary purposes, it is hardcoded to be a default predefined
-		// format
-		final RealtimeData data = new RealtimeData(bluetoothAddress,
-				realtimeData);
-		return ((T) data);
 	}
 
 }
