@@ -30,7 +30,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-import de.tum.in.data.format.MillingMachineData;
 import de.tum.in.data.format.RealtimeData;
 
 /**
@@ -52,11 +51,6 @@ public class DataCache implements EventHandler {
 	 * Common OSGi Topic Placeholder to cache data
 	 */
 	private static final String DATA_CACHE_TOPIC = "de/tum/in/device/cache/*";
-
-	/**
-	 * Placeholder to store the data format class name from the event properties
-	 */
-	private Class<RealtimeData> m_dataFormatClass;
 
 	/**
 	 * Placeholder to store the device address from the event properties
@@ -114,15 +108,14 @@ public class DataCache implements EventHandler {
 			LOGGER.debug("Cache Event Handler caching....");
 
 			// Extract all the event properties
-			m_dataFormatClass = ((Class<RealtimeData>) event
-					.getProperty("class"));
 			m_deviceAddress = (String) event.getProperty("device.id");
 			m_timestamp = (String) event.getProperty("timestamp");
 			m_realtimeData = (String) event.getProperty("data");
 
 			// Prepare the data and wrap it
-			final RealtimeData data = new MillingMachineData(m_deviceAddress,
-					m_realtimeData, m_timestamp);
+			final RealtimeData data = new RealtimeData.Builder()
+					.setDeviceAddress(m_deviceAddress)
+					.setTimestamp(m_timestamp).setValue(m_realtimeData).build();
 
 			// Now put the data in the cache
 			m_cache.put(String.valueOf(System.currentTimeMillis()), data);

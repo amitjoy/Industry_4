@@ -15,13 +15,16 @@
  *******************************************************************************/
 package de.tum.in.data.format;
 
+import com.google.common.annotations.Beta;
+
 /**
- * Marker Interface. All the cache data format must implement this interface
+ * The realtime data format must align with this
  * 
  * @author AMIT KUMAR MONDAL
  *
  */
-public abstract class RealtimeData {
+@Beta
+public final class RealtimeData {
 
 	/**
 	 * The bluetooth address of the device which spawned the result
@@ -44,20 +47,82 @@ public abstract class RealtimeData {
 	private final Object m_extraBody;
 
 	/* Constructor */
-	public RealtimeData(String deviceAddress, Object value, String timeStamp) {
-		m_deviceAddress = deviceAddress;
-		m_value = value;
-		m_timestamp = timeStamp;
-		m_extraBody = null;
-	}
-
-	/* Constructor */
-	public RealtimeData(String deviceAddress, Object value, String timeStamp,
+	private RealtimeData(String deviceAddress, Object value, String timeStamp,
 			Object extraBody) {
 		m_deviceAddress = deviceAddress;
 		m_value = value;
 		m_timestamp = timeStamp;
 		m_extraBody = extraBody;
+	}
+
+	/**
+	 * Builder class to set optional values
+	 * 
+	 * @author AMIT KUMAR MONDAL
+	 *
+	 */
+	public static class Builder {
+
+		/**
+		 * The bluetooth address of the device
+		 */
+		private String m_deviceAddress;
+
+		/**
+		 * The value retrieved
+		 */
+		private Object m_value;
+
+		/**
+		 * The timestamp of the data
+		 */
+		private String m_timestamp;
+
+		/**
+		 * Extra Information
+		 */
+		private Object m_extraBody;
+
+		/**
+		 * Setter for device address
+		 */
+		public Builder setDeviceAddress(String deviceAddress) {
+			m_deviceAddress = deviceAddress;
+			return this;
+		}
+
+		/**
+		 * Setter for realtime data
+		 */
+		public Builder setValue(Object value) {
+			m_value = value;
+			return this;
+		}
+
+		/**
+		 * Setter for timestamp
+		 */
+		public Builder setTimestamp(String timestamp) {
+			m_timestamp = timestamp;
+			return this;
+		}
+
+		/**
+		 * Setter for extra body
+		 */
+		public Builder setExtraBody(Object extraBody) {
+			m_extraBody = extraBody;
+			return this;
+		}
+
+		/**
+		 * Final Building of the object
+		 */
+		public RealtimeData build() {
+			return new RealtimeData(m_deviceAddress, m_value, m_timestamp,
+					m_extraBody);
+		}
+
 	}
 
 	/**

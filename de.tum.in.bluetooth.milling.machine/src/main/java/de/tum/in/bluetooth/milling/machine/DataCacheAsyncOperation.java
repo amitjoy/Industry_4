@@ -28,7 +28,6 @@ import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
-import de.tum.in.data.format.MillingMachineData;
 import de.tum.in.events.EventConstants;
 
 /**
@@ -106,7 +105,6 @@ public final class DataCacheAsyncOperation implements
 			properties.put("device.id", m_deviceAddress);
 			properties.put("timestamp",
 					String.valueOf(System.currentTimeMillis()));
-			properties.put("class", MillingMachineData.class);
 			properties.put("data", input);
 
 			final Event cacheEvent = new Event(
