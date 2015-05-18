@@ -18,6 +18,9 @@ package de.tum.in.data.cache;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 import de.tum.in.data.format.MillingMachineData;
 import de.tum.in.data.format.RealtimeData;
 import de.tum.in.data.util.CacheUtil;
@@ -55,6 +58,15 @@ public class DataCache implements EventHandler {
 	 */
 	private String m_realtimeData;
 
+	/**
+	 * The cache to store data
+	 */
+	@SuppressWarnings("unchecked")
+	private final Cache<String, Object> CACHE = CacheBuilder.newBuilder()
+			.concurrencyLevel(5).weakValues().maximumSize(50000)
+			.removalListener(new RemoveRealtimeDataListener()).build();
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public void handleEvent(Event event) {
 		if (DATA_CACHE_TOPIC.startsWith(event.getTopic())) {
@@ -70,6 +82,8 @@ public class DataCache implements EventHandler {
 
 			final RealtimeData format = CacheUtil.convert(data,
 					m_dataFormatClass);
+
+			CACHE.put(String.valueOf(System.currentTimeMillis()), format);
 		}
 	}
 
