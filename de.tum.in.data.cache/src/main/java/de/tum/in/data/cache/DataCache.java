@@ -17,6 +17,7 @@ package de.tum.in.data.cache;
 
 import java.util.concurrent.TimeUnit;
 
+import org.apache.felix.scr.annotations.Component;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
@@ -33,6 +34,7 @@ import de.tum.in.data.util.CacheUtil;
  * @author AMIT KUMAR MONDAL
  *
  */
+@Component
 public class DataCache implements EventHandler {
 
 	/**
