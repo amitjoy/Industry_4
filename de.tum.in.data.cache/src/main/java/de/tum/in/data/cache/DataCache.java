@@ -15,6 +15,8 @@
  *******************************************************************************/
 package de.tum.in.data.cache;
 
+import java.util.concurrent.TimeUnit;
+
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
@@ -62,10 +64,12 @@ public class DataCache implements EventHandler {
 	 * The cache to store data
 	 */
 	@SuppressWarnings("unchecked")
-	private final Cache<String, Object> CACHE = CacheBuilder.newBuilder()
-			.concurrencyLevel(5).weakValues().maximumSize(50000)
+	private static final Cache<String, Object> CACHE = CacheBuilder
+			.newBuilder().concurrencyLevel(5).weakValues().maximumSize(50000)
+			.expireAfterWrite(5, TimeUnit.HOURS)
 			.removalListener(new RemoveRealtimeDataListener()).build();
 
+	/** {@inheritDoc} */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void handleEvent(Event event) {
