@@ -44,6 +44,7 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.collections.IterableMap;
 import org.apache.commons.collections.MapIterator;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -999,8 +1000,8 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			final ComponentConfiguration configuration = m_configurationService
 					.getComponentConfiguration(APP_CONF_ID);
 
-			final IterableMap map = (IterableMap) configuration
-					.getConfigurationProperties();
+			final IterableMap map = new HashedMap(
+					configuration.getConfigurationProperties());
 			final MapIterator it = map.mapIterator();
 
 			while (it.hasNext()) {
