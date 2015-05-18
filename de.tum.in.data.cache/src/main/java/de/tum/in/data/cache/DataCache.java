@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.felix.scr.annotations.Component;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -36,6 +38,12 @@ import de.tum.in.data.util.CacheUtil;
  */
 @Component
 public class DataCache implements EventHandler {
+
+	/**
+	 * Logger
+	 */
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(DataCache.class);
 
 	/**
 	 * Common OSGi Topic Placeholder to cache data
@@ -75,7 +83,10 @@ public class DataCache implements EventHandler {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void handleEvent(Event event) {
+		LOGGER.debug("Cache Event Handler starting....");
+
 		if (DATA_CACHE_TOPIC.startsWith(event.getTopic())) {
+			LOGGER.debug("Cache Event Handler caching....");
 
 			m_dataFormatClass = ((Class<RealtimeData>) event
 					.getProperty("class"));
@@ -90,6 +101,8 @@ public class DataCache implements EventHandler {
 					m_dataFormatClass);
 
 			CACHE.put(String.valueOf(System.currentTimeMillis()), format);
+
+			LOGGER.debug("Cache Event Handler Caching...done");
 		}
 	}
 
