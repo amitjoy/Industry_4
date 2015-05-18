@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package de.tum.in.events;
+package de.tum.in.data.cache;
 
-/**
- * All the system event constants should be registered here. To get your data
- * cached, you have to add your event which must have a topic starting with
- * <code>de/tum/in/device/cache/<code>
- * 
- * @author AMIT KUMAR MONDAL
- *
- */
-public interface EventConstants {
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 
-	/**
-	 * Used to cache data retrieved from the bluetooth enabled milling machine
-	 */
-	public static final String MILLING_MACHINE_DATA_CACHE = "de/tum/in/device/cache/milling/machine";
+public class DataCache implements EventHandler {
+
+	private static final String DATA_CACHE_TOPIC = "de/tum/in/device/cache/*";
+
+	public void handleEvent(Event event) {
+		if (DATA_CACHE_TOPIC.startsWith(event.getTopic())) {
+
+		}
+	}
 
 }

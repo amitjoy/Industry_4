@@ -101,10 +101,11 @@ public final class DataCacheAsyncOperation implements
 		public String call() throws Exception {
 			LOGGER.debug("Asynchronous Operation starting...");
 
-			final Dictionary<String, String> properties = new Hashtable<String, String>();
+			final Dictionary properties = new Hashtable();
 			properties.put("device.id", m_deviceAddress);
 			properties.put("timestamp",
 					String.valueOf(System.currentTimeMillis()));
+			// properties.put("class.name", MillingMachineData.class.getName());
 
 			final Event cacheEvent = new Event(
 					EventConstants.MILLING_MACHINE_DATA_CACHE, properties);

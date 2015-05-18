@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>de.tum.in</groupId>
-	<artifactId>de.tum.in.events</artifactId>
+	<artifactId>de.tum.in.data.cache</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
-	<name>OSGi Events</name>
+	<name>Realtime Data Cache</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,6 +19,11 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>4.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<version>1.4.0</version>
 		</dependency>
 	</dependencies>
 
@@ -47,9 +52,9 @@
 		</plugins>
 	</build>
 
-	<description>This bundle is responsible for registering all the the event constants required for the application</description>
 	<organization>
 		<name>Technical University of Munich</name>
 		<url>http://www.tum.de</url>
 	</organization>
+	<description>This bundle is responsible for providing the opportunity to cache realtime data</description>
 </project>

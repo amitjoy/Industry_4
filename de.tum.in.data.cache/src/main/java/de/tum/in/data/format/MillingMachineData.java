@@ -13,21 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package de.tum.in.events;
+package de.tum.in.data.format;
 
-/**
- * All the system event constants should be registered here. To get your data
- * cached, you have to add your event which must have a topic starting with
- * <code>de/tum/in/device/cache/<code>
- * 
- * @author AMIT KUMAR MONDAL
- *
- */
-public interface EventConstants {
-
-	/**
-	 * Used to cache data retrieved from the bluetooth enabled milling machine
-	 */
-	public static final String MILLING_MACHINE_DATA_CACHE = "de/tum/in/device/cache/milling/machine";
+public class MillingMachineData implements RealtimeData {
 
 }
