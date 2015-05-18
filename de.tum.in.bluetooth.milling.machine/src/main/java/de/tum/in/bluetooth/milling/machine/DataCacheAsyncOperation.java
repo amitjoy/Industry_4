@@ -28,6 +28,7 @@ import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
+import de.tum.in.data.format.MillingMachineData;
 import de.tum.in.events.EventConstants;
 
 /**
@@ -101,11 +102,12 @@ public final class DataCacheAsyncOperation implements
 		public String call() throws Exception {
 			LOGGER.debug("Asynchronous Operation starting...");
 
-			final Dictionary properties = new Hashtable();
+			final Dictionary<String, Object> properties = new Hashtable<>();
 			properties.put("device.id", m_deviceAddress);
 			properties.put("timestamp",
 					String.valueOf(System.currentTimeMillis()));
-			// properties.put("class.name", MillingMachineData.class.getName());
+			properties.put("class", MillingMachineData.class);
+			properties.put("data", input);
 
 			final Event cacheEvent = new Event(
 					EventConstants.MILLING_MACHINE_DATA_CACHE, properties);

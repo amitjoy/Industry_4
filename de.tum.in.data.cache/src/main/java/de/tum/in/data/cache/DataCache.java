@@ -18,13 +18,58 @@ package de.tum.in.data.cache;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
+import de.tum.in.data.format.MillingMachineData;
+import de.tum.in.data.format.RealtimeData;
+import de.tum.in.data.util.CacheUtil;
+
+/**
+ * OSGi Event Listener to cache the data in a Concurrent Map
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public class DataCache implements EventHandler {
 
+	/**
+	 * Common OSGi Topic Placeholder to cache data
+	 */
 	private static final String DATA_CACHE_TOPIC = "de/tum/in/device/cache/*";
 
+	/**
+	 * Placeholder to store the data format class name from the event properties
+	 */
+	private Class<RealtimeData> m_dataFormatClass;
+
+	/**
+	 * Placeholder to store the device address from the event properties
+	 */
+	private String m_deviceAddress;
+
+	/**
+	 * Placeholder to store the data timestamp name from the event properties
+	 */
+	private String m_timestamp;
+
+	/**
+	 * Placeholder to store the data from the event properties
+	 */
+	private String m_realtimeData;
+
+	@Override
 	public void handleEvent(Event event) {
 		if (DATA_CACHE_TOPIC.startsWith(event.getTopic())) {
 
+			m_dataFormatClass = ((Class<RealtimeData>) event
+					.getProperty("class"));
+			m_deviceAddress = (String) event.getProperty("device.id");
+			m_timestamp = (String) event.getProperty("timestamp");
+			m_realtimeData = (String) event.getProperty("data");
+
+			final MillingMachineData data = new MillingMachineData(
+					m_deviceAddress, m_realtimeData, m_timestamp);
+
+			final RealtimeData format = CacheUtil.convert(data,
+					m_dataFormatClass);
 		}
 	}
 

@@ -13,20 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package de.tum.in.data.format;
+package de.tum.in.data.util;
+
+import de.tum.in.data.format.RealtimeData;
 
 /**
- * Represents Data Format for Bluetooth Enabled Milling Machine
+ * Used to store all the necessary utility methods required for data caching
  * 
  * @author AMIT KUMAR MONDAL
  *
  */
-public final class MillingMachineData extends RealtimeData {
+public final class CacheUtil {
 
-	/** Constructor */
-	public MillingMachineData(String bluetoothAddress, Object value,
-			String timeStamp) {
-		super(bluetoothAddress, value, timeStamp);
+	/**
+	 * Used to cast the data to the specific format
+	 * 
+	 * @param data
+	 *            the data which needs to be casted
+	 * @param dataClass
+	 *            the class to which the data would be casted
+	 * @return the type casted data
+	 */
+	public static <T extends RealtimeData> T convert(Object data,
+			Class<T> dataClass) {
+		return dataClass.cast(data);
+
 	}
 
 }

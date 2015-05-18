@@ -21,6 +21,48 @@ package de.tum.in.data.format;
  * @author AMIT KUMAR MONDAL
  *
  */
-public interface RealtimeData {
+public abstract class RealtimeData {
 
+	/**
+	 * The bluetooth address of the device which spawned the result
+	 */
+	private final String m_deviceAddress;
+
+	/**
+	 * The value retrieved during communication
+	 */
+	private final Object m_value;
+
+	/**
+	 * The timestamp of the data
+	 */
+	private final String m_timestamp;
+
+	/* Constructor */
+	public RealtimeData(String deviceAddress, Object value, String timeStamp) {
+		m_deviceAddress = deviceAddress;
+		m_value = value;
+		m_timestamp = timeStamp;
+	}
+
+	/**
+	 * The Getter for bluetooth address
+	 */
+	public String getDeviceAddress() {
+		return m_deviceAddress;
+	}
+
+	/**
+	 * The getter for the value
+	 */
+	public Object getValue() {
+		return m_value;
+	}
+
+	/**
+	 * The getter for the timestamp
+	 */
+	public String getTimestamp() {
+		return m_timestamp;
+	}
 }
