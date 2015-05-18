@@ -21,7 +21,7 @@
 			<version>1.9.6</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
@@ -45,7 +45,7 @@
 			<artifactId>org.eclipse.kura.api</artifactId>
 			<version>1.0.4-SNAPSHOT</version>
 		</dependency>
-		
+
 
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
@@ -78,6 +78,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+						<Bundle-Vendor>TU Munich</Bundle-Vendor>
+						<Bundle-Developer>Amit Kumar Mondal</Bundle-Developer>
 						<_dsannotations>*</_dsannotations>
 					</instructions>
 				</configuration>
