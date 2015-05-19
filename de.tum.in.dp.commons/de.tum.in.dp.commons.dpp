@@ -1,0 +1,23 @@
+#Deployment Plugin Project File
+#Tue May 19 19:49:19 CEST 2015
+build.ant.name=<.>/de.tum.in.dp.commons_build.xml
+build.dp.file=<.>/de.tum.in.dp.commons.dp
+build.location=
+bundles.0.bundle_path=/Users/AMIT/IoT_IDP/Pi/de.tum.in.events/target/de.tum.in.events-1.0-SNAPSHOT.jar
+bundles.0.customizer=false
+bundles.0.headers.count=0
+bundles.0.missing=false
+bundles.0.name=de.tum.in.events-1.0-SNAPSHOT.jar
+bundles.0.symbolic_name=de.tum.in.de.tum.in.events
+bundles.0.version=1.0.0.SNAPSHOT
+bundles.count=1
+certificates.count=0
+general.signbundles=false
+headers.contact.address=admin@amitinside.com
+headers.copyright=Amit Kumar Mondal
+headers.description=Common Bundles required for the application
+headers.other.headers=
+headers.symbolic.name=de.tum.in.dp.commons
+headers.version=1.0.0
+resources.count=0
+
