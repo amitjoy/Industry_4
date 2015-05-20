@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
+	localization="en_us">
+	<OCD id="de.tum.in.mongodb" name="MongoDB"
+		description="This is used to consume all the mentioned bluetooth enabled milling machines for communciating with Raspberry Pi ">
+
+		<Icon
+			resource="http://icons.iconarchive.com/icons/thiago-silva/palm/128/Settings-Bluetooth-icon.png"
+			size="32" />
+
+		<AD id="mongo.db.host" name="mongo.db.host" type="String"
+			cardinality="0" required="false" default="localhost"
+			description="Configurable property to set Mongo DB Server Address" />
+
+		<AD id="mongo.db.port" name="mongo.db.port" type="Integer"
+			cardinality="0" required="false" default="27017"
+			description="Configurable Property to set Mongo DB Server Port No" />
+
+		<AD id="mongo.db.dbname" name="mongo.db.dbname" type="String"
+			cardinality="0" required="true" default="test"
+			description="Configurable Property to set Mongo DB Database Name" />
+
+		<AD id="mongo.db.username" name="mongo.db.username" type="String"
+			cardinality="0" required="true" default="username"
+			description="Configurable Property to set Mongo DB Username" />
+
+		<AD id="mongo.db.password" name="mongo.db.password" type="String"
+			cardinality="0" required="true" default="password"
+			description="Configurable Property to set Mongo DB Password" />
+
+	</OCD>
+
+	<Designate pid="de.tum.in.mongodb">
+		<Object ocdref="de.tum.in.mongodb" />
+	</Designate>
+</MetaData>
