@@ -15,7 +15,7 @@
  *******************************************************************************/
 package de.tum.in.data.format;
 
-import com.google.common.annotations.Beta;
+import com.google.common.base.MoreObjects;
 
 /**
  * The realtime data format must align with this
@@ -23,7 +23,6 @@ import com.google.common.annotations.Beta;
  * @author AMIT KUMAR MONDAL
  *
  */
-@Beta
 public final class RealtimeData {
 
 	/**
@@ -151,5 +150,13 @@ public final class RealtimeData {
 	 */
 	public Object getExtraBody() {
 		return m_extraBody;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this).addValue(m_extraBody)
+				.addValue(m_value).addValue(m_deviceAddress)
+				.addValue(m_timestamp).toString();
 	}
 }
