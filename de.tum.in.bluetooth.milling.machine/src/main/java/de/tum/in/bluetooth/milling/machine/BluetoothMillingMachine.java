@@ -328,7 +328,8 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		super.setCloudService(m_cloudService);
 		super.activate(componentContext);
 
-		m_devices = loadMillingMachines(BLUETOOH_ENABLED_MILLING_MACHINES);
+		m_devices = loadMillingMachines((String) m_properties
+				.get(BLUETOOH_ENABLED_MILLING_MACHINES));
 
 		LOGGER.info("Activating Bluetooth Milling Machine Component... Done.");
 
