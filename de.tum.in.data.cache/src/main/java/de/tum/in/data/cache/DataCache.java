@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -32,6 +33,7 @@ import com.google.common.cache.CacheBuilder;
 
 import de.tum.in.data.format.RealtimeData;
 import de.tum.in.events.Events;
+import de.tum.in.mongodb.MongoDBService;
 
 /**
  * OSGi Event Listener to cache the data in a Concurrent Map
@@ -75,15 +77,44 @@ public class DataCache implements EventHandler {
 	private Cache<String, Object> m_cache;
 
 	/**
+	 * Mongo DB Service
+	 */
+	@Reference(bind = "bindMongoDbService", unbind = "unbindMongoDbService")
+	private volatile MongoDBService m_mongoDbService;
+
+	/**
+	 * Callback when MongoDB Service is getting registered
+	 */
+	protected synchronized void bindMongoDbService(MongoDBService mongoDBService) {
+		if (this.m_mongoDbService == null)
+			m_mongoDbService = mongoDBService;
+	}
+
+	/**
+	 * Callback when MongoDB Service is getting deregistered
+	 */
+	protected synchronized void unbindMongoDbService(
+			MongoDBService mongoDBService) {
+		if (this.m_mongoDbService == mongoDBService)
+			m_mongoDbService = null;
+	}
+
+	/**
 	 * The callback while the component gets registered in the service registry
 	 */
 	@Activate
 	protected synchronized void activate(ComponentContext componentContext) {
 		LOGGER.info("Activating Caching Component...");
 
-		m_cache = CacheBuilder.newBuilder().concurrencyLevel(5).weakValues()
-				.maximumSize(50000).expireAfterWrite(2, TimeUnit.HOURS)
-				.removalListener(new RemoveRealtimeDataListener()).build();
+		m_cache = CacheBuilder
+				.newBuilder()
+				.concurrencyLevel(5)
+				.weakValues()
+				.maximumSize(50000)
+				.expireAfterWrite(2, TimeUnit.HOURS)
+				.removalListener(
+						new RemoveRealtimeDataListener(m_mongoDbService))
+				.build();
 
 		LOGGER.info("Activating Caching Component...Done");
 	}
