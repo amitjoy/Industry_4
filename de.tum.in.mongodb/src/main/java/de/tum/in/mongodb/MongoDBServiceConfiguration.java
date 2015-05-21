@@ -15,10 +15,8 @@
  *******************************************************************************/
 package de.tum.in.mongodb;
 
-import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -31,12 +29,11 @@ import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 
 /**
@@ -130,9 +127,9 @@ public class MongoDBServiceConfiguration extends Cloudlet implements
 	private String m_password;
 
 	/**
-	 * Place holder for Mongo Client
+	 * Place holder for MongoDB Client
 	 */
-	private MongoClient mongo;;
+	private MongoClient m_mongoClient;;
 
 	/**
 	 * Map to store list of configurations
@@ -198,14 +195,12 @@ public class MongoDBServiceConfiguration extends Cloudlet implements
 		super.setCloudService(m_cloudService);
 		super.activate(componentContext);
 
-		final MongoClient mongo;
-		final MongoClientOptions mongoOptions = createMongoOptions(properties);
-
-		// mongo = createMongo(m_host, m_port, mongoOptions);
-
 		if (m_username != null) {
-			// mongo.getDatabase(m_dbname).auth(m_username,
-			// m_password.toCharArray());
+			final MongoCredential credential = MongoCredential
+					.createCredential("user1", "test",
+							"password1".toCharArray());
+			m_mongoClient = new MongoClient(new ServerAddress(m_host),
+					Arrays.asList(credential));
 			LOGGER.info("Authenticated as '" + m_username + "'");
 		}
 
@@ -215,43 +210,13 @@ public class MongoDBServiceConfiguration extends Cloudlet implements
 
 	}
 
-	private MongoClient createMongo(String host, int port,
-			MongoClientOptions mongoOptions) throws UnknownHostException {
-		if (host.contains(",")) {
-			final String[] hosts = host.split(",");
-			final List<ServerAddress> addresses = new ArrayList<ServerAddress>();
-			for (final String hostUrl : hosts) {
-				ServerAddress serverAddress;
-				if (hostUrl.contains(":")) {
-					final String[] hostUrlParts = hostUrl.split(":");
-					port = Integer.parseInt(hostUrlParts[1]);
-					serverAddress = new ServerAddress(hostUrlParts[0], port);
-				} else {
-					serverAddress = new ServerAddress(hostUrl);
-				}
-
-				addresses.add(serverAddress);
-			}
-
-			mongo = new MongoClient(addresses, mongoOptions);
-		} else {
-			mongo = new MongoClient(new ServerAddress(host, port), mongoOptions);
-		}
-		return mongo;
-	}
-
-	private MongoClientOptions createMongoOptions(Map<String, Object> properties) {
-		// TO-DO Mongo Client Options
-		return null;
-	}
-
 	private void registerMongoDBService(ComponentContext componentContext) {
 		final Hashtable<String, String> properties = new Hashtable<String, String>();
 		properties.put("dbName", m_dbname);
-		final MongoDBService dbService = new MongoDBServiceImpl(mongo,
-				mongo.getDB(m_dbname));
+		final MongoDBService dbService = new MongoDBServiceImpl(m_mongoClient,
+				m_mongoClient.getDatabase(m_dbname));
 		componentContext.getBundleContext().registerService(
-				ConnectionFactory.class.getName(), dbService, properties);
+				MongoDBService.class.getName(), dbService, properties);
 	}
 
 	/**

@@ -15,8 +15,18 @@
  *******************************************************************************/
 package de.tum.in.mongodb;
 
-import com.mongodb.DB;
+import com.mongodb.client.MongoDatabase;
 
+/**
+ * Mongo DB Service
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public interface MongoDBService {
-	DB getDB();
+
+	/**
+	 * Used to get database object
+	 */
+	MongoDatabase getDatabase();
 }
