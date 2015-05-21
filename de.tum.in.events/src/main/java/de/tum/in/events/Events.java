@@ -23,7 +23,7 @@ package de.tum.in.events;
  * @author AMIT KUMAR MONDAL
  *
  */
-public interface EventConstants {
+public interface Events {
 
 	/**
 	 * Used to cache data retrieved from the bluetooth enabled milling machine

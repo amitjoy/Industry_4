@@ -28,7 +28,7 @@ import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 
-import de.tum.in.events.EventConstants;
+import de.tum.in.events.Events;
 
 /**
  * Asynchronous Operation to save the data to a cache
@@ -107,8 +107,7 @@ public final class DataCacheAsyncOperation implements
 					String.valueOf(System.currentTimeMillis()));
 			properties.put("data", input);
 
-			final Event cacheEvent = new Event(EventConstants.DATA_CACHE,
-					properties);
+			final Event cacheEvent = new Event(Events.DATA_CACHE, properties);
 			m_eventAdmin.postEvent(cacheEvent);
 
 			return input;

@@ -31,7 +31,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 import de.tum.in.data.format.RealtimeData;
-import de.tum.in.events.EventConstants;
+import de.tum.in.events.Events;
 
 /**
  * OSGi Event Listener to cache the data in a Concurrent Map
@@ -107,7 +107,7 @@ public class DataCache implements EventHandler {
 		LOGGER.debug("Cache Event Handler starting....");
 
 		Preconditions.checkNotNull(event);
-		if (EventConstants.DATA_CACHE.equals(event.getTopic())) {
+		if (Events.DATA_CACHE.equals(event.getTopic())) {
 			LOGGER.debug("Cache Event Handler caching....");
 
 			// Extract all the event properties
