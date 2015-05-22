@@ -255,7 +255,7 @@ public class BluetoothServiceDiscovery {
 	public synchronized void unbindRemoteDevice(RemoteDevice device) {
 		LOGGER.info("Unbinding Remote Device...." + device);
 		unregister(device);
-		LOGGER.info("Unbinding Remote Device...." + device);
+		LOGGER.info("Unbinding Remote Device....Done" + device);
 	}
 
 	/**

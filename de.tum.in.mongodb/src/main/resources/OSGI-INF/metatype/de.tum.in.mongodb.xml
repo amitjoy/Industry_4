@@ -5,7 +5,7 @@
 		description="This is used to consume all the mentioned bluetooth enabled milling machines for communciating with Raspberry Pi ">
 
 		<Icon
-			resource="http://icons.iconarchive.com/icons/thiago-silva/palm/128/Settings-Bluetooth-icon.png"
+			resource="http://icons.iconarchive.com/icons/double-j-design/ravenna-3d/128/Database-Active-icon.png"
 			size="32" />
 
 		<AD id="mongo.db.host" name="mongo.db.host" type="String"
