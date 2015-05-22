@@ -325,6 +325,8 @@ public class BluetoothServiceDiscovery {
 
 	@SuppressWarnings("unused")
 	private void incrementAttempt(final RemoteDevice remote) {
+		LOGGER.info("Attempting to retry..Retry On "
+				+ remote.getBluetoothAddress());
 		final AtomicInteger attempt = new AtomicInteger(m_attempts.get(remote));
 		if (attempt == null) {
 			attempt.set(1);

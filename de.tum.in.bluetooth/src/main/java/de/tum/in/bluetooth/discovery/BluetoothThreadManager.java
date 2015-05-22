@@ -143,7 +143,7 @@ public class BluetoothThreadManager {
 	 * Shutdowns the pool. No task can be submitted once this method is called.
 	 */
 	public static void stopScheduler() {
-		LOGGER.info("Shutdown scheduler");
+		LOGGER.info("Shutting down scheduler...");
 		try {
 			s_pool.shutdownNow();
 		} catch (final Throwable e) {
@@ -151,6 +151,7 @@ public class BluetoothThreadManager {
 			LOGGER.warn("Exception during shutdown : ",
 					Throwables.getStackTraceAsString(e));
 		}
+		LOGGER.info("Shutting down scheduler...Done");
 	}
 
 }
