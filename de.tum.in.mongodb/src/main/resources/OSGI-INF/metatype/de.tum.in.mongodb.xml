@@ -2,7 +2,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
 	localization="en_us">
 	<OCD id="de.tum.in.mongodb" name="MongoDB"
-		description="This is used to consume all the mentioned bluetooth enabled milling machines for communciating with Raspberry Pi ">
+		description="This provides the configuration for the service used to access MongoDB Database Server ">
 
 		<Icon
 			resource="http://icons.iconarchive.com/icons/double-j-design/ravenna-3d/128/Database-Active-icon.png"
