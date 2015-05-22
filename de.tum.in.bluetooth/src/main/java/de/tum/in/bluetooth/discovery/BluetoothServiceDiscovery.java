@@ -123,6 +123,9 @@ public class BluetoothServiceDiscovery {
 		LOGGER.info("Activating Bluetooth Service Discovery....Done");
 	}
 
+	/**
+	 * Used for testing
+	 */
 	public void setDeviceFile(File file) throws IOException {
 		if (!file.exists()) {
 			m_fleet = null;
@@ -150,8 +153,10 @@ public class BluetoothServiceDiscovery {
 	 */
 	@Deactivate
 	public synchronized void stop() {
+		LOGGER.info("Dectivating Bluetooth Service Discovery....");
 		unregisterAll();
 		m_attempts.clear();
+		LOGGER.info("Deactivating Bluetooth Service Discovery....");
 	}
 
 	private synchronized void unregisterAll() {
@@ -161,6 +166,7 @@ public class BluetoothServiceDiscovery {
 	}
 
 	private synchronized void unregister(RemoteDevice remote) {
+		LOGGER.info("Deregistering Service Records....");
 		final Map<ServiceRecord, ServiceRegistration> services = m_servicesRecord
 				.remove(remote);
 		if (services == null) {
@@ -169,6 +175,7 @@ public class BluetoothServiceDiscovery {
 		for (final ServiceRegistration<?> sr : services.values()) {
 			sr.unregister();
 		}
+		LOGGER.info("Deregistering Service Records....Done");
 	}
 
 	/**
@@ -183,6 +190,8 @@ public class BluetoothServiceDiscovery {
 	 */
 	private synchronized void register(RemoteDevice remote,
 			ServiceRecord serviceRecord, Device device, String url) {
+		LOGGER.info("Registering Service Records....");
+
 		if (!m_servicesRecord.containsKey(remote)) {
 			m_servicesRecord.put(remote,
 					new HashMap<ServiceRecord, ServiceRegistration>());
@@ -199,13 +208,18 @@ public class BluetoothServiceDiscovery {
 			}
 			props.put("service.attributes", attrs);
 		}
+
 		props.put("service.url", url);
+
 		if (device != null) {
 			props.put("fleet.device", device);
 		}
+
 		final ServiceRegistration<?> sr = m_context.registerService(
 				ServiceRecord.class.getName(), serviceRecord, props);
 		m_servicesRecord.get(remote).put(serviceRecord, sr);
+
+		LOGGER.info("Registering Service Records....Done");
 	}
 
 	/**
@@ -216,6 +230,7 @@ public class BluetoothServiceDiscovery {
 	 *            the device
 	 */
 	public synchronized void bindRemoteDevice(RemoteDevice device) {
+		LOGGER.info("Binding Remote Device...." + device);
 		try {
 			// We can't run searches concurrently.
 			final ServiceDiscoveryAgent agent = new ServiceDiscoveryAgent(this,
@@ -227,6 +242,7 @@ public class BluetoothServiceDiscovery {
 							+ device.getBluetoothAddress(),
 					Throwables.getStackTraceAsString(e));
 		}
+		LOGGER.info("Binding Remote Device....Done" + device);
 	}
 
 	/**
@@ -237,7 +253,9 @@ public class BluetoothServiceDiscovery {
 	 *            the device
 	 */
 	public synchronized void unbindRemoteDevice(RemoteDevice device) {
+		LOGGER.info("Unbinding Remote Device...." + device);
 		unregister(device);
+		LOGGER.info("Unbinding Remote Device...." + device);
 	}
 
 	/**
@@ -317,6 +335,7 @@ public class BluetoothServiceDiscovery {
 	}
 
 	private boolean retry(final RemoteDevice remote) {
+		LOGGER.info("Retrying for service discovery attempt..." + remote);
 		final Device device = findDeviceFromFleet(remote);
 		if (device == null) {
 			return true;
@@ -332,6 +351,8 @@ public class BluetoothServiceDiscovery {
 		if (mr != null && mr.intValue() != 0) {
 			max = mr.intValue();
 		}
+
+		LOGGER.info("Retrying for service discovery attempt...Done" + remote);
 
 		return (device.isRetry() && max >= numberOfTries);
 	}
