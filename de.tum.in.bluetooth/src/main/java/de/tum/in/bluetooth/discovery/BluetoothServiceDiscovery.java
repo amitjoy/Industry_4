@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import javax.bluetooth.DataElement;
@@ -323,16 +322,15 @@ public class BluetoothServiceDiscovery {
 
 	}
 
-	@SuppressWarnings("unused")
 	private void incrementAttempt(final RemoteDevice remote) {
 		LOGGER.info("Attempting to retry..Retry On "
 				+ remote.getBluetoothAddress());
-		final AtomicInteger attempt = new AtomicInteger(m_attempts.get(remote));
+		Integer attempt = m_attempts.get(remote);
 		if (attempt == null) {
-			attempt.set(1);
-			m_attempts.put(remote, attempt.get());
+			attempt = 1;
+			m_attempts.put(remote, attempt);
 		} else {
-			m_attempts.put(remote, attempt.incrementAndGet());
+			m_attempts.put(remote, ++attempt);
 		}
 	}
 

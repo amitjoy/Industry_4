@@ -17,7 +17,6 @@ package de.tum.in.bluetooth.discovery;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javax.bluetooth.BluetoothStateException;
@@ -32,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 
 /**
  * Discovery Agent searching services for one specific device. If a matching
@@ -62,8 +62,8 @@ class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(ServiceDiscoveryAgent.class);
 
-	private final List<ServiceRecord> m_discoveredServices = Collections
-			.emptyList();
+	private final List<ServiceRecord> m_discoveredServices = Lists
+			.newArrayList();
 
 	public ServiceDiscoveryAgent(
 			BluetoothServiceDiscovery bluetoothServiceDiscovery,

@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -70,6 +69,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
 import de.tum.in.bluetooth.BluetoothController;
@@ -592,8 +592,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 
 		// Detect devices that have left
 		// We must create a copy of the list to avoid concurrent modifications
-		Set<RemoteDevice> presents = Collections.unmodifiableSet(m_devices
-				.keySet());
+		Set<RemoteDevice> presents = Sets.newHashSet(m_devices.keySet());
 		for (final RemoteDevice old : presents) {
 			LOGGER.info("Did we lost contact with " + old.getBluetoothAddress()
 					+ " => " + (!contains(discovered, old)));
@@ -637,7 +636,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			if (cachedDevices == null || cachedDevices.length == 0) {
 				return;
 			}
-			presents = Collections.unmodifiableSet(m_devices.keySet());
+			presents = Sets.newHashSet(m_devices.keySet());
 			for (final RemoteDevice cached : cachedDevices) {
 				if (!contains(presents, cached)) {
 					final ServiceCheckAgent serviceCheckAgent = new ServiceCheckAgent(
