@@ -36,12 +36,6 @@ import com.google.common.base.Throwables;
  */
 public class WrappedConnection implements StreamConnection {
 
-	public static void main(String[] args) {
-		final WrappedConnection connection = new WrappedConnection(null);
-		System.out.println(connection instanceof StreamConnection);
-		System.out.println();
-	}
-
 	/**
 	 * slf4j Logger
 	 */
