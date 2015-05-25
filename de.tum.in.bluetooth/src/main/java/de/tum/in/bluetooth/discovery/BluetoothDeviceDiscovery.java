@@ -62,6 +62,7 @@ import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -526,6 +527,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		LOGGER.info("Enabling Bluetooth...");
 
 		extractRequiredConfigurations();
+		registerDeviceListFleetAsAService();
 
 		if (m_agent != null) {
 			return;
@@ -546,6 +548,17 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		m_agent = new DeviceDiscoveryAgent(this, m_discoveryMode,
 				m_onlineCheckOnDiscovery);
 		BluetoothThreadManager.scheduleJob(m_agent, m_period);
+	}
+
+	/**
+	 * Registering devices configuration as a service
+	 * 
+	 * @param fleet
+	 */
+	private void registerDeviceListFleetAsAService() {
+		final BundleContext context = FrameworkUtil.getBundle(this.getClass())
+				.getBundleContext();
+		context.registerService(DeviceList.class, m_fleet, null);
 	}
 
 	/**

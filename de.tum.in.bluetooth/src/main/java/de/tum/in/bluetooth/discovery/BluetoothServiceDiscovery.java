@@ -34,6 +34,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -84,7 +85,8 @@ public class BluetoothServiceDiscovery {
 	 * Set of devices loaded from the <tt>devices.xml</tt> file. This file
 	 * contains the authentication information for the device.
 	 */
-	private DeviceList m_fleet = null;
+	@Reference(bind = "bindDeviceListService", unbind = "unbindDeviceListService")
+	private volatile DeviceList m_fleet;
 
 	/**
 	 * List of device under attempts.
@@ -110,6 +112,23 @@ public class BluetoothServiceDiscovery {
 	}
 
 	/**
+	 * Device Configuration List Service Binding Callback
+	 */
+	public synchronized void bindDeviceListService(DeviceList deviceList) {
+		if (m_fleet == null) {
+			m_fleet = deviceList;
+		}
+	}
+
+	/**
+	 * Device Configuration List Service Service Callback while deregistering
+	 */
+	public synchronized void unbindDeviceListService(DeviceList deviceList) {
+		if (m_fleet == deviceList)
+			m_fleet = null;
+	}
+
+	/**
 	 * Callback during registration of this DS Service Component
 	 * 
 	 * @param context
@@ -123,7 +142,7 @@ public class BluetoothServiceDiscovery {
 	}
 
 	/**
-	 * Used for testing TO-DO Refactor
+	 * Used for testing
 	 */
 	public void setDeviceFile(File file) throws IOException {
 		if (!file.exists()) {
