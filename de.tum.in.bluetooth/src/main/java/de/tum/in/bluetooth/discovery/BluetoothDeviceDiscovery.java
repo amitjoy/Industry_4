@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -68,6 +69,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.intel.bluetooth.RemoteDeviceHelper;
@@ -116,6 +119,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private static final String DEVICES = "bluetooh.discovery.devices";
 
 	/**
+	 * Configurable property to get all the configurations for the remote
+	 * bluetooth devices
+	 */
+	private static final String DEVICES_LIST = "bluetooh.devices";
+
+	/**
 	 * Configuration property enabling the support of unnamed devices. Unnamed
 	 * devices do not communicate their name.
 	 */
@@ -162,6 +171,11 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * Placeholder for M_IGNORE_UNNAMED_DEVICES
 	 */
 	boolean m_ignoreUnnamedDevices;
+
+	/**
+	 * Placeholder for M_DEVICES_LIST
+	 */
+	private String m_devicesList;
 
 	/**
 	 * Placeholder for M_ONLINE_CHECK_ON_DISCOVERY
@@ -245,7 +259,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * once we get a name, it is stored in this list. This map can be persisted
 	 * if the device name file is set.
 	 */
-	private Properties m_names = new Properties();
+	private Properties m_names;
 
 	/**
 	 * The fleet device filter (regex configured in the devices.xml file).
@@ -313,6 +327,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			m_configurationService = null;
 	}
 
+	/** Used for read device properties */
 	public void setAutopairingConfiguration(File file) throws IOException {
 		if (!file.exists()) {
 			m_fleet = null;
@@ -347,6 +362,54 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		}
 	}
 
+	/** Used to get all the configurations for the remote bluetooth devices */
+	private void loadAutoPairingConfiguration(String deviceList) {
+		if (deviceList == null) {
+			m_fleet = null;
+			LOGGER.warn("No device configuration found, ignoring auto-pairing and device filter");
+		} else {
+			final List<String> devices = Lists.newArrayList();
+			Device device = null;
+
+			final String DEVICE_SPLITTER = "#";
+			Iterators.addAll(devices,
+					Splitter.on(DEVICE_SPLITTER).split(deviceList).iterator());
+			for (final String deviceStr : devices) {
+				final String SEPARATOR = ";";
+				final String NEW_LINE = "\n";
+
+				final Splitter splitter = Splitter.on(SEPARATOR)
+						.omitEmptyStrings().trimResults();
+				final Joiner stringDevicesJoiner = Joiner.on(NEW_LINE)
+						.skipNulls();
+
+				final Properties properties = new Properties();
+
+				final String deviceAsPropertiesFormat = stringDevicesJoiner
+						.join(splitter.splitToList(deviceStr));
+
+				if (isNullOrEmpty(deviceAsPropertiesFormat.toString())) {
+					LOGGER.error("No Bluetooth Enabled Device Addess Found");
+				}
+
+				try {
+					properties.load(new StringReader(deviceAsPropertiesFormat));
+				} catch (final IOException e) {
+					LOGGER.error("Error while parsing list of input bluetooth devices");
+				}
+				device = new Device();
+				device.setId(properties.getProperty("id"));
+				device.setUsername(properties.getProperty("username"));
+				device.setPassword(properties.getProperty("password"));
+				device.setPin(properties.getProperty("pin"));
+				device.setRetry(Boolean.valueOf(properties.getProperty("retry")));
+				device.setMaxRetry(new BigInteger(properties
+						.getProperty("max-retry")));
+				m_fleet.getDevices().add(device);
+			}
+		}
+	}
+
 	/**
 	 * Sets the device name file. If set to <code>null</code> or to
 	 * <code>""</code> or to <code>"null"</code>, the persistent support is
@@ -366,6 +429,11 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		m_names = loadDeviceNames();
 	}
 
+	/**
+	 * Used to load bluetooth device info from the properties file. This is
+	 * basically used in testing environment to load device names and addresses
+	 * which need to be discovered by Discovery Agent
+	 */
 	private Properties loadDeviceNames() {
 		final Properties properties = new Properties();
 
@@ -394,6 +462,9 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		return properties;
 	}
 
+	/**
+	 * Used to currently discovered devices in a properties file
+	 */
 	private void storeDeviceNames(Properties properties) {
 		if (m_deviceNameFile == null) {
 			return;
@@ -490,6 +561,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		m_onlineCheckOnDiscovery = (boolean) m_properties
 				.get(ONLINE_CHECK_ON_DISCOVERY);
 		m_unpairLostDevices = (boolean) m_properties.get(UNPAIR_LOST_DEVICES);
+		m_devicesList = (String) m_properties.get(DEVICES_LIST);
 
 		if ((Integer) m_properties.get(DISCOVERY_MODE) == 0)
 			m_discoveryMode = DiscoveryMode.GIAC;
@@ -499,6 +571,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		// m_names = loadDeviceNames(); //Used for testing purposes
 		m_names = loadListOfDevicesToBeDiscovered((String) m_properties
 				.get(DEVICES));
+		loadAutoPairingConfiguration(m_devicesList);
 
 		if (m_period == 0) {
 			m_period = 10; // Default to 10 seconds.
@@ -668,6 +741,13 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		return false;
 	}
 
+	/**
+	 * Filter used to search for remote bluetooth devices
+	 * 
+	 * @param device
+	 *            the current device found
+	 * @return true if matches the filter pattern
+	 */
 	public boolean matchesDeviceFilter(RemoteDevice device) {
 		if (m_filter == null) {
 			// No filter... all devices accepted

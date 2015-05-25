@@ -123,7 +123,7 @@ public class BluetoothServiceDiscovery {
 	}
 
 	/**
-	 * Used for testing
+	 * Used for testing TO-DO Refactor
 	 */
 	public void setDeviceFile(File file) throws IOException {
 		if (!file.exists()) {
