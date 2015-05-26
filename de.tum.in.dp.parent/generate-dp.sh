@@ -8,5 +8,5 @@ home_dir="/Users/AMIT/IoT_IDP/Pi/"
 for i in "${arr[@]}"
 do
    echo "Generating Deployment Package for $i"
-   ant -buildfile  $home_dir$i$c$i$b
+   ant -d -buildfile  $home_dir$i$c$i$b
 done
