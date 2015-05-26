@@ -15,8 +15,6 @@
  *******************************************************************************/
 package de.tum.in.bluetooth.discovery;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Dictionary;
@@ -29,7 +27,6 @@ import java.util.regex.Pattern;
 import javax.bluetooth.DataElement;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
-import javax.xml.bind.JAXBException;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -82,8 +79,8 @@ public class BluetoothServiceDiscovery {
 			.newHashMap();
 
 	/**
-	 * Set of devices loaded from the <tt>devices.xml</tt> file. This file
-	 * contains the authentication information for the device.
+	 * Set of devices loaded from the <tt>configuration</tt>. This contains the
+	 * authentication information for the device.
 	 */
 	@Reference(bind = "bindDeviceListService", unbind = "unbindDeviceListService")
 	private volatile DeviceList m_fleet;
@@ -139,31 +136,6 @@ public class BluetoothServiceDiscovery {
 		LOGGER.info("Activating Bluetooth Service Discovery....");
 		m_context = context.getBundleContext();
 		LOGGER.info("Activating Bluetooth Service Discovery....Done");
-	}
-
-	/**
-	 * Used for testing
-	 */
-	public void setDeviceFile(File file) throws IOException {
-		if (!file.exists()) {
-			m_fleet = null;
-			LOGGER.warn("No devices.xml file found, ignoring authentication");
-		} else {
-			try {
-				final FileInputStream fis = new FileInputStream(file);
-				m_fleet = ConfigurationUtils.unmarshal(DeviceList.class, fis);
-				LOGGER.info(m_fleet.getDevices().size()
-						+ " devices loaded from devices.xml");
-				fis.close();
-			} catch (final JAXBException e) {
-				LOGGER.error(
-						"Cannot unmarshall devices from "
-								+ file.getAbsolutePath(), e);
-			} catch (final IOException e) {
-				LOGGER.error(
-						"Cannot read devices from " + file.getAbsolutePath(), e);
-			}
-		}
 	}
 
 	/**

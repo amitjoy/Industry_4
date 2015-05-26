@@ -19,8 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
@@ -40,7 +38,6 @@ import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
-import javax.xml.bind.JAXBException;
 
 import org.apache.commons.collections.IterableMap;
 import org.apache.commons.collections.MapIterator;
@@ -242,8 +239,8 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			.getLogger(BluetoothDeviceDiscovery.class);
 
 	/**
-	 * Set of devices loaded from the <tt>devices.xml</tt> file. This file
-	 * contains the authentication information for the device.
+	 * Set of devices loaded from the <tt>devices</tt> configuration property.
+	 * This contains the authentication information for the device.
 	 */
 	private DeviceList m_fleet = null;
 
@@ -263,7 +260,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private Properties m_names;
 
 	/**
-	 * The fleet device filter (regex configured in the devices.xml file).
+	 * The fleet device filter (regex configured in the configuration).
 	 */
 	Pattern m_filter;
 
@@ -328,41 +325,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			m_configurationService = null;
 	}
 
-	/** Used for read device properties */
-	public void setAutopairingConfiguration(File file) throws IOException {
-		if (!file.exists()) {
-			m_fleet = null;
-			LOGGER.warn("No devices.xml file found, ignoring auto-pairing and device filter");
-		} else {
-			try {
-				final FileInputStream fis = new FileInputStream(file);
-				m_fleet = ConfigurationUtils.unmarshal(DeviceList.class, fis);
-				final String filter = m_fleet.getDeviceFilter();
-
-				if (filter != null) {
-					m_filter = Pattern.compile(filter);
-				}
-
-				LOGGER.info(m_fleet.getDevices().size()
-						+ " devices loaded from devices.xml");
-				if (m_filter != null) {
-					LOGGER.info("Device filter set to : " + m_filter.pattern());
-				} else {
-					LOGGER.info("No device filter set - Accepting all devices");
-				}
-
-				fis.close();
-			} catch (final JAXBException e) {
-				LOGGER.error(
-						"Cannot unmarshall devices from "
-								+ file.getAbsolutePath(), e);
-			} catch (final IOException e) {
-				LOGGER.error(
-						"Cannot read devices from " + file.getAbsolutePath(), e);
-			}
-		}
-	}
-
 	/** Used to get all the configurations for the remote bluetooth devices */
 	private void loadAutoPairingConfiguration(String deviceList) {
 		if (deviceList == null) {
@@ -412,81 +374,10 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	}
 
 	/**
-	 * Sets the device name file. If set to <code>null</code> or to
-	 * <code>""</code> or to <code>"null"</code>, the persistent support is
-	 * disabled. Otherwise, the file is read to initialize the device list and
-	 * written each time we find a new device.
-	 *
-	 * @param name
-	 *            the path to the file relative to the working directory.
-	 */
-	public void setDeviceNameFile(String name) {
-		if (name == null || name.equals("null") || name.trim().length() == 0) {
-			LOGGER.warn("No device name file set, disabling persistent support");
-			return;
-		}
-		m_deviceNameFile = new File(name);
-
-		m_names = loadDeviceNames();
-	}
-
-	/**
-	 * Used to load bluetooth device info from the properties file. This is
-	 * basically used in testing environment to load device names and addresses
-	 * which need to be discovered by Discovery Agent
-	 */
-	private Properties loadDeviceNames() {
-		final Properties properties = new Properties();
-
-		if (m_deviceNameFile == null) {
-			LOGGER.error("No device name files, ignoring persistent support");
-			return properties;
-		}
-
-		if (!m_deviceNameFile.exists()) {
-			LOGGER.error("The device name file does not exist, ignoring ("
-					+ m_deviceNameFile.getAbsolutePath() + ")");
-			return properties;
-		}
-
-		try {
-			final FileInputStream fis = new FileInputStream(m_deviceNameFile);
-			properties.load(fis);
-			fis.close();
-			LOGGER.info("Device name file loaded, " + properties.size()
-					+ " devices read");
-		} catch (final IOException e) {
-			LOGGER.error("Cannot load the device name file ("
-					+ m_deviceNameFile.getAbsolutePath() + ")", e);
-		}
-
-		return properties;
-	}
-
-	/**
 	 * Used to currently discovered devices in a properties file
 	 */
 	private void storeDeviceNames(Properties properties) {
-		if (m_deviceNameFile == null) {
-			return;
-		}
-
-		if (!m_deviceNameFile.exists()) {
-			final File parent = m_deviceNameFile.getParentFile();
-			if (parent != null) {
-				parent.mkdirs();
-			}
-		}
-
-		try {
-			final FileOutputStream fos = new FileOutputStream(m_deviceNameFile);
-			properties.store(fos, "Mac to Name file");
-			fos.close();
-		} catch (final IOException e) {
-			LOGGER.error(
-					"Cannot store the 'names' in "
-							+ m_deviceNameFile.getAbsolutePath(), e);
-		}
+		// TO-DO
 	}
 
 	/**
