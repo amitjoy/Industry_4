@@ -496,6 +496,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 			}
 			m_activityLogService
 					.saveLog("Bluetooth Milling Machine Configuration Retrieved");
+
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 
 			LOGGER.info("Bluetooth Milling Machine Configuration Retrieval Finished");
@@ -550,6 +551,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		}
 		m_activityLogService
 				.saveLog("Bluetooth Milling Machine Communication Terminated");
+
 		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 
 		LOGGER.info("Bluetooth Milling Machine Communication Termination Done");
@@ -571,6 +573,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		}
 		m_activityLogService
 				.saveLog("Bluetooth Milling Machine Configuration Updated");
+
 		LOGGER.info("Bluetooth Milling Machine Configuration Updated");
 	}
 }

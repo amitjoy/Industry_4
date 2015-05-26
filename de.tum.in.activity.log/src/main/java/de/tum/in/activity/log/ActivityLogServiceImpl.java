@@ -44,9 +44,7 @@ import com.google.common.collect.Lists;
  * The implementation of ActivityLogService
  * 
  * @see ActivityLogService
- * 
  * @author AMIT KUMAR MONDAL
- *
  */
 @Component
 @Service
@@ -175,12 +173,13 @@ public class ActivityLogServiceImpl extends Cloudlet implements
 		final List<ActivityLog> logs = Lists.newArrayList();
 		final String retrieveStatement = "SELECT * FROM " + TABLE_NAME
 				+ " WHERE 1 ";
-		ResultSet resultSet;
 		try {
-			resultSet = m_statement.executeQuery(retrieveStatement);
+			final ResultSet resultSet = m_statement
+					.executeQuery(retrieveStatement);
 			while (resultSet.next()) {
 				final String timestamp = resultSet.getString("timestamp");
 				final String description = resultSet.getString("description");
+
 				final ActivityLog activityLog = new ActivityLog(timestamp,
 						description);
 				logs.add(activityLog);

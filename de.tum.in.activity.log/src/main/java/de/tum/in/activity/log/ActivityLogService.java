@@ -15,7 +15,6 @@
  *******************************************************************************/
 package de.tum.in.activity.log;
 
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -31,7 +30,6 @@ public interface ActivityLogService {
 	 * 
 	 * @param log
 	 *            the log to be saved
-	 * @throws SQLException
 	 */
 	public void saveLog(String log);
 
@@ -39,7 +37,6 @@ public interface ActivityLogService {
 	 * Used to retrieve saved activity logs
 	 * 
 	 * @return the list of logs
-	 * @throws SQLException
 	 */
 	public List<ActivityLog> retrieveLogs();
 

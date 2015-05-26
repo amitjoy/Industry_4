@@ -4,9 +4,9 @@
 
     <parent>
         <groupId>de.tum.in</groupId>
-        <artifactId>de.tum.in.bluetooth.parent</artifactId>
+        <artifactId>de.tum.in.parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../de.tum.in.bluetooth.parent/pom.xml</relativePath>
+        <relativePath>../de.tum.in.parent/pom.xml</relativePath>
     </parent>
 
     <groupId>de.tum.in</groupId>

@@ -6,26 +6,23 @@
 
 
 	<groupId>de.tum.in</groupId>
-	<artifactId>de.tum.in.bluetooth.parent</artifactId>
+	<artifactId>de.tum.in.parent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Bluetooth OSGi Service Reactor</name>
+	<name>Complete Project Parent POM</name>
 	<packaging>pom</packaging>
+
 	<properties>
 		<!-- Dependencies version -->
 		<bluecove.version>2.1.0</bluecove.version>
-		<jaxb-api.version>2.2.7</jaxb-api.version>
 		<osgi-core.version>5.0.0</osgi-core.version>
 		<osgi.version>4.3.1</osgi.version>
-		<ipojo.version>1.10.1</ipojo.version>
 		<slf4j.version>1.6.6</slf4j.version>
 
 		<!-- Plugins versions -->
-		<ipojo.plugin.version>1.10.1</ipojo.plugin.version>
 		<bundle.plugin.version>2.4.0</bundle.plugin.version>
 		<compiler.plugin.version>3.1</compiler.plugin.version>
 		<maven-scm-plugin.version>1.8.1</maven-scm-plugin.version>
 		<maven-invoker-plugin.version>1.8</maven-invoker-plugin.version>
-		<maven-jaxb-plugin.version>1.1.1</maven-jaxb-plugin.version>
 
 		<!-- Test dependencies version -->
 		<junit.version>4.11</junit.version>
@@ -66,19 +63,6 @@
 				<version>${osgi.version}</version>
 			</dependency>
 
-			<!-- iPOJO -->
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.ipojo.annotations</artifactId>
-				<version>${ipojo.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>${jaxb-api.version}</version>
-			</dependency>
-
 			<!--SLF4J -->
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -86,23 +70,6 @@
 				<version>${slf4j.version}</version>
 			</dependency>
 
-			<!-- TESTS DEPENDENCIES -->
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit-dep</artifactId>
-				<version>${junit.version}</version>
-				<type>jar</type>
-			</dependency>
-			<dependency>
-				<groupId>org.easymock</groupId>
-				<artifactId>easymock</artifactId>
-				<version>${easymock.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hamcrest</groupId>
-				<artifactId>hamcrest-all</artifactId>
-				<version>${hamcrest.version}</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -123,16 +90,6 @@
 					<version>${compiler.plugin.version}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.felix</groupId>
-					<artifactId>maven-ipojo-plugin</artifactId>
-					<version>${ipojo.plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>com.sun.tools.xjc.maven2</groupId>
-					<artifactId>maven-jaxb-plugin</artifactId>
-					<version>${maven-jaxb-plugin.version}</version>
-				</plugin>
-				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-scm-plugin</artifactId>
 					<version>${maven-scm-plugin.version}</version>
@@ -146,13 +103,17 @@
 		</pluginManagement>
 	</build>
 
-
-
 	<modules>
-		<module>../de.tum.in.bluecove</module>
 		<module>../de.tum.in.bluetooth</module>
 		<module>../de.tum.in.bluecove.fragment</module>
+		<module>../de.tum.in.activity.log</module>
+		<module>../de.tum.in.bluetooth.milling.machine</module>
+		<module>../de.tum.in.data.cache</module>
+		<module>../de.tum.in.events</module>
+		<module>../de.tum.in.mongodb</module>
+		<module>../de.tum.in.bluecove</module>
 	</modules>
+	
 	<organization>
 		<url>http://www.tum.de</url>
 		<name>Technical University of Munich</name>
