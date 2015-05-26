@@ -335,6 +335,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		} else {
 			final List<String> devices = Lists.newArrayList();
 			Device device = null;
+			m_fleet = new DeviceList();
 
 			final String DEVICE_SPLITTER = "#";
 			Iterators.addAll(devices,
