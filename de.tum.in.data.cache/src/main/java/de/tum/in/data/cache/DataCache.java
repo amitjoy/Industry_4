@@ -68,7 +68,7 @@ public class DataCache implements EventHandler {
 	/**
 	 * Placeholder to store the extra information from the event properties
 	 */
-	private String m_extraInformation;
+	private Object m_extraInformation;
 
 	/**
 	 * The cache to store data
@@ -145,7 +145,7 @@ public class DataCache implements EventHandler {
 			m_deviceAddress = (String) event.getProperty("device.id");
 			m_timestamp = (String) event.getProperty("timestamp");
 			m_realtimeData = (String) event.getProperty("data");
-			m_extraInformation = (String) event.getProperty("extra.info");
+			m_extraInformation = event.getProperty("extra.info");
 
 			// Prepare the data and wrap it
 			final RealtimeData data = new RealtimeData.Builder()
