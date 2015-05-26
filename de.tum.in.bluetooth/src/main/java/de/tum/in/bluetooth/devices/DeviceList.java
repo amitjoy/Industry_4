@@ -15,7 +15,6 @@
  *******************************************************************************/
 package de.tum.in.bluetooth.devices;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.base.MoreObjects;
@@ -28,49 +27,14 @@ import com.google.common.collect.Lists;
  */
 public class DeviceList {
 
-	protected String deviceFilter;
-	protected List<Device> devices;
-
-	/**
-	 * Gets the value of the deviceFilter property.
-	 * 
-	 * @return possible object is {@link String }
-	 * 
-	 */
-	public String getDeviceFilter() {
-		return deviceFilter;
-	}
-
-	/**
-	 * Sets the value of the deviceFilter property.
-	 * 
-	 * @param value
-	 *            allowed object is {@link String }
-	 * 
-	 */
-	public void setDeviceFilter(String value) {
-		this.deviceFilter = value;
-	}
+	private List<Device> devices;
 
 	/**
 	 * Gets the value of the devices property.
-	 * 
-	 * <p>
-	 * For example, to add a new item, do as follows:
-	 * 
-	 * <pre>
-	 * getDevices().add(newItem);
-	 * </pre>
-	 * 
-	 * 
-	 * <p>
-	 * Objects of the following type(s) are allowed in the list {@link Device }
-	 * 
-	 * 
 	 */
 	public List<Device> getDevices() {
 		if (devices == null) {
-			devices = new ArrayList<Device>();
+			devices = Lists.newArrayList();
 		}
 		return this.devices;
 	}
@@ -79,7 +43,6 @@ public class DeviceList {
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
-				.add("device-filter", deviceFilter)
 				.add("devices", Lists.newArrayList(devices).toString())
 				.toString();
 	}

@@ -21,13 +21,13 @@ import com.google.common.base.MoreObjects;
 
 public class Device {
 
-	protected String id;
-	protected String pin;
-	protected String username;
-	protected String password;
-	protected String realm;
-	protected boolean retry;
-	protected BigInteger maxRetry;
+	private String id;
+	private String pin;
+	private String username;
+	private String password;
+	private String realm;
+	private boolean retry;
+	private BigInteger maxRetry;
 
 	/**
 	 * Gets the value of the id property.
