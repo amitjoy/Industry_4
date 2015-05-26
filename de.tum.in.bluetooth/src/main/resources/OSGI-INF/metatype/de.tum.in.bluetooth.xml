@@ -18,6 +18,10 @@
 			default="id=TDU_.*;pin=11111111;username=akquinet;password=5485799094;retry=true;max-retry=5#id=1000E8C18C85;pin=11111111;username=akquinet;password=5485799094;retry=true;max-retry=5"
 			description="Configurable property to get all the configurations for the remote bluetooth devices" />
 
+		<AD id="bluetooh.devices.filter" name="bluetooh.devices.filter"
+			type="String" cardinality="0" required="true" default="device-filter"
+			description="Configurable property to set search filter for list of bluetooth enabled devices to be discovered" />
+
 		<AD id="bluetooth.discovery.mode" name="bluetooth.discovery.mode"
 			type="Integer" cardinality="0" required="true" default="0"
 			description="Configurable property specifying the discovery mode among GIAC and LIAC">

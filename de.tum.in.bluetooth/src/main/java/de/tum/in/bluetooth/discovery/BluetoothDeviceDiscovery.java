@@ -18,7 +18,6 @@ package de.tum.in.bluetooth.discovery;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
@@ -59,7 +58,6 @@ import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.watchdog.CriticalComponent;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -123,6 +121,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private static final String DEVICES_LIST = "bluetooh.devices";
 
 	/**
+	 * Configurable property to set search filter for list of bluetooth enabled
+	 * devices to be discovered
+	 */
+	private static final String DEVICES_LIST_FILTER = "bluetooh.devices.filter";
+
+	/**
 	 * Configuration property enabling the support of unnamed devices. Unnamed
 	 * devices do not communicate their name.
 	 */
@@ -174,6 +178,11 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * Placeholder for M_DEVICES_LIST
 	 */
 	private String m_devicesList;
+
+	/**
+	 * Placeholder for M_DEVICES_LIST_FILTER
+	 */
+	private String m_devicesListFilter;
 
 	/**
 	 * Placeholder for M_ONLINE_CHECK_ON_DISCOVERY
@@ -243,13 +252,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * This contains the authentication information for the device.
 	 */
 	private DeviceList m_fleet;
-
-	/**
-	 * The file storing the mac -> name association. This file is updated every
-	 * time a new device is discovered. If set to <code>null</code> the list is
-	 * not persisted.
-	 */
-	private File m_deviceNameFile;
 
 	/**
 	 * Map storing the MAC address to name association (ex.
@@ -360,6 +362,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 				} catch (final IOException e) {
 					LOGGER.error("Error while parsing list of input bluetooth devices");
 				}
+
 				device = new Device();
 				device.setId(properties.getProperty("id"));
 				device.setUsername(properties.getProperty("username"));
@@ -411,7 +414,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		LOGGER.info("Enabling Bluetooth...");
 
 		extractRequiredConfigurations();
-		registerDeviceListFleetAsAService();
+		registerDeviceListFleetAsService();
 
 		if (m_agent != null) {
 			return;
@@ -435,14 +438,10 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	}
 
 	/**
-	 * Registering devices configuration as a service
-	 * 
-	 * @param fleet
+	 * Registering devices configuration as an OSGi service
 	 */
-	private void registerDeviceListFleetAsAService() {
-		final BundleContext context = FrameworkUtil.getBundle(this.getClass())
-				.getBundleContext();
-		context.registerService(DeviceList.class, m_fleet, null);
+	private void registerDeviceListFleetAsService() {
+		m_context.registerService(DeviceList.class, m_fleet, null);
 	}
 
 	/**
@@ -459,13 +458,18 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 				.get(ONLINE_CHECK_ON_DISCOVERY);
 		m_unpairLostDevices = (boolean) m_properties.get(UNPAIR_LOST_DEVICES);
 		m_devicesList = (String) m_properties.get(DEVICES_LIST);
+		m_devicesListFilter = (String) m_properties.get(DEVICES_LIST_FILTER);
+
+		if ("device-filter".equals(m_devicesListFilter))
+			m_filter = null;
+		else
+			m_filter = Pattern.compile(m_devicesListFilter);
 
 		if ((Integer) m_properties.get(DISCOVERY_MODE) == 0)
 			m_discoveryMode = DiscoveryMode.GIAC;
 		else
 			m_discoveryMode = DiscoveryMode.LIAC;
 
-		// m_names = loadDeviceNames(); //Used for testing purposes
 		m_names = loadListOfDevicesToBeDiscovered((String) m_properties
 				.get(DEVICES));
 		loadAutoPairingConfiguration(m_devicesList);
@@ -646,7 +650,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 */
 	public boolean matchesDeviceFilter(RemoteDevice device) {
 		if (m_filter == null) {
-			// No filter... all devices accepted
+			// No filter... all devices are accepted
 			return true;
 		}
 
@@ -678,6 +682,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		return name;
 	}
 
+	/** Unregister and unpair all the services */
 	private synchronized void unregisterAll() {
 		for (final Map.Entry<RemoteDevice, ServiceRegistration<?>> entry : m_devices
 				.entrySet()) {
@@ -956,12 +961,17 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	protected void doExec(CloudletTopic reqTopic,
 			KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
 			throws KuraException {
-		if ("start".equals(reqTopic.getResources()[0])) {
+
+		switch (reqTopic.getResources()[0]) {
+		case "start":
 			start();
-		}
-		if ("stop".equals(reqTopic.getResources()[0])) {
+			break;
+
+		case "stop":
 			stop();
+			break;
 		}
+
 		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 	}
 
