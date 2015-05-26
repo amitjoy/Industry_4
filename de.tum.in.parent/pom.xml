@@ -69,7 +69,6 @@
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
-
 		</dependencies>
 	</dependencyManagement>
 
@@ -112,8 +111,9 @@
 		<module>../de.tum.in.events</module>
 		<module>../de.tum.in.mongodb</module>
 		<module>../de.tum.in.bluecove</module>
+		<module>../de.tum.in.dp.parent</module>
 	</modules>
-	
+
 	<organization>
 		<url>http://www.tum.de</url>
 		<name>Technical University of Munich</name>
