@@ -15,32 +15,37 @@
  *******************************************************************************/
 package de.tum.in.activity.log;
 
-import java.sql.SQLException;
-import java.util.List;
-
 /**
- * Used to save and retrieve activity logs
+ * Represents the Activity Log
  * 
  * @author AMIT KUMAR MONDAL
  *
  */
-public interface ActivityLogService {
+public final class ActivityLog {
+
+	/** Log Timestamp */
+	private final String timestamp;
+
+	/** Log Description */
+	private final String description;
+
+	public ActivityLog(String timestamp, String log) {
+		this.timestamp = timestamp;
+		this.description = log;
+	}
 
 	/**
-	 * Used to save log to the database
-	 * 
-	 * @param log
-	 *            the log to be saved
-	 * @throws SQLException
+	 * @return the timestamp
 	 */
-	public void saveLog(String log) throws SQLException;
+	public String getTimestamp() {
+		return timestamp;
+	}
 
 	/**
-	 * Used to retrieve saved activity logs
-	 * 
-	 * @return the list of logs
-	 * @throws SQLException
+	 * @return the description
 	 */
-	public List<ActivityLog> retrieveLogs() throws SQLException;
+	public String getDescription() {
+		return description;
+	}
 
 }

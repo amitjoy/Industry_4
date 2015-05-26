@@ -40,6 +40,19 @@
 			<artifactId>org.eclipse.kura.api</artifactId>
 			<version>1.0.4-SNAPSHOT</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.12</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<scope>provided</scope>
+			<version>4.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
