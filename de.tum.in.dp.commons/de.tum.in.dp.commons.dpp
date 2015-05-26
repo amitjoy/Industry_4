@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Fri May 22 00:25:34 CEST 2015
+#Tue May 26 15:27:19 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.commons_build.xml
 build.dp.file=<.>/de.tum.in.dp.commons.dp
 build.location=
@@ -17,9 +17,16 @@ bundles.1.missing=false
 bundles.1.name=de.tum.in.mongodb-1.0-SNAPSHOT.jar
 bundles.1.symbolic_name=de.tum.in.de.tum.in.mongodb
 bundles.1.version=1.0.0.SNAPSHOT
-bundles.count=2
+bundles.2.bundle_path=/Users/AMIT/IoT_IDP/Pi/de.tum.in.activity.log/target/de.tum.in.activity.log-1.0-SNAPSHOT.jar
+bundles.2.customizer=false
+bundles.2.headers.count=0
+bundles.2.missing=false
+bundles.2.name=de.tum.in.activity.log-1.0-SNAPSHOT.jar
+bundles.2.symbolic_name=de.tum.in.de.tum.in.activity.log
+bundles.2.version=1.0.0.SNAPSHOT
+bundles.count=3
 certificates.count=0
-general.signbundles=false
+general.signbundles=true
 headers.contact.address=admin@amitinside.com
 headers.copyright=Amit Kumar Mondal
 headers.description=Common Bundles required for the application

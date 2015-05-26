@@ -448,6 +448,7 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	@Override
 	protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
 			KuraResponsePayload respPayload) throws KuraException {
+		// TO-DO Add activity log service to all the doX()
 		LOGGER.info("Bluetooth Milling Machine Component GET handler");
 
 		// Retrieve the configurations
