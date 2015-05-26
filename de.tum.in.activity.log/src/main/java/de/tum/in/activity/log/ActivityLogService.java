@@ -33,7 +33,7 @@ public interface ActivityLogService {
 	 *            the log to be saved
 	 * @throws SQLException
 	 */
-	public void saveLog(String log) throws SQLException;
+	public void saveLog(String log);
 
 	/**
 	 * Used to retrieve saved activity logs
@@ -41,6 +41,6 @@ public interface ActivityLogService {
 	 * @return the list of logs
 	 * @throws SQLException
 	 */
-	public List<ActivityLog> retrieveLogs() throws SQLException;
+	public List<ActivityLog> retrieveLogs();
 
 }

@@ -61,6 +61,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
+import de.tum.in.activity.log.ActivityLogService;
+
 /**
  * Used to consume all the service record provided by all the paired Bluetooth
  * Enabled Milling Machines
@@ -155,6 +157,12 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	private volatile EventAdmin m_eventAdmin;
 
 	/**
+	 * Activity Log Service Dependency
+	 */
+	@Reference(bind = "bindActivityLogService", unbind = "unbindActivityLogService")
+	private volatile ActivityLogService m_activityLogService;
+
+	/**
 	 * Eclipse Kura Cloud Service Dependency
 	 */
 	@Reference(bind = "bindCloudService", unbind = "unbindCloudService")
@@ -226,6 +234,25 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		if (m_serviceRecords.size() > 0
 				&& m_serviceRecords.contains(serviceRecord))
 			m_serviceRecords.remove(serviceRecord);
+	}
+
+	/**
+	 * Callback to be used while {@link ActivityLogService} is registering
+	 */
+	public synchronized void bindActivityLogService(
+			ActivityLogService activityLogService) {
+		if (m_activityLogService == null) {
+			m_activityLogService = activityLogService;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link ActivityLogService} is deregistering
+	 */
+	public synchronized void unbindActivityLogService(
+			ActivityLogService activityLogService) {
+		if (m_activityLogService == activityLogService)
+			m_activityLogService = null;
 	}
 
 	/**
@@ -448,7 +475,6 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	@Override
 	protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
 			KuraResponsePayload respPayload) throws KuraException {
-		// TO-DO Add activity log service to all the doX()
 		LOGGER.info("Bluetooth Milling Machine Component GET handler");
 
 		// Retrieve the configurations
@@ -468,7 +494,8 @@ public class BluetoothMillingMachine extends Cloudlet implements
 
 				respPayload.addMetric((String) key, value);
 			}
-
+			m_activityLogService
+					.saveLog("Bluetooth Milling Machine Configuration Retrieved");
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 
 			LOGGER.info("Bluetooth Milling Machine Configuration Retrieval Finished");
@@ -486,6 +513,8 @@ public class BluetoothMillingMachine extends Cloudlet implements
 				respPayload
 						.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 			}
+			m_activityLogService
+					.saveLog("List of Bluetooth Milling Machines Retrieved");
 			LOGGER.info("Bluetooth Milling Machine Paired Device List Retrieval Finished");
 		}
 	}
@@ -519,6 +548,8 @@ public class BluetoothMillingMachine extends Cloudlet implements
 				m_poolForAsyncFunction.shutdown();
 			}
 		}
+		m_activityLogService
+				.saveLog("Bluetooth Milling Machine Communication Terminated");
 		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 
 		LOGGER.info("Bluetooth Milling Machine Communication Termination Done");
@@ -538,7 +569,8 @@ public class BluetoothMillingMachine extends Cloudlet implements
 
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 		}
-
+		m_activityLogService
+				.saveLog("Bluetooth Milling Machine Configuration Updated");
 		LOGGER.info("Bluetooth Milling Machine Configuration Updated");
 	}
 }

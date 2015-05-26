@@ -71,6 +71,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
+import de.tum.in.activity.log.ActivityLogService;
 import de.tum.in.bluetooth.BluetoothController;
 import de.tum.in.bluetooth.devices.Device;
 import de.tum.in.bluetooth.devices.DeviceList;
@@ -236,6 +237,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private volatile ConfigurationService m_configurationService;
 
 	/**
+	 * Activity Log Service Dependency
+	 */
+	@Reference(bind = "bindActivityLogService", unbind = "unbindActivityLogService")
+	private volatile ActivityLogService m_activityLogService;
+
+	/**
 	 * Map storing the currently exposed bluetooth device.
 	 */
 	private final Map<RemoteDevice, ServiceRegistration<?>> m_devices = Maps
@@ -325,6 +332,25 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			ConfigurationService configurationService) {
 		if (m_configurationService == configurationService)
 			m_configurationService = null;
+	}
+
+	/**
+	 * Callback to be used while {@link ActivityLogService} is registering
+	 */
+	public synchronized void bindActivityLogService(
+			ActivityLogService activityLogService) {
+		if (m_activityLogService == null) {
+			m_activityLogService = activityLogService;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link ActivityLogService} is deregistering
+	 */
+	public synchronized void unbindActivityLogService(
+			ActivityLogService activityLogService) {
+		if (m_activityLogService == activityLogService)
+			m_activityLogService = null;
 	}
 
 	/** Used to get all the configurations for the remote bluetooth devices */
@@ -966,10 +992,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		switch (reqTopic.getResources()[0]) {
 		case "start":
 			start();
+			m_activityLogService.saveLog("Bluetooth Started");
 			break;
 
 		case "stop":
 			stop();
+			m_activityLogService.saveLog("Bluetooth Stopped");
 			break;
 		}
 
@@ -980,7 +1008,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	@Override
 	protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
 			KuraResponsePayload respPayload) throws KuraException {
-		// TO-DO Add activity log service to all the doX()
 		LOGGER.info("Bluetooth Configuration Retrieving...");
 		// Retrieve the configurations
 		if ("configurations".equals(reqTopic.getResources()[0])) {
@@ -997,6 +1024,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 
 				respPayload.addMetric((String) key, value);
 			}
+			m_activityLogService.saveLog("Bluetooth Configuration Retrieved");
 
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 		}
@@ -1014,6 +1042,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 			m_configurationService.updateConfiguration(APP_CONF_ID,
 					reqPayload.metrics());
 
+			m_activityLogService.saveLog("Bluetooth Configuration Updated");
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 		}
 		LOGGER.info("Bluetooth Configuration Updated");

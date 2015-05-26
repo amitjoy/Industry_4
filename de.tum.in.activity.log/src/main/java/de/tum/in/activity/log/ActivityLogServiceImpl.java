@@ -153,12 +153,16 @@ public class ActivityLogServiceImpl extends Cloudlet implements
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void saveLog(String log) throws SQLException {
+	public void saveLog(String log) {
 		LOGGER.debug("Saving log to the Activity Logs Database...");
 		final String insertStatment = "INSERT INTO " + TABLE_NAME + " VALUES ("
 				+ "'" + log + "'" + "," + "'" + LocalDateTime.now() + "'"
 				+ " )";
-		m_statement.execute(insertStatment);
+		try {
+			m_statement.execute(insertStatment);
+		} catch (final SQLException e) {
+			LOGGER.error(Throwables.getStackTraceAsString(e));
+		}
 		LOGGER.debug("Saving log to the Activity Logs Database...Done");
 	}
 
@@ -166,20 +170,25 @@ public class ActivityLogServiceImpl extends Cloudlet implements
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<ActivityLog> retrieveLogs() throws SQLException {
+	public List<ActivityLog> retrieveLogs() {
 		LOGGER.debug("Retrieving logs from the Activity Logs Database...");
 		final List<ActivityLog> logs = Lists.newArrayList();
 		final String retrieveStatement = "SELECT * FROM " + TABLE_NAME
 				+ " WHERE 1 ";
-		final ResultSet resultSet = m_statement.executeQuery(retrieveStatement);
-
-		while (resultSet.next()) {
-			final String timestamp = resultSet.getString("timestamp");
-			final String description = resultSet.getString("description");
-			final ActivityLog activityLog = new ActivityLog(timestamp,
-					description);
-			logs.add(activityLog);
+		ResultSet resultSet;
+		try {
+			resultSet = m_statement.executeQuery(retrieveStatement);
+			while (resultSet.next()) {
+				final String timestamp = resultSet.getString("timestamp");
+				final String description = resultSet.getString("description");
+				final ActivityLog activityLog = new ActivityLog(timestamp,
+						description);
+				logs.add(activityLog);
+			}
+		} catch (final SQLException e) {
+			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
+
 		LOGGER.debug("Retrieving logs from the Activity Logs Database...Done");
 		return logs;
 	}
@@ -189,14 +198,10 @@ public class ActivityLogServiceImpl extends Cloudlet implements
 	protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
 			KuraResponsePayload respPayload) throws KuraException {
 		if ("logs".equals(reqTopic.getResources()[0])) {
-			try {
-				final List<ActivityLog> logs = retrieveLogs();
-				for (final ActivityLog activityLog : logs) {
-					respPayload.addMetric(activityLog.getTimestamp(),
-							activityLog.getDescription());
-				}
-			} catch (final SQLException e) {
-				LOGGER.error(Throwables.getStackTraceAsString(e));
+			final List<ActivityLog> logs = retrieveLogs();
+			for (final ActivityLog activityLog : logs) {
+				respPayload.addMetric(activityLog.getTimestamp(),
+						activityLog.getDescription());
 			}
 		}
 		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
