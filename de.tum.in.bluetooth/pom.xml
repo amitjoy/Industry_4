@@ -16,14 +16,6 @@
 	<description>Bundle exposing OSGi services from discovered bluetooth devices and services. Apart from this, it also registers a Connection Factory Implementation for Bluetooth Serial Port Profile</description>
 	<packaging>bundle</packaging>
 
-	<licenses>
-		<license>
-			<name>Apache 2</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
@@ -31,7 +23,6 @@
 			<version>1.9.6</version>
 			<scope>provided</scope>
 		</dependency>
-		
 
 		<dependency>
 			<groupId>org.osgi</groupId>

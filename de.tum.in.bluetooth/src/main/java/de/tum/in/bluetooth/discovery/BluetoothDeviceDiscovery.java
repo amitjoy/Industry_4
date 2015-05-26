@@ -168,7 +168,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	/**
 	 * Placeholder for M_IGNORE_UNNAMED_DEVICES
 	 */
-	boolean m_ignoreUnnamedDevices;
+	private boolean m_ignoreUnnamedDevices;
 
 	/**
 	 * Placeholder for M_DEVICES_LIST
@@ -242,7 +242,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * Set of devices loaded from the <tt>devices</tt> configuration property.
 	 * This contains the authentication information for the device.
 	 */
-	private DeviceList m_fleet = null;
+	private DeviceList m_fleet;
 
 	/**
 	 * The file storing the mac -> name association. This file is updated every
@@ -262,7 +262,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	/**
 	 * The fleet device filter (regex configured in the configuration).
 	 */
-	Pattern m_filter;
+	private Pattern m_filter;
 
 	/**
 	 * Device Discovery Agent to handle bluetooth enabled device detection
@@ -371,13 +371,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 				m_fleet.getDevices().add(device);
 			}
 		}
-	}
-
-	/**
-	 * Used to currently discovered devices in a properties file
-	 */
-	private void storeDeviceNames(Properties properties) {
-		// TO-DO
 	}
 
 	/**
@@ -527,7 +520,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		if (m_agent == null) {
 			return;
 		}
-		storeDeviceNames(m_names);
 		m_agent = null;
 		BluetoothThreadManager.stopScheduler();
 		unregisterAll();
