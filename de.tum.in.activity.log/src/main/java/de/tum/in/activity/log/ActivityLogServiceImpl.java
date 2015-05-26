@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -157,8 +158,8 @@ public class ActivityLogServiceImpl extends Cloudlet implements
 	public void saveLog(String log) throws SQLException {
 		LOGGER.debug("Saving log to the Activity Logs Database...");
 		final String insertStatment = "INSERT INTO " + TABLE_NAME + " VALUES ("
-				+ "'" + log + "'" + "," + "'" + System.currentTimeMillis()
-				+ "'" + " )";
+				+ "'" + log + "'" + "," + "'" + LocalDateTime.now() + "'"
+				+ " )";
 		m_statement.execute(insertStatment);
 		LOGGER.debug("Saving log to the Activity Logs Database...Done");
 	}
