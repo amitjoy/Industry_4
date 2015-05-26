@@ -123,15 +123,13 @@ public class ActivityLogServiceImpl extends Cloudlet implements
 	protected synchronized void deactivate(ComponentContext context) {
 		LOGGER.info("Deactivating Activity Log Service....");
 		super.deactivate(context);
-		try {
-			if (m_statement != null)
-				m_statement.close();
 
-			if (m_connection != null)
-				m_connection.close();
-		} catch (final SQLException e) {
-			LOGGER.error(Throwables.getStackTraceAsString(e));
-		}
+		if (m_statement != null)
+			m_dbService.close(m_statement);
+
+		if (m_connection != null)
+			m_dbService.close(m_connection);
+
 		LOGGER.info("Deactivating Activity Log Service... Done.");
 	}
 
