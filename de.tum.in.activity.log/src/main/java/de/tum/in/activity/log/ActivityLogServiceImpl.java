@@ -199,6 +199,7 @@ public class ActivityLogServiceImpl extends Cloudlet implements
 			KuraResponsePayload respPayload) throws KuraException {
 		if ("logs".equals(reqTopic.getResources()[0])) {
 			final List<ActivityLog> logs = retrieveLogs();
+
 			for (final ActivityLog activityLog : logs) {
 				respPayload.addMetric(activityLog.getTimestamp(),
 						activityLog.getDescription());
