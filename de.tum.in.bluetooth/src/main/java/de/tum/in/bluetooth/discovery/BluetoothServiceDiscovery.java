@@ -56,10 +56,8 @@ import de.tum.in.bluetooth.devices.DeviceList;
 @Component(immediate = true)
 public class BluetoothServiceDiscovery {
 
-	static final int[] ATTRIBUTES = null;
-
 	// Used only for RFCOMM Connections
-	private static final int SERVICE_NAME_ATTRIBUTE = 0x0003;
+	private static final int SERVICE_NAME_ATTRIBUTE = ServiceConstants.SERVICE_NAME;
 
 	/**
 	 * Bundle Context.

@@ -39,15 +39,14 @@ import com.google.common.collect.Lists;
  * 
  * @author AMIT KUMAR MONDAL
  */
-class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
+public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 
-	static UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP };
+	// TO-DO Validation of SDP
+	// private static UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP };
+	private static UUID[] searchUuidSet = { UUIDs.RFCOMM };
 
-	static int[] attrIDs = BluetoothServiceDiscovery.ATTRIBUTES;
+	private static int[] attrIDs = new int[] { ServiceConstants.SERVICE_NAME };
 
-	/**
-     *
-     */
 	private final BluetoothServiceDiscovery m_parent;
 
 	private final RemoteDevice m_device;
@@ -119,8 +118,9 @@ class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 				if (Env.isTestEnvironmentEnabled()) {
 					LOGGER.warn("=== TEST ENVIRONMENT ENABLED ===");
 				} else {
-					local.getDiscoveryAgent().searchServices(attrIDs,
-							searchUuidSet, m_device, this);
+					final int trans = local.getDiscoveryAgent().searchServices(
+							attrIDs, searchUuidSet, m_device, this);
+					LOGGER.info("Service Search {} started", trans);
 				}
 
 				wait();
