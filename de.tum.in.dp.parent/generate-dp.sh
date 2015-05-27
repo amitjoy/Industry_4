@@ -15,16 +15,33 @@
 #*******************************************************************************
 #!/bin/bash
 
+# Declaring all the Deployment Package Project Names to facilitate easy finding of 
+# its directory (as the directory name is as same as the project name)
+
 declare -a arr=("de.tum.in.dp.bluetooth" "de.tum.in.dp.bluetooth.machine" "de.tum.in.dp.cache" "de.tum.in.dp.commons" "de.tum.in.dp.dependencies")
+
+# The build file filename extension
 b="_build.xml"
+
+# The Directory Separator
 c="/"
+
+# The root directory of all the aforementioned projects.
 home_dir="/Users/AMIT/IoT_IDP/Pi/"
+
+# The DP file extension
 ext=".dp"
+
+# The destination directory to copy all deployment packages
 cp_dir="/Users/AMIT/Downloads/"
 
 for i in "${arr[@]}"
 do
    echo "Generating Deployment Package for $i"
+   
+   # Run ant on the build file
    /usr/local/bin/ant -d -buildfile  $home_dir$i$c$i$b
+   
+   # Move the deployment package to destination folder
    mv $home_dir$i$c$i$ext $cp_dir
 done
