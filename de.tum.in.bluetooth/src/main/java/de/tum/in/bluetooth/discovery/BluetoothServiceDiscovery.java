@@ -58,7 +58,8 @@ public class BluetoothServiceDiscovery {
 
 	static final int[] ATTRIBUTES = null;
 
-	private static final int SERVICE_NAME_ATTRIBUTE = 0x0100;
+	// Used only for RFCOMM Connections
+	private static final int SERVICE_NAME_ATTRIBUTE = 0x0003;
 
 	/**
 	 * Bundle Context.
