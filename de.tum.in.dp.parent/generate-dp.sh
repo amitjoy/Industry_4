@@ -19,9 +19,12 @@ declare -a arr=("de.tum.in.dp.bluetooth" "de.tum.in.dp.bluetooth.machine" "de.tu
 b="_build.xml"
 c="/"
 home_dir="/Users/AMIT/IoT_IDP/Pi/"
+ext=".dp"
+cp_dir="/Users/AMIT/Downloads/"
 
 for i in "${arr[@]}"
 do
    echo "Generating Deployment Package for $i"
    /usr/local/bin/ant -d -buildfile  $home_dir$i$c$i$b
+   mv $home_dir$i$c$i$ext $cp_dir
 done
