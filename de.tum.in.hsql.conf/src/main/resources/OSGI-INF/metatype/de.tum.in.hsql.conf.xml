@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
 	localization="en_us">
-	<OCD id="de.tum.in.hsql.conf" name="HyperSQL Configuration"
+	<OCD id="de.tum.in.hsql.conf" name="HyperSQL"
 		description="This is used to configure HypeSQL Connection">
 
 		<Icon
