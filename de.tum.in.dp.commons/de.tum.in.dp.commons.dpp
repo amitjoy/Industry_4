@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Tue May 26 15:27:19 CEST 2015
+#Fri May 29 19:13:41 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.commons_build.xml
 build.dp.file=<.>/de.tum.in.dp.commons.dp
 build.location=
@@ -24,7 +24,14 @@ bundles.2.missing=false
 bundles.2.name=de.tum.in.activity.log-1.0-SNAPSHOT.jar
 bundles.2.symbolic_name=de.tum.in.de.tum.in.activity.log
 bundles.2.version=1.0.0.SNAPSHOT
-bundles.count=3
+bundles.3.bundle_path=/Users/AMIT/IoT_IDP/Pi/de.tum.in.hsql.conf/target/de.tum.in.hsql.conf-1.0-SNAPSHOT.jar
+bundles.3.customizer=false
+bundles.3.headers.count=0
+bundles.3.missing=false
+bundles.3.name=de.tum.in.hsql.conf-1.0-SNAPSHOT.jar
+bundles.3.symbolic_name=de.tum.in.de.tum.in.hsql.conf
+bundles.3.version=1.0.0.SNAPSHOT
+bundles.count=4
 certificates.count=0
 general.signbundles=true
 headers.contact.address=admin@amitinside.com

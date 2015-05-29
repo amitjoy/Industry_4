@@ -16,3 +16,7 @@ Bundle-Version: 1.0.0.SNAPSHOT
 Name: de.tum.in.activity.log-1.0-SNAPSHOT.jar
 Bundle-SymbolicName: de.tum.in.de.tum.in.activity.log
 Bundle-Version: 1.0.0.SNAPSHOT
+
+Name: de.tum.in.hsql.conf-1.0-SNAPSHOT.jar
+Bundle-SymbolicName: de.tum.in.de.tum.in.hsql.conf
+Bundle-Version: 1.0.0.SNAPSHOT
