@@ -112,6 +112,7 @@
 		<module>../de.tum.in.mongodb</module>
 		<module>../de.tum.in.bluecove</module>
 		<module>../de.tum.in.dp.parent</module>
+		<module>../de.tum.in.hsql.conf</module>
 	</modules>
 
 	<organization>
