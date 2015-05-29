@@ -46,8 +46,8 @@ import com.google.common.collect.Lists;
  * @see ActivityLogService
  * @author AMIT KUMAR MONDAL
  */
-@Component
-@Service
+@Component(name = "de.tum.in.activity.log")
+@Service(value = { ActivityLogService.class })
 public class ActivityLogServiceImpl extends Cloudlet implements
 		ActivityLogService {
 
