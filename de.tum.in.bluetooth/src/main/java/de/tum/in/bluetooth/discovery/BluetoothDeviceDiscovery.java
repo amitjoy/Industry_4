@@ -434,6 +434,20 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	}
 
 	/**
+	 * Used to be called when configurations will get updated
+	 */
+	public void updated(Map<String, Object> properties) {
+		LOGGER.info("Updated Bluetooth Component...");
+
+		m_properties = properties;
+		for (final String s : properties.keySet()) {
+			LOGGER.info("Update - " + s + ": " + properties.get(s));
+		}
+
+		LOGGER.info("Updated Bluetooth Component... Done.");
+	}
+
+	/**
 	 * Initializes the discovery.
 	 */
 	@Override

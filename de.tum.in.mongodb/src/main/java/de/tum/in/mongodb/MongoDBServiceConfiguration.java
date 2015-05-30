@@ -102,6 +102,11 @@ public class MongoDBServiceConfiguration extends Cloudlet implements
 	private volatile ConfigurationService m_configurationService;
 
 	/**
+	 * Service Component Context
+	 */
+	private ComponentContext m_context;
+
+	/**
 	 * Place holder for host
 	 */
 	private String m_host;
@@ -185,15 +190,27 @@ public class MongoDBServiceConfiguration extends Cloudlet implements
 			Map<String, Object> properties) {
 		LOGGER.info("Activating MongoDB Component...");
 
+		super.setCloudService(m_cloudService);
+		super.activate(componentContext);
+		m_context = componentContext;
+
+		doRegister(componentContext, properties);
+
+		LOGGER.info("Activating MongoDB Component... Done.");
+
+	}
+
+	/**
+	 * Register MongoDB Service
+	 */
+	private void doRegister(ComponentContext componentContext,
+			Map<String, Object> properties) {
 		m_properties = properties;
 		m_host = (String) m_properties.get(MONGO_DB_HOST);
 		m_port = (int) m_properties.get(MONGO_DB_PORT);
 		m_dbname = (String) m_properties.get(MONGO_DB_DBNAME);
 		m_username = (String) m_properties.get(MONGO_DB_USERNAME);
 		m_password = (String) m_properties.get(MONGO_DB_PASSWORD);
-
-		super.setCloudService(m_cloudService);
-		super.activate(componentContext);
 
 		if (m_username != null) {
 			final MongoCredential credential = MongoCredential
@@ -205,9 +222,6 @@ public class MongoDBServiceConfiguration extends Cloudlet implements
 		}
 
 		registerMongoDBService(componentContext);
-
-		LOGGER.info("Activating MongoDB Component... Done.");
-
 	}
 
 	private void registerMongoDBService(ComponentContext componentContext) {
@@ -243,6 +257,7 @@ public class MongoDBServiceConfiguration extends Cloudlet implements
 		for (final String s : properties.keySet()) {
 			LOGGER.info("Update - " + s + ": " + properties.get(s));
 		}
+		doRegister(m_context, properties);
 
 		LOGGER.info("Updated MongoDB Component... Done.");
 	}
