@@ -366,13 +366,14 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		m_devices = loadMillingMachines((String) m_properties
 				.get(BLUETOOH_ENABLED_MILLING_MACHINES));
 
-		for (final ServiceRecord serviceRecord : m_serviceRecords) {
-			// If the device is mentioned in the configuration of this
-			// component, then we have to publish the realtime data
-			if (m_devices.contains(serviceRecord.getHostDevice()
-					.getBluetoothAddress()))
-				doPublish(serviceRecord);
-		}
+		// If the device is mentioned in the configuration of this
+		// component, then we have to publish the realtime data
+		m_serviceRecords
+				.stream()
+				.filter(serviceRecord -> m_devices.contains(serviceRecord
+						.getHostDevice().getBluetoothAddress()))
+				.forEach(serviceRecord -> doPublish(serviceRecord));
+
 	}
 
 	/**
