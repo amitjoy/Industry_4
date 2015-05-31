@@ -8,7 +8,7 @@
 	<groupId>de.tum.in</groupId>
 	<artifactId>de.tum.in.parent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Complete Project Parent POM</name>
+	<name>Complete IDP Parent POM</name>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -194,6 +194,9 @@
 		<module>../de.tum.in.bluecove</module>
 		<module>../de.tum.in.dp.parent</module>
 		<module>../de.tum.in.hsql.conf</module>
+		
+		<module>../de.tum.in.scheduler.api</module>
+		<module>../de.tum.in.scheduler</module>
 	</modules>
 
 	<organization>
