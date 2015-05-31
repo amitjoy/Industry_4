@@ -20,20 +20,16 @@
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
-			<version>1.9.6</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -44,13 +40,11 @@
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
-			<version>3.2.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.api</artifactId>
-			<version>1.0.4-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -61,15 +55,12 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>18.0</version>
-			<type>bundle</type>
 		</dependency>
 
 		<dependency>
 			<groupId>de.tum.in</groupId>
 			<artifactId>de.tum.in.activity.log</artifactId>
 			<version>1.0-SNAPSHOT</version>
-			<type>bundle</type>
 		</dependency>
 	</dependencies>
 
@@ -79,7 +70,6 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-scr-plugin</artifactId>
-				<version>1.21.0</version>
 				<executions>
 					<execution>
 						<id>generate-scr-scrdescriptor</id>
@@ -104,7 +94,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -120,7 +109,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>2.5.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>

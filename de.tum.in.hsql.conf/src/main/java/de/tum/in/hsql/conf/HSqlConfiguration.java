@@ -182,9 +182,8 @@ public class HSqlConfiguration implements ConfigurableComponent {
 
 		m_properties = properties;
 		setConfiguration();
-		for (final String s : properties.keySet()) {
-			LOGGER.info("Update - " + s + ": " + properties.get(s));
-		}
+		properties.keySet().forEach(
+				s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
 		LOGGER.info("Updated HyperSQL Configuration Component... Done.");
 	}

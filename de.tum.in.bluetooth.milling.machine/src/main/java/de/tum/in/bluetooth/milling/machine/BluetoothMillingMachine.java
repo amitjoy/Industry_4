@@ -470,9 +470,8 @@ public class BluetoothMillingMachine extends Cloudlet implements
 		LOGGER.info("Updated Bluetooth Milling Machine Component...");
 
 		m_properties = properties;
-		for (final String s : properties.keySet()) {
-			LOGGER.info("Update - " + s + ": " + properties.get(s));
-		}
+		properties.keySet().forEach(
+				s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 		doLoadMachines();
 
 		LOGGER.info("Updated Bluetooth Milling Machine Component... Done.");

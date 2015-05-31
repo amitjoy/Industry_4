@@ -440,9 +440,8 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		LOGGER.info("Updated Bluetooth Component...");
 
 		m_properties = properties;
-		for (final String s : properties.keySet()) {
-			LOGGER.info("Update - " + s + ": " + properties.get(s));
-		}
+		properties.keySet().forEach(
+				s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
 		LOGGER.info("Updated Bluetooth Component... Done.");
 	}
