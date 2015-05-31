@@ -68,6 +68,12 @@ public class ActivityLogServiceImpl extends Cloudlet implements
 	private static final String TABLE_NAME = "logs";
 
 	/**
+	 * Activity logs data retrieval query
+	 */
+	private static final String RETRIEVAL_QUERY = "SELECT * FROM " + TABLE_NAME
+			+ " WHERE 1 ";
+
+	/**
 	 * The HyperSQL Connection Reference
 	 */
 	private Connection m_connection;
@@ -171,11 +177,10 @@ public class ActivityLogServiceImpl extends Cloudlet implements
 	public List<ActivityLog> retrieveLogs() {
 		LOGGER.debug("Retrieving logs from the Activity Logs Database...");
 		final List<ActivityLog> logs = Lists.newArrayList();
-		final String retrieveStatement = "SELECT * FROM " + TABLE_NAME
-				+ " WHERE 1 ";
+
 		try {
 			final ResultSet resultSet = m_statement
-					.executeQuery(retrieveStatement);
+					.executeQuery(RETRIEVAL_QUERY);
 			while (resultSet.next()) {
 				final String timestamp = resultSet.getString("timestamp");
 				final String description = resultSet.getString("description");
@@ -199,10 +204,8 @@ public class ActivityLogServiceImpl extends Cloudlet implements
 		if ("logs".equals(reqTopic.getResources()[0])) {
 			final List<ActivityLog> logs = retrieveLogs();
 
-			for (final ActivityLog activityLog : logs) {
-				respPayload.addMetric(activityLog.getTimestamp(),
-						activityLog.getDescription());
-			}
+			logs.forEach(activityLog -> respPayload.addMetric(
+					activityLog.getTimestamp(), activityLog.getDescription()));
 		}
 		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 	}
