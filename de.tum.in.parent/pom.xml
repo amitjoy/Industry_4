@@ -185,5 +185,11 @@
 		<url>http://www.tum.de</url>
 		<name>Technical University of Munich</name>
 	</organization>
+	<scm>
+		<connection>Mercurial</connection>
+		<developerConnection>Amit Kumar Mondal</developerConnection>
+		<tag>Eclipse Kura, OSGi, Bluetooth, OPC-UA, IoT</tag>
+		<url>https://bitbucket.org/i-am-it/iot_idp_pi</url>
+	</scm>
 </project>
 
