@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-        <groupId>de.tum.in</groupId>
-        <artifactId>de.tum.in.parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../de.tum.in.parent/pom.xml</relativePath>
-    </parent>
+		<groupId>de.tum.in</groupId>
+		<artifactId>de.tum.in.parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../de.tum.in.parent/pom.xml</relativePath>
+	</parent>
 
 	<groupId>de.tum.in</groupId>
 	<artifactId>de.tum.in.bluetooth</artifactId>
@@ -52,19 +52,19 @@
 			<artifactId>org.eclipse.kura.api</artifactId>
 			<version>1.0.4-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>net.sf.bluecove</groupId>
 			<artifactId>bluecove</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>18.0</version>
 			<type>bundle</type>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>de.tum.in</groupId>
 			<artifactId>de.tum.in.activity.log</artifactId>
@@ -88,6 +88,39 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.1</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
