@@ -20,3 +20,11 @@ Bundle-Version: 1.0.0.SNAPSHOT
 Name: de.tum.in.hsql.conf-1.0-SNAPSHOT.jar
 Bundle-SymbolicName: de.tum.in.hsql.conf
 Bundle-Version: 1.0.0.SNAPSHOT
+
+Name: de.tum.in.scheduler-1.0-SNAPSHOT.jar
+Bundle-SymbolicName: de.tum.in.scheduler
+Bundle-Version: 1.0.0.SNAPSHOT
+
+Name: de.tum.in.scheduler.api-1.0-SNAPSHOT.jar
+Bundle-SymbolicName: de.tum.in.scheduler.api
+Bundle-Version: 1.0.0.SNAPSHOT
