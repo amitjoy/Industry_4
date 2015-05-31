@@ -6,17 +6,17 @@ DeploymentPackage-ContactAddress: admin@amitinside.com
 DeploymentPackage-Description: Common Bundles required for the application
 
 Name: de.tum.in.events-1.0-SNAPSHOT.jar
-Bundle-SymbolicName: de.tum.in.de.tum.in.events
+Bundle-SymbolicName: de.tum.in.events
 Bundle-Version: 1.0.0.SNAPSHOT
 
 Name: de.tum.in.mongodb-1.0-SNAPSHOT.jar
-Bundle-SymbolicName: de.tum.in.de.tum.in.mongodb
+Bundle-SymbolicName: de.tum.in.mongodb
 Bundle-Version: 1.0.0.SNAPSHOT
 
 Name: de.tum.in.activity.log-1.0-SNAPSHOT.jar
-Bundle-SymbolicName: de.tum.in.de.tum.in.activity.log
+Bundle-SymbolicName: de.tum.in.activity.log
 Bundle-Version: 1.0.0.SNAPSHOT
 
 Name: de.tum.in.hsql.conf-1.0-SNAPSHOT.jar
-Bundle-SymbolicName: de.tum.in.de.tum.in.hsql.conf
+Bundle-SymbolicName: de.tum.in.hsql.conf
 Bundle-Version: 1.0.0.SNAPSHOT
