@@ -197,6 +197,7 @@
 		
 		<module>../de.tum.in.scheduler.api</module>
 		<module>../de.tum.in.scheduler</module>
+		<module>../de.tum.in.heartbeat</module>
 	</modules>
 
 	<organization>
