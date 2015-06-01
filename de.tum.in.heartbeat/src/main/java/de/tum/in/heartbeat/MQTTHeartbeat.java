@@ -114,8 +114,9 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent,
 	/**
 	 * Broadcasts the heartbeat message
 	 */
-	private void doBroadcastHeartbeat(ComponentContext componentContext,
-			Map<String, Object> properties) throws KuraException {
+	private void doBroadcastHeartbeat(Map<String, Object> properties)
+			throws KuraException {
+		LOGGER.info("Sending MQTT Heartbeat...");
 		m_properties = properties;
 		final KuraPayload kuraPayload = new KuraPayload();
 		kuraPayload.addMetric("data", "live");
@@ -170,7 +171,7 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent,
 	public void execute(JobExecutionContext executionContext)
 			throws JobExecutionException {
 		try {
-			doBroadcastHeartbeat(m_context, m_properties);
+			doBroadcastHeartbeat(m_properties);
 		} catch (final KuraException e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
