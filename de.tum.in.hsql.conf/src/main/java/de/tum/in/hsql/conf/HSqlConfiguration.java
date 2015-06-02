@@ -45,11 +45,6 @@ public class HSqlConfiguration implements ConfigurableComponent {
 			.getLogger(HSqlConfiguration.class);
 
 	/**
-	 * Defines Application Configuration Metatype Id
-	 */
-	private static final String APP_CONF_ID = "de.tum.in.hsql.conf";
-
-	/**
 	 * Configurable Property to set HyperSQL Connection URL
 	 */
 	private static final String DB_SERVICE_URL = "db.service.hsqldb.url";
