@@ -16,7 +16,7 @@
 		<bluecove.version>2.1.0</bluecove.version>
 		<osgi-core.version>5.0.0</osgi-core.version>
 		<osgi.version>4.3.1</osgi.version>
-		<slf4j.version>1.6.6</slf4j.version>
+		<slf4j.version>1.6.4</slf4j.version>
 		<kura.version>1.0.4-SNAPSHOT</kura.version>
 		<guava.version>18.0</guava.version>
 		<mongo.version>3.0.1</mongo.version>
@@ -176,19 +176,15 @@
 	</build>
 
 	<modules>
-		<module>../de.tum.in.bluetooth</module>
+		<module>../de.tum.in.bluecove</module>
 		<module>../de.tum.in.bluecove.fragment</module>
+		<module>../de.tum.in.bluetooth</module>
 		<module>../de.tum.in.activity.log</module>
 		<module>../de.tum.in.bluetooth.milling.machine</module>
 		<module>../de.tum.in.data.cache</module>
 		<module>../de.tum.in.events</module>
 		<module>../de.tum.in.mongodb</module>
-		<module>../de.tum.in.bluecove</module>
-
 		<module>../de.tum.in.hsql.conf</module>
-
-
-
 		<module>../de.tum.in.heartbeat</module>
 		<module>../de.tum.in.dp.parent</module>
 	</modules>

@@ -126,9 +126,10 @@
 							de.tum.in.bluetooth.devices
 						</Private-Package>
 						<Export-Package>
-							de.tum.in.bluetooth.obex*,
 							de.tum.in.bluetooth.discovery,
-							de.tum.in.bluetooth
+							de.tum.in.bluetooth,
+							de.tum.in.bluetooth.connection,
+							de.tum.in.bluetooth.devices
 						</Export-Package>
 						<Bundle-Developer>Amit Kumar Mondal</Bundle-Developer>
 					</instructions>

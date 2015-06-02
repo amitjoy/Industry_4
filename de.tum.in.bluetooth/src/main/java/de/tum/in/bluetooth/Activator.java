@@ -22,8 +22,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 
 import de.tum.in.bluetooth.connection.ConnectionFactoryImpl;
 
@@ -48,11 +46,6 @@ public class Activator implements BundleActivator {
 	private final static Logger LOGGER = LoggerFactory
 			.getLogger(Activator.class);
 
-	/**
-	 * slf4j Marker to keep track of bundle
-	 */
-	private static final Marker m_bundleMarker = createBundleMarker();
-
 	@Override
 	public void start(BundleContext context) throws Exception {
 		final Hashtable<String, String[]> properties = new Hashtable<String, String[]>();
@@ -60,24 +53,13 @@ public class Activator implements BundleActivator {
 		m_connectionFactory = new ConnectionFactoryImpl();
 		context.registerService(ConnectionFactory.class.getName(),
 				m_connectionFactory, properties);
-		LOGGER.debug(m_bundleMarker, "Started Bundle");
-	}
-
-	/**
-	 * slf4j Marker to keep track of bundle
-	 * 
-	 */
-	private static Marker createBundleMarker() {
-		final Marker bundleMarker = MarkerFactory.getMarker(Activator.class
-				.getName());
-		bundleMarker.add(MarkerFactory.getMarker("IS_BUNDLE"));
-		return bundleMarker;
+		LOGGER.debug("Started Bundle");
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		m_connectionFactory = null;
-		LOGGER.debug(m_bundleMarker, "Stopped Bundle");
+		LOGGER.debug("Stopped Bundle");
 	}
 
 }
