@@ -16,7 +16,7 @@
 			type="Integer" cardinality="0" required="false" default="50000"
 			description="Configurable Property to set caching of rows" />
 
-		<AD id="db.service.hsqldb.lob_file_scale"" name="db.service.hsqldb.lob_file_scale""
+		<AD id="db.service.hsqldb.lob_file_scale" name="db.service.hsqldb.lob_file_scale"
 			type="Integer" cardinality="0" required="false" default="32"
 			description="Configurable Property to set lob file scaling size" />
 

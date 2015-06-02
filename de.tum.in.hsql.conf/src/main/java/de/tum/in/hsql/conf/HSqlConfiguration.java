@@ -131,7 +131,7 @@ public class HSqlConfiguration implements ConfigurableComponent {
 	}
 
 	/**
-	 * Sets the configuration parameters to system service
+	 * Sets or updates the configuration parameters in {@link SystemService}
 	 */
 	private void setConfiguration() {
 		m_systemService.getProperties().put(DB_SERVICE_URL,
