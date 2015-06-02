@@ -16,14 +16,6 @@
 <target name="check.file.exists ../de.tum.in.hsql.conf/target/de.tum.in.hsql.conf-1.0-SNAPSHOT.jar" unless="file.exists.../de.tum.in.hsql.conf/target/de.tum.in.hsql.conf-1.0-SNAPSHOT.jar">
   <fail message="Can not find file ../de.tum.in.hsql.conf/target/de.tum.in.hsql.conf-1.0-SNAPSHOT.jar"/>
 </target>
-<available property="file.exists.../de.tum.in.scheduler/target/de.tum.in.scheduler-1.0-SNAPSHOT.jar" file="../de.tum.in.scheduler/target/de.tum.in.scheduler-1.0-SNAPSHOT.jar"/>
-<target name="check.file.exists ../de.tum.in.scheduler/target/de.tum.in.scheduler-1.0-SNAPSHOT.jar" unless="file.exists.../de.tum.in.scheduler/target/de.tum.in.scheduler-1.0-SNAPSHOT.jar">
-  <fail message="Can not find file ../de.tum.in.scheduler/target/de.tum.in.scheduler-1.0-SNAPSHOT.jar"/>
-</target>
-<available property="file.exists.../de.tum.in.scheduler.api/target/de.tum.in.scheduler.api-1.0-SNAPSHOT.jar" file="../de.tum.in.scheduler.api/target/de.tum.in.scheduler.api-1.0-SNAPSHOT.jar"/>
-<target name="check.file.exists ../de.tum.in.scheduler.api/target/de.tum.in.scheduler.api-1.0-SNAPSHOT.jar" unless="file.exists.../de.tum.in.scheduler.api/target/de.tum.in.scheduler.api-1.0-SNAPSHOT.jar">
-  <fail message="Can not find file ../de.tum.in.scheduler.api/target/de.tum.in.scheduler.api-1.0-SNAPSHOT.jar"/>
-</target>
 <available property="file.exists.../de.tum.in.heartbeat/target/de.tum.in.heartbeat-1.0-SNAPSHOT.jar" file="../de.tum.in.heartbeat/target/de.tum.in.heartbeat-1.0-SNAPSHOT.jar"/>
 <target name="check.file.exists ../de.tum.in.heartbeat/target/de.tum.in.heartbeat-1.0-SNAPSHOT.jar" unless="file.exists.../de.tum.in.heartbeat/target/de.tum.in.heartbeat-1.0-SNAPSHOT.jar">
   <fail message="Can not find file ../de.tum.in.heartbeat/target/de.tum.in.heartbeat-1.0-SNAPSHOT.jar"/>
@@ -34,16 +26,12 @@
   <antcall target="check.file.exists ../de.tum.in.mongodb/target/de.tum.in.mongodb-1.0-SNAPSHOT.jar"/>
   <antcall target="check.file.exists ../de.tum.in.activity.log/target/de.tum.in.activity.log-1.0-SNAPSHOT.jar"/>
   <antcall target="check.file.exists ../de.tum.in.hsql.conf/target/de.tum.in.hsql.conf-1.0-SNAPSHOT.jar"/>
-  <antcall target="check.file.exists ../de.tum.in.scheduler/target/de.tum.in.scheduler-1.0-SNAPSHOT.jar"/>
-  <antcall target="check.file.exists ../de.tum.in.scheduler.api/target/de.tum.in.scheduler.api-1.0-SNAPSHOT.jar"/>
   <antcall target="check.file.exists ../de.tum.in.heartbeat/target/de.tum.in.heartbeat-1.0-SNAPSHOT.jar"/>
   <jar destfile="de.tum.in.dp.commons.dp" manifest="de.tum.in.dp.commons_manifest.mf">
     <zipfileset file="../de.tum.in.events/target/de.tum.in.events-1.0-SNAPSHOT.jar" fullpath="de.tum.in.events-1.0-SNAPSHOT.jar" />
     <zipfileset file="../de.tum.in.mongodb/target/de.tum.in.mongodb-1.0-SNAPSHOT.jar" fullpath="de.tum.in.mongodb-1.0-SNAPSHOT.jar" />
     <zipfileset file="../de.tum.in.activity.log/target/de.tum.in.activity.log-1.0-SNAPSHOT.jar" fullpath="de.tum.in.activity.log-1.0-SNAPSHOT.jar" />
     <zipfileset file="../de.tum.in.hsql.conf/target/de.tum.in.hsql.conf-1.0-SNAPSHOT.jar" fullpath="de.tum.in.hsql.conf-1.0-SNAPSHOT.jar" />
-    <zipfileset file="../de.tum.in.scheduler/target/de.tum.in.scheduler-1.0-SNAPSHOT.jar" fullpath="de.tum.in.scheduler-1.0-SNAPSHOT.jar" />
-    <zipfileset file="../de.tum.in.scheduler.api/target/de.tum.in.scheduler.api-1.0-SNAPSHOT.jar" fullpath="de.tum.in.scheduler.api-1.0-SNAPSHOT.jar" />
     <zipfileset file="../de.tum.in.heartbeat/target/de.tum.in.heartbeat-1.0-SNAPSHOT.jar" fullpath="de.tum.in.heartbeat-1.0-SNAPSHOT.jar" />
   </jar>
 </target>
