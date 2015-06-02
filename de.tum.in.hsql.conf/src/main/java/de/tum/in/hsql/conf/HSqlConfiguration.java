@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author AMIT KUMAR MONDAL
  *
  */
-@Component(immediate = false, name = "de.tum.in.hsql.conf")
+@Component(immediate = true, name = "de.tum.in.hsql.conf")
 @Service(value = { HSqlConfiguration.class })
 public class HSqlConfiguration implements ConfigurableComponent {
 

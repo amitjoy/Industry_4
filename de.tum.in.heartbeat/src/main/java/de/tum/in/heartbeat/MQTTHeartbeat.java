@@ -143,6 +143,7 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 	protected void deactivate(ComponentContext context) {
 		LOGGER.debug("Deactivating MQTT Heartbeat Component...");
 		super.deactivate(context);
+		s_scheduledExecutor.shutdown();
 		LOGGER.debug("Deactivating MQTT Heartbeat Component... Done.");
 	}
 
