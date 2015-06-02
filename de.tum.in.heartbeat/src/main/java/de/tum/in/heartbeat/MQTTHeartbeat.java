@@ -16,6 +16,9 @@
 package de.tum.in.heartbeat;
 
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -28,16 +31,10 @@ import org.eclipse.kura.cloud.Cloudlet;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.service.component.ComponentContext;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
-
-import de.tum.in.scheduler.annotations.RepeatForever;
-import de.tum.in.scheduler.annotations.RepeatInterval;
 
 /**
  * This is used to broadcast MQTT Heartbeat messages
@@ -45,12 +42,9 @@ import de.tum.in.scheduler.annotations.RepeatInterval;
  * @author AMIT KUMAR MONDAL
  *
  */
-@RepeatForever
-@RepeatInterval(period = RepeatInterval.SECOND, value = 10)
 @Component(immediate = false, name = "de.tum.in.mqtt.heartbeat")
-@Service(value = { MQTTHeartbeat.class, Job.class })
-public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent,
-		Job {
+@Service(value = { MQTTHeartbeat.class })
+public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 
 	/**
 	 * Logger
@@ -84,6 +78,9 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent,
 	 */
 	private ComponentContext m_context;
 
+	private static final ScheduledExecutorService s_scheduledExecutor = Executors
+			.newSingleThreadScheduledExecutor();
+
 	/**
 	 * Map to store list of configurations
 	 */
@@ -107,6 +104,12 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent,
 		super.activate(componentContext);
 		m_context = componentContext;
 
+		try {
+			doBroadcastHeartbeat(m_properties);
+		} catch (final KuraException e) {
+			LOGGER.error(Throwables.getStackTraceAsString(e));
+		}
+
 		LOGGER.info("Activating MQTT Heartbeat Component... Done.");
 
 	}
@@ -116,13 +119,20 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent,
 	 */
 	private void doBroadcastHeartbeat(Map<String, Object> properties)
 			throws KuraException {
-		LOGGER.info("Sending MQTT Heartbeat...");
-		m_properties = properties;
-		final KuraPayload kuraPayload = new KuraPayload();
-		kuraPayload.addMetric("data", "live");
-		getCloudApplicationClient().publish(
-				(String) m_properties.get(HEARTBEAT_TOPIC), kuraPayload,
-				DFLT_PUB_QOS, DFLT_RETAIN);
+		s_scheduledExecutor.schedule(
+				() -> {
+					LOGGER.info("Sending MQTT Heartbeat...");
+					m_properties = properties;
+					final KuraPayload kuraPayload = new KuraPayload();
+					kuraPayload.addMetric("data", "live");
+					try {
+						getCloudApplicationClient().publish(
+								(String) m_properties.get(HEARTBEAT_TOPIC),
+								kuraPayload, DFLT_PUB_QOS, DFLT_RETAIN);
+					} catch (final KuraException e) {
+						LOGGER.error(Throwables.getStackTraceAsString(e));
+					}
+				}, 5, TimeUnit.SECONDS);
 	}
 
 	/**
@@ -163,17 +173,12 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent,
 		properties.keySet().forEach(
 				s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
-		LOGGER.info("Updated MQTT Heartbeat Component... Done.");
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public void execute(JobExecutionContext executionContext)
-			throws JobExecutionException {
 		try {
 			doBroadcastHeartbeat(m_properties);
 		} catch (final KuraException e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
+		LOGGER.info("Updated MQTT Heartbeat Component... Done.");
 	}
+
 }

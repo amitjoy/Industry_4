@@ -36,7 +36,3 @@ Bundle-Version: 4.0.28.Final
 Name: netty-codec-4.0.28.Final.jar
 Bundle-SymbolicName: io.netty.codec
 Bundle-Version: 4.0.28.Final
-
-Name: org.apache.felix.dependencymanager-3.2.0.jar
-Bundle-SymbolicName: org.apache.felix.dependencymanager
-Bundle-Version: 3.2.0
