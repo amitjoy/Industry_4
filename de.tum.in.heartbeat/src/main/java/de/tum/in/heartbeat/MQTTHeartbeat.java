@@ -134,9 +134,10 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 					final KuraPayload kuraPayload = new KuraPayload();
 					kuraPayload.addMetric("data", "live");
 					try {
-						getCloudApplicationClient().publish(
+						getCloudApplicationClient().controlPublish(
 								(String) properties.get(HEARTBEAT_TOPIC),
-								kuraPayload, DFLT_PUB_QOS, DFLT_RETAIN);
+								kuraPayload, DFLT_PUB_QOS, DFLT_RETAIN,
+								DFLT_PRIORITY);
 					} catch (final KuraException e) {
 						LOGGER.error(Throwables.getStackTraceAsString(e));
 					}
