@@ -53,7 +53,7 @@ import de.tum.in.bluetooth.devices.DeviceList;
  * 
  * @author AMIT KUMAR MONDAL
  */
-@Component(immediate = true)
+@Component(immediate = true, name = "de.tum.in.bluetooth.service.discovery")
 public class BluetoothServiceDiscovery {
 
 	// Used only for RFCOMM Connections
