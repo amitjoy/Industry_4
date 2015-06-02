@@ -43,11 +43,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>net.sf.bluecove</groupId>
-			<artifactId>bluecove</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
@@ -62,14 +57,12 @@
 			<groupId>de.tum.in</groupId>
 			<artifactId>de.tum.in.activity.log</artifactId>
 			<version>1.0-SNAPSHOT</version>
-			<type>bundle</type>
 		</dependency>
 
 		<dependency>
 			<groupId>de.tum.in</groupId>
 			<artifactId>de.tum.in.events</artifactId>
 			<version>1.0-SNAPSHOT</version>
-			<type>bundle</type>
 		</dependency>
 	</dependencies>
 	<build>
