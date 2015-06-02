@@ -32,6 +32,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -81,7 +82,7 @@ public class BluetoothServiceDiscovery {
 	 * Set of devices loaded from the <tt>configuration</tt>. This contains the
 	 * authentication information for the device.
 	 */
-	@Reference(bind = "bindDeviceListService", unbind = "unbindDeviceListService")
+	@Reference(bind = "bindDeviceListService", unbind = "unbindDeviceListService", cardinality = ReferenceCardinality.OPTIONAL_UNARY)
 	private volatile DeviceList m_fleet;
 
 	/**
