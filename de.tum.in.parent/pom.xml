@@ -192,12 +192,13 @@
 		<module>../de.tum.in.events</module>
 		<module>../de.tum.in.mongodb</module>
 		<module>../de.tum.in.bluecove</module>
-		<module>../de.tum.in.dp.parent</module>
+		
 		<module>../de.tum.in.hsql.conf</module>
 		
 		<module>../de.tum.in.scheduler.api</module>
 		<module>../de.tum.in.scheduler</module>
 		<module>../de.tum.in.heartbeat</module>
+		<module>../de.tum.in.dp.parent</module>
 	</modules>
 
 	<organization>

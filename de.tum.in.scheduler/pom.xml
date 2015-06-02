@@ -76,6 +76,7 @@
 						<Embed-Dependency>
 							quartz
 						</Embed-Dependency>
+						<Import-Package>!com.mchange.v2.c3p0</Import-Package>
 						<Bundle-Activator>de.tum.in.scheduler.Activator</Bundle-Activator>
 						<Bundle-Developer>Amit Kumar Mondal</Bundle-Developer>
 						<Bundle-Vendor>TU Munich</Bundle-Vendor>

@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Fri May 22 18:11:13 CEST 2015
+#Tue Jun 02 12:48:39 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.dependencies_build.xml
 build.dp.file=<.>/de.tum.in.dp.dependencies.dp
 build.location=
@@ -59,7 +59,14 @@ bundles.7.missing=false
 bundles.7.name=netty-codec-4.0.28.Final.jar
 bundles.7.symbolic_name=io.netty.codec
 bundles.7.version=4.0.28.Final
-bundles.count=8
+bundles.8.bundle_path=<.>/lib/org.apache.felix.dependencymanager-3.2.0.jar
+bundles.8.customizer=false
+bundles.8.headers.count=0
+bundles.8.missing=false
+bundles.8.name=org.apache.felix.dependencymanager-3.2.0.jar
+bundles.8.symbolic_name=org.apache.felix.dependencymanager
+bundles.8.version=3.2.0
+bundles.count=9
 certificates.count=0
 general.signbundles=true
 headers.contact.address=admin@amitinside.com

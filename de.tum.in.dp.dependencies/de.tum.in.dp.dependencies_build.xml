@@ -32,6 +32,10 @@
 <target name="check.file.exists lib/netty-codec-4.0.28.Final.jar" unless="file.exists.lib/netty-codec-4.0.28.Final.jar">
   <fail message="Can not find file lib/netty-codec-4.0.28.Final.jar"/>
 </target>
+<available property="file.exists.lib/org.apache.felix.dependencymanager-3.2.0.jar" file="lib/org.apache.felix.dependencymanager-3.2.0.jar"/>
+<target name="check.file.exists lib/org.apache.felix.dependencymanager-3.2.0.jar" unless="file.exists.lib/org.apache.felix.dependencymanager-3.2.0.jar">
+  <fail message="Can not find file lib/org.apache.felix.dependencymanager-3.2.0.jar"/>
+</target>
 <target name="all">
   <mkdir dir="/Users/AMIT/IoT_IDP/Pi/de.tum.in.dp.dependencies"/>
   <antcall target="check.file.exists lib/guava-18.0.jar"/>
@@ -42,6 +46,7 @@
   <antcall target="check.file.exists lib/netty-handler-4.0.28.Final.jar"/>
   <antcall target="check.file.exists lib/netty-transport-4.0.28.Final.jar"/>
   <antcall target="check.file.exists lib/netty-codec-4.0.28.Final.jar"/>
+  <antcall target="check.file.exists lib/org.apache.felix.dependencymanager-3.2.0.jar"/>
   <jar destfile="de.tum.in.dp.dependencies.dp" manifest="de.tum.in.dp.dependencies_manifest.mf">
     <zipfileset file="lib/guava-18.0.jar" fullpath="guava-18.0.jar" />
     <zipfileset file="lib/commons-collections-3.2.1.jar" fullpath="commons-collections-3.2.1.jar" />
@@ -51,6 +56,7 @@
     <zipfileset file="lib/netty-handler-4.0.28.Final.jar" fullpath="netty-handler-4.0.28.Final.jar" />
     <zipfileset file="lib/netty-transport-4.0.28.Final.jar" fullpath="netty-transport-4.0.28.Final.jar" />
     <zipfileset file="lib/netty-codec-4.0.28.Final.jar" fullpath="netty-codec-4.0.28.Final.jar" />
+    <zipfileset file="lib/org.apache.felix.dependencymanager-3.2.0.jar" fullpath="org.apache.felix.dependencymanager-3.2.0.jar" />
   </jar>
 </target>
 
