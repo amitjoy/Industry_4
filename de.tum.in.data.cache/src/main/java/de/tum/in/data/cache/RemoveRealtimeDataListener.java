@@ -15,38 +15,33 @@
  *******************************************************************************/
 package de.tum.in.data.cache;
 
-import org.bson.Document;
-
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
-import com.mongodb.client.MongoCollection;
 
 import de.tum.in.mongodb.MongoDBService;
 
 /**
  * Listener used to dump data while removing the data from the cache
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
-public class RemoveRealtimeDataListener implements
-		RemovalListener<String, Object> {
+public class RemoveRealtimeDataListener implements RemovalListener<String, Object> {
 
 	/** Mongo DB Service */
 	private final MongoDBService m_mongoDBService;
 
 	/** Constructor */
-	public RemoveRealtimeDataListener(MongoDBService mongoDbService) {
+	public RemoveRealtimeDataListener(final MongoDBService mongoDbService) {
 		m_mongoDBService = mongoDbService;
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public void onRemoval(RemovalNotification<String, Object> notification) {
-		final MongoCollection<Document> dbCollection = m_mongoDBService
-				.getDatabase().getCollection("BLUETOOTH-MILLING");
+	public void onRemoval(final RemovalNotification<String, Object> notification) {
+		m_mongoDBService.getDatabase().getCollection("BLUETOOTH-MILLING");
 
-		// TO-DO Insert the data
+		// TODO Insert the data
 	}
 
 }
