@@ -39,7 +39,7 @@ import com.google.common.base.Throwables;
 
 /**
  * This is used to broadcast MQTT Heartbeat messages
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
@@ -48,10 +48,9 @@ import com.google.common.base.Throwables;
 public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 
 	/**
-	 * Logger
+	 * Defines Application Configuration Metatype Id
 	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(MQTTHeartbeat.class);
+	private static final String APP_CONF_ID = "de.tum.in.mqtt.heartbeat";
 
 	/**
 	 * Application Identifier
@@ -59,15 +58,9 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 	private static final String APP_ID = "HEARTBEAT-V1";
 
 	/**
-	 * Defines Application Configuration Metatype Id
+	 * Configurable property to set MQTT Hearbeat Period
 	 */
-	private static final String APP_CONF_ID = "de.tum.in.mqtt.heartbeat";
-
-	/**
-	 * Eclipse Kura Cloud Service Dependency
-	 */
-	@Reference(bind = "bindCloudService", unbind = "unbindCloudService")
-	private volatile CloudService m_cloudService;
+	private static final String HEARTBEAT_PERIOD = "de.tum.in.mqtt.heartbeat.period";
 
 	/**
 	 * Configurable property to set MQTT Hearbeat Topic Namespace
@@ -75,9 +68,15 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 	private static final String HEARTBEAT_TOPIC = "de.tum.in.mqtt.heartbeat.topic";
 
 	/**
-	 * Scheduled Thread Pool Executor Reference
+	 * Logger
 	 */
-	private final ScheduledExecutorService m_worker;
+	private static final Logger LOGGER = LoggerFactory.getLogger(MQTTHeartbeat.class);
+
+	/**
+	 * Eclipse Kura Cloud Service Dependency
+	 */
+	@Reference(bind = "bindCloudService", unbind = "unbindCloudService")
+	private volatile CloudService m_cloudService;
 
 	/**
 	 * Future Event Handle for Executor
@@ -89,26 +88,31 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 	 */
 	private Map<String, Object> m_properties;
 
+	/**
+	 * Scheduled Thread Pool Executor Reference
+	 */
+	private final ScheduledExecutorService m_worker;
+
 	/* Constructor */
 	public MQTTHeartbeat() {
 		super(APP_ID);
-		m_worker = Executors.newSingleThreadScheduledExecutor();
+		this.m_worker = Executors.newSingleThreadScheduledExecutor();
 	}
 
 	/**
 	 * Callback used when this service component is activating
 	 */
 	@Activate
-	protected synchronized void activate(ComponentContext componentContext,
-			Map<String, Object> properties) {
+	protected synchronized void activate(final ComponentContext componentContext,
+			final Map<String, Object> properties) {
 		LOGGER.info("Activating MQTT Heartbeat Component...");
 
-		m_properties = properties;
-		super.setCloudService(m_cloudService);
+		this.m_properties = properties;
+		super.setCloudService(this.m_cloudService);
 		super.activate(componentContext);
 
 		try {
-			doBroadcastHeartbeat(m_properties);
+			this.doBroadcastHeartbeat(this.m_properties);
 		} catch (final KuraException e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
@@ -118,30 +122,12 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 	}
 
 	/**
-	 * Broadcasts the heartbeat message
+	 * Callback to be used while {@link CloudService} is registering
 	 */
-	private void doBroadcastHeartbeat(Map<String, Object> properties)
-			throws KuraException {
-
-		// cancel a current worker handle if one if active
-		if (m_handle != null) {
-			m_handle.cancel(true);
+	public synchronized void bindCloudService(final CloudService cloudService) {
+		if (this.m_cloudService == null) {
+			super.setCloudService(this.m_cloudService = cloudService);
 		}
-		m_handle = m_worker.scheduleAtFixedRate(
-				() -> {
-					LOGGER.info("Sending MQTT Heartbeat...");
-					Thread.currentThread().setName(getClass().getSimpleName());
-					final KuraPayload kuraPayload = new KuraPayload();
-					kuraPayload.addMetric("data", "live");
-					try {
-						getCloudApplicationClient().controlPublish(
-								(String) properties.get(HEARTBEAT_TOPIC),
-								kuraPayload, DFLT_PUB_QOS, DFLT_RETAIN,
-								DFLT_PRIORITY);
-					} catch (final KuraException e) {
-						LOGGER.error(Throwables.getStackTraceAsString(e));
-					}
-				}, 0, 10, TimeUnit.SECONDS);
 	}
 
 	/**
@@ -149,46 +135,60 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 	 */
 	@Override
 	@Deactivate
-	protected void deactivate(ComponentContext context) {
+	protected void deactivate(final ComponentContext context) {
 		LOGGER.debug("Deactivating MQTT Heartbeat Component...");
 		super.deactivate(context);
 		// shutting down the worker and cleaning up the properties
-		m_worker.shutdown();
+		this.m_worker.shutdown();
 		// Releasing the CloudApplicationClient
 		LOGGER.info("Releasing CloudApplicationClient for {}...", APP_ID);
-		getCloudApplicationClient().release();
+		this.getCloudApplicationClient().release();
 		LOGGER.debug("Deactivating MQTT Heartbeat Component... Done.");
 	}
 
 	/**
-	 * Callback to be used while {@link CloudService} is registering
+	 * Broadcasts the heartbeat message
 	 */
-	public synchronized void bindCloudService(CloudService cloudService) {
-		if (m_cloudService == null) {
-			super.setCloudService(m_cloudService = cloudService);
+	private void doBroadcastHeartbeat(final Map<String, Object> properties) throws KuraException {
+
+		// cancel a current worker handle if one if active
+		if (this.m_handle != null) {
+			this.m_handle.cancel(true);
 		}
+		this.m_handle = this.m_worker.scheduleAtFixedRate(() -> {
+			LOGGER.info("Sending MQTT Heartbeat...");
+			Thread.currentThread().setName(this.getClass().getSimpleName());
+			final KuraPayload kuraPayload = new KuraPayload();
+			kuraPayload.addMetric("data", "live");
+			try {
+				this.getCloudApplicationClient().controlPublish((String) properties.get(HEARTBEAT_TOPIC), kuraPayload,
+						DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
+			} catch (final KuraException e) {
+				LOGGER.error(Throwables.getStackTraceAsString(e));
+			}
+		} , 0, (int) properties.get(HEARTBEAT_PERIOD), TimeUnit.SECONDS);
 	}
 
 	/**
 	 * Callback to be used while {@link CloudService} is deregistering
 	 */
-	public synchronized void unbindCloudService(CloudService cloudService) {
-		if (m_cloudService == cloudService)
-			super.setCloudService(m_cloudService = null);
+	public synchronized void unbindCloudService(final CloudService cloudService) {
+		if (this.m_cloudService == cloudService) {
+			super.setCloudService(this.m_cloudService = null);
+		}
 	}
 
 	/**
 	 * Used to be called when configurations will get updated
 	 */
-	public void updated(Map<String, Object> properties) {
+	public void updated(final Map<String, Object> properties) {
 		LOGGER.info("Updated MQTT Heartbeat Component...");
 
-		m_properties = properties;
-		properties.keySet().forEach(
-				s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
+		this.m_properties = properties;
+		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
 		try {
-			doBroadcastHeartbeat(m_properties);
+			this.doBroadcastHeartbeat(this.m_properties);
 		} catch (final Exception e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
