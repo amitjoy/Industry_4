@@ -104,7 +104,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>de.tum.in.mqtt.client.example.MQTTClient</mainClass>
+							<mainClass>de.tum.in.client.example.MQTTClient</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
