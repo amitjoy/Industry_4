@@ -21,6 +21,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -41,7 +42,8 @@ import de.tum.in.mongodb.MongoDBService;
  * @author AMIT KUMAR MONDAL
  *
  */
-@Component(name = "de.tum.in.realtime.data.cache")
+@Component(immediate = true, name = "de.tum.in.realtime.data.cache")
+@Service
 public class DataCache implements EventHandler {
 
 	/**
