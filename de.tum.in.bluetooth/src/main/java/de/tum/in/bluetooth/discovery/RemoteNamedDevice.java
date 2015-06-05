@@ -22,69 +22,69 @@ import javax.microedition.io.Connection;
 
 /**
  * A class extending {@link RemoteDevice} but setting the friendly name.
- * 
+ *
  * @See {@link RemoteDevice}
  * @author AMIT KUMAR MONDAL
  */
 public class RemoteNamedDevice extends RemoteDevice {
 
-	public final String friendlyName;
-
 	public final RemoteDevice device;
 
-	protected RemoteNamedDevice(RemoteDevice device, String name) {
+	public final String friendlyName;
+
+	protected RemoteNamedDevice(final RemoteDevice device, final String name) {
 		super(device.getBluetoothAddress());
 		this.device = device;
 		this.friendlyName = name;
 	}
 
 	@Override
-	public String getFriendlyName(boolean alwaysAsk) throws IOException {
-		return friendlyName;
-	}
-
-	@Override
-	public boolean isTrustedDevice() {
-		return device.isTrustedDevice();
-	}
-
-	@Override
 	public boolean authenticate() throws IOException {
-		return device.authenticate();
+		return this.device.authenticate();
 	}
 
 	@Override
-	public boolean authorize(Connection conn) throws IOException {
-		return device.authorize(conn);
+	public boolean authorize(final Connection conn) throws IOException {
+		return this.device.authorize(conn);
 	}
 
 	@Override
-	public boolean encrypt(Connection conn, boolean on) throws IOException {
-		return device.encrypt(conn, on);
+	public boolean encrypt(final Connection conn, final boolean on) throws IOException {
+		return this.device.encrypt(conn, on);
 	}
 
 	@Override
-	public boolean isAuthenticated() {
-		return device.isAuthenticated();
+	public boolean equals(final Object obj) {
+		return this.device.equals(obj);
 	}
 
 	@Override
-	public boolean isAuthorized(Connection conn) throws IOException {
-		return device.isAuthorized(conn);
-	}
-
-	@Override
-	public boolean isEncrypted() {
-		return device.isEncrypted();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return device.equals(obj);
+	public String getFriendlyName(final boolean alwaysAsk) throws IOException {
+		return this.friendlyName;
 	}
 
 	@Override
 	public int hashCode() {
-		return device.hashCode();
+		return this.device.hashCode();
+	}
+
+	@Override
+	public boolean isAuthenticated() {
+		return this.device.isAuthenticated();
+	}
+
+	@Override
+	public boolean isAuthorized(final Connection conn) throws IOException {
+		return this.device.isAuthorized(conn);
+	}
+
+	@Override
+	public boolean isEncrypted() {
+		return this.device.isEncrypted();
+	}
+
+	@Override
+	public boolean isTrustedDevice() {
+		return this.device.isTrustedDevice();
 	}
 }

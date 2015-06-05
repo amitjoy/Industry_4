@@ -22,162 +22,161 @@ import com.google.common.base.MoreObjects;
 public class Device {
 
 	private String id;
-	private String pin;
-	private String username;
+	private BigInteger maxRetry;
 	private String password;
+	private String pin;
 	private String realm;
 	private boolean retry;
-	private BigInteger maxRetry;
+	private String username;
 
 	/**
 	 * Gets the value of the id property.
-	 * 
+	 *
 	 * @return possible object is {@link String }
-	 * 
+	 *
 	 */
 	public String getId() {
-		return id;
-	}
-
-	/**
-	 * Sets the value of the id property.
-	 * 
-	 * @param value
-	 *            allowed object is {@link String }
-	 * 
-	 */
-	public void setId(String value) {
-		this.id = value;
-	}
-
-	/**
-	 * Gets the value of the pin property.
-	 * 
-	 * @return possible object is {@link String }
-	 * 
-	 */
-	public String getPin() {
-		return pin;
-	}
-
-	/**
-	 * Sets the value of the pin property.
-	 * 
-	 * @param value
-	 *            allowed object is {@link String }
-	 * 
-	 */
-	public void setPin(String value) {
-		this.pin = value;
-	}
-
-	/**
-	 * Gets the value of the username property.
-	 * 
-	 * @return possible object is {@link String }
-	 * 
-	 */
-	public String getUsername() {
-		return username;
-	}
-
-	/**
-	 * Sets the value of the username property.
-	 * 
-	 * @param value
-	 *            allowed object is {@link String }
-	 * 
-	 */
-	public void setUsername(String value) {
-		this.username = value;
-	}
-
-	/**
-	 * Gets the value of the password property.
-	 * 
-	 * @return possible object is {@link String }
-	 * 
-	 */
-	public String getPassword() {
-		return password;
-	}
-
-	/**
-	 * Sets the value of the password property.
-	 * 
-	 * @param value
-	 *            allowed object is {@link String }
-	 * 
-	 */
-	public void setPassword(String value) {
-		this.password = value;
-	}
-
-	/**
-	 * Gets the value of the realm property.
-	 * 
-	 * @return possible object is {@link String }
-	 * 
-	 */
-	public String getRealm() {
-		return realm;
-	}
-
-	/**
-	 * Sets the value of the realm property.
-	 * 
-	 * @param value
-	 *            allowed object is {@link String }
-	 * 
-	 */
-	public void setRealm(String value) {
-		this.realm = value;
-	}
-
-	/**
-	 * Gets the value of the retry property.
-	 * 
-	 */
-	public boolean isRetry() {
-		return retry;
-	}
-
-	/**
-	 * Sets the value of the retry property.
-	 * 
-	 */
-	public void setRetry(boolean value) {
-		this.retry = value;
+		return this.id;
 	}
 
 	/**
 	 * Gets the value of the maxRetry property.
-	 * 
+	 *
 	 * @return possible object is {@link BigInteger }
-	 * 
+	 *
 	 */
 	public BigInteger getMaxRetry() {
-		return maxRetry;
+		return this.maxRetry;
+	}
+
+	/**
+	 * Gets the value of the password property.
+	 *
+	 * @return possible object is {@link String }
+	 *
+	 */
+	public String getPassword() {
+		return this.password;
+	}
+
+	/**
+	 * Gets the value of the pin property.
+	 *
+	 * @return possible object is {@link String }
+	 *
+	 */
+	public String getPin() {
+		return this.pin;
+	}
+
+	/**
+	 * Gets the value of the realm property.
+	 *
+	 * @return possible object is {@link String }
+	 *
+	 */
+	public String getRealm() {
+		return this.realm;
+	}
+
+	/**
+	 * Gets the value of the username property.
+	 *
+	 * @return possible object is {@link String }
+	 *
+	 */
+	public String getUsername() {
+		return this.username;
+	}
+
+	/**
+	 * Gets the value of the retry property.
+	 *
+	 */
+	public boolean isRetry() {
+		return this.retry;
+	}
+
+	/**
+	 * Sets the value of the id property.
+	 *
+	 * @param value
+	 *            allowed object is {@link String }
+	 *
+	 */
+	public void setId(final String value) {
+		this.id = value;
 	}
 
 	/**
 	 * Sets the value of the maxRetry property.
-	 * 
+	 *
 	 * @param value
 	 *            allowed object is {@link BigInteger }
-	 * 
+	 *
 	 */
-	public void setMaxRetry(BigInteger value) {
+	public void setMaxRetry(final BigInteger value) {
 		this.maxRetry = value;
+	}
+
+	/**
+	 * Sets the value of the password property.
+	 *
+	 * @param value
+	 *            allowed object is {@link String }
+	 *
+	 */
+	public void setPassword(final String value) {
+		this.password = value;
+	}
+
+	/**
+	 * Sets the value of the pin property.
+	 *
+	 * @param value
+	 *            allowed object is {@link String }
+	 *
+	 */
+	public void setPin(final String value) {
+		this.pin = value;
+	}
+
+	/**
+	 * Sets the value of the realm property.
+	 *
+	 * @param value
+	 *            allowed object is {@link String }
+	 *
+	 */
+	public void setRealm(final String value) {
+		this.realm = value;
+	}
+
+	/**
+	 * Sets the value of the retry property.
+	 *
+	 */
+	public void setRetry(final boolean value) {
+		this.retry = value;
+	}
+
+	/**
+	 * Sets the value of the username property.
+	 *
+	 * @param value
+	 *            allowed object is {@link String }
+	 *
+	 */
+	public void setUsername(final String value) {
+		this.username = value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("id", id)
-				.add("username", username).add("password", password)
-				.add("pin", pin).add("retry", retry).add("max-retry", maxRetry)
-				.toString();
+		return MoreObjects.toStringHelper(this).add("id", this.id).add("username", this.username)
+				.add("password", this.password).add("pin", this.pin).add("retry", this.retry)
+				.add("max-retry", this.maxRetry).toString();
 	}
 
 }

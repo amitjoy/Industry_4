@@ -28,11 +28,16 @@ import de.tum.in.bluetooth.connection.ConnectionFactoryImpl;
 /**
  * Activator used to register Bluetooth Serial Port Profile Connection factory
  * Implementation
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
 public class Activator implements BundleActivator {
+
+	/**
+	 * slf4j Logger
+	 */
+	private final static Logger LOGGER = LoggerFactory.getLogger(Activator.class);
 
 	// Schema provided for connections
 	private static final String SCHEMA = "btspp";
@@ -40,25 +45,20 @@ public class Activator implements BundleActivator {
 	// The ConnectionFactory Service implementation
 	private ConnectionFactory m_connectionFactory;
 
-	/**
-	 * slf4j Logger
-	 */
-	private final static Logger LOGGER = LoggerFactory
-			.getLogger(Activator.class);
-
+	/** {@inheritDoc} */
 	@Override
-	public void start(BundleContext context) throws Exception {
+	public void start(final BundleContext context) throws Exception {
 		final Hashtable<String, String[]> properties = new Hashtable<String, String[]>();
 		properties.put(ConnectionFactory.IO_SCHEME, new String[] { SCHEMA });
-		m_connectionFactory = new ConnectionFactoryImpl();
-		context.registerService(ConnectionFactory.class.getName(),
-				m_connectionFactory, properties);
+		this.m_connectionFactory = new ConnectionFactoryImpl();
+		context.registerService(ConnectionFactory.class.getName(), this.m_connectionFactory, properties);
 		LOGGER.debug("Started Bundle");
 	}
 
+	/** {@inheritDoc} */
 	@Override
-	public void stop(BundleContext context) throws Exception {
-		m_connectionFactory = null;
+	public void stop(final BundleContext context) throws Exception {
+		this.m_connectionFactory = null;
 		LOGGER.debug("Stopped Bundle");
 	}
 

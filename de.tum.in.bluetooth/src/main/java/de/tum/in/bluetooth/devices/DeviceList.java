@@ -22,7 +22,7 @@ import com.google.common.collect.Lists;
 
 /**
  * Java class for DeviceList complex type.
- * 
+ *
  * @author AMIT KUMAR MONDAL
  */
 public class DeviceList {
@@ -33,8 +33,8 @@ public class DeviceList {
 	 * Gets the value of the devices property.
 	 */
 	public List<Device> getDevices() {
-		if (devices == null) {
-			devices = Lists.newArrayList();
+		if (this.devices == null) {
+			this.devices = Lists.newArrayList();
 		}
 		return this.devices;
 	}
@@ -42,9 +42,7 @@ public class DeviceList {
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this)
-				.add("devices", Lists.newArrayList(devices).toString())
-				.toString();
+		return MoreObjects.toStringHelper(this).add("devices", Lists.newArrayList(this.devices).toString()).toString();
 	}
 
 }

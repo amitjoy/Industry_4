@@ -36,43 +36,84 @@ import com.google.common.collect.Lists;
 /**
  * Discovery Agent searching services for one specific device. If a matching
  * service is found, we publishes an ??
- * 
+ *
  * @author AMIT KUMAR MONDAL
  */
 public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
+
+	private static int[] attrIDs = new int[] { ServiceConstants.SERVICE_NAME };
+
+	/**
+	 * Logger
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDiscoveryAgent.class);
 
 	// TO-DO Validation of SDP
 	// private static UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP };
 	private static UUID[] searchUuidSet = { UUIDs.RFCOMM };
 
-	private static int[] attrIDs = new int[] { ServiceConstants.SERVICE_NAME };
-
-	private final BluetoothServiceDiscovery m_parent;
-
 	private final RemoteDevice m_device;
+
+	private final List<ServiceRecord> m_discoveredServices = Lists.newArrayList();
 
 	private String m_name;
 
+	private final BluetoothServiceDiscovery m_parent;
+
 	private boolean m_searchInProgress = false;
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(ServiceDiscoveryAgent.class);
-
-	private final List<ServiceRecord> m_discoveredServices = Lists
-			.newArrayList();
-
-	public ServiceDiscoveryAgent(
-			BluetoothServiceDiscovery bluetoothServiceDiscovery,
-			RemoteDevice device) {
-		m_parent = bluetoothServiceDiscovery;
-		m_device = device;
+	public ServiceDiscoveryAgent(final BluetoothServiceDiscovery bluetoothServiceDiscovery, final RemoteDevice device) {
+		this.m_parent = bluetoothServiceDiscovery;
+		this.m_device = device;
 		try {
-			m_name = m_device.getFriendlyName(false);
+			this.m_name = this.m_device.getFriendlyName(false);
 		} catch (final IOException e) {
-			m_name = m_device.getBluetoothAddress();
+			this.m_name = this.m_device.getBluetoothAddress();
+		}
+	}
+
+	/*
+	 *
+	 * ********* DiscoveryListener **********
+	 */
+	@Override
+	public void deviceDiscovered(final RemoteDevice btDevice, final DeviceClass cod) {
+		// Not used here.
+	}
+
+	void doSearch(final LocalDevice local) {
+		synchronized (this) {
+			this.m_searchInProgress = true;
+			try {
+
+				if (Env.isTestEnvironmentEnabled()) {
+					LOGGER.warn("=== TEST ENVIRONMENT ENABLED ===");
+				} else {
+					final int trans = local.getDiscoveryAgent().searchServices(attrIDs, searchUuidSet, this.m_device,
+							this);
+					LOGGER.info("Service Search {} started", trans);
+				}
+
+				this.wait();
+			} catch (final InterruptedException e) {
+				if (this.m_searchInProgress) {
+					// we're stopping, aborting discovery.
+					this.m_searchInProgress = false;
+					LOGGER.warn("Interrupting bluetooth service discovery - interruption");
+				} else {
+					// Search done !
+					LOGGER.info("Bluetooth discovery for " + this.m_name + " completed !");
+				}
+			} catch (final BluetoothStateException e) {
+				// well ... bad choice. Bluetooth driver not ready
+				// Just abort.
+				LOGGER.error("Cannot search for bluetooth services", Throwables.getStackTraceAsString(e));
+				this.m_parent.discovered(this.m_device, null);
+				return;
+			}
+			LOGGER.info("Bluetooth discovery for " + this.m_name + " is now completed - injecting "
+					+ this.m_discoveredServices.size() + " discovered services ");
+			this.m_parent.discovered(this.m_device, this.m_discoveredServices);
 		}
 	}
 
@@ -91,100 +132,49 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 	}
 
 	@Override
-	public void run() {
-		try {
-			LOGGER.info("Search services on " + m_device.getBluetoothAddress()
-					+ " " + m_name);
-
-			final LocalDevice local = initialize();
-			if (!LocalDevice.isPowerOn() || local == null) {
-				LOGGER.error("Bluetooth adapter not ready, aborting service discovery");
-				m_parent.discovered(m_device, null);
-				return;
-			}
-
-			doSearch(local);
-		} catch (final Throwable e) {
-			LOGGER.error("Unexpected exception during service inquiry",
-					Throwables.getStackTraceAsString(e));
-		}
-	}
-
-	void doSearch(LocalDevice local) {
-		synchronized (this) {
-			m_searchInProgress = true;
-			try {
-
-				if (Env.isTestEnvironmentEnabled()) {
-					LOGGER.warn("=== TEST ENVIRONMENT ENABLED ===");
-				} else {
-					final int trans = local.getDiscoveryAgent().searchServices(
-							attrIDs, searchUuidSet, m_device, this);
-					LOGGER.info("Service Search {} started", trans);
-				}
-
-				wait();
-			} catch (final InterruptedException e) {
-				if (m_searchInProgress) {
-					// we're stopping, aborting discovery.
-					m_searchInProgress = false;
-					LOGGER.warn("Interrupting bluetooth service discovery - interruption");
-				} else {
-					// Search done !
-					LOGGER.info("Bluetooth discovery for " + m_name
-							+ " completed !");
-				}
-			} catch (final BluetoothStateException e) {
-				// well ... bad choice. Bluetooth driver not ready
-				// Just abort.
-				LOGGER.error("Cannot search for bluetooth services",
-						Throwables.getStackTraceAsString(e));
-				m_parent.discovered(m_device, null);
-				return;
-			}
-			LOGGER.info("Bluetooth discovery for " + m_name
-					+ " is now completed - injecting "
-					+ m_discoveredServices.size() + " discovered services ");
-			m_parent.discovered(m_device, m_discoveredServices);
-		}
-	}
-
-	/*
-	 * 
-	 * ********* DiscoveryListener **********
-	 */
-	@Override
-	public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
+	public void inquiryCompleted(final int discType) {
 		// Not used here.
 	}
 
 	@Override
-	public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
+	public void run() {
+		try {
+			LOGGER.info("Search services on " + this.m_device.getBluetoothAddress() + " " + this.m_name);
+
+			final LocalDevice local = this.initialize();
+			if (!LocalDevice.isPowerOn() || (local == null)) {
+				LOGGER.error("Bluetooth adapter not ready, aborting service discovery");
+				this.m_parent.discovered(this.m_device, null);
+				return;
+			}
+
+			this.doSearch(local);
+		} catch (final Throwable e) {
+			LOGGER.error("Unexpected exception during service inquiry", Throwables.getStackTraceAsString(e));
+		}
+	}
+
+	@Override
+	public void servicesDiscovered(final int transID, final ServiceRecord[] servRecord) {
 		synchronized (this) {
-			if (!m_searchInProgress) {
+			if (!this.m_searchInProgress) {
 				// We were stopped.
-				notifyAll();
+				this.notifyAll();
 				return;
 			}
 		}
 
 		LOGGER.info("Matching service found - " + servRecord.length);
-		m_discoveredServices.addAll(Arrays.asList(servRecord));
+		this.m_discoveredServices.addAll(Arrays.asList(servRecord));
 	}
 
 	@Override
-	public void serviceSearchCompleted(int transID, int respCode) {
+	public void serviceSearchCompleted(final int transID, final int respCode) {
 		synchronized (this) {
-			LOGGER.info("Service search completed for device "
-					+ m_device.getBluetoothAddress());
-			m_searchInProgress = false;
-			notifyAll();
+			LOGGER.info("Service search completed for device " + this.m_device.getBluetoothAddress());
+			this.m_searchInProgress = false;
+			this.notifyAll();
 		}
-	}
-
-	@Override
-	public void inquiryCompleted(int discType) {
-		// Not used here.
 	}
 
 }

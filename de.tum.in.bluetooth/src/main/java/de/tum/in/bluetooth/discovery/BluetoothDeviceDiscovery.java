@@ -83,18 +83,153 @@ import de.tum.in.bluetooth.devices.DeviceList;
  * detected periodically. So interacting with a bluetooth device can throw
  * {@link IOException} at any time. If bluetooth is not available, the component
  * just stops. Inquiries can not be run concurrently.
- * 
+ *
  * @author AMIT KUMAR MONDAL
  */
 @Component(policy = ConfigurationPolicy.REQUIRE, name = "de.tum.in.bluetooth")
 @Service(value = { BluetoothDeviceDiscovery.class })
-public class BluetoothDeviceDiscovery extends Cloudlet implements
-		BluetoothController, ConfigurableComponent, CriticalComponent {
+public class BluetoothDeviceDiscovery extends Cloudlet
+		implements BluetoothController, ConfigurableComponent, CriticalComponent {
 
 	/**
-	 * Defines Application ID for Pi's bluetooth application
+	 * Bluetooth discovery mode (inquiry).
 	 */
-	private static final String APP_ID = "BLUETOOTH-V1";
+	public enum DiscoveryMode {
+		/**
+		 * Global inquiry.
+		 */
+		GIAC, /**
+				 * Limited inquiry.
+				 */
+		LIAC
+	}
+
+	class ServiceCheckAgent implements Runnable, DiscoveryListener {
+
+		private final int m_action;
+
+		private final RemoteDevice m_device;
+
+		private final Logger m_logger = LoggerFactory.getLogger(ServiceCheckAgent.class);
+
+		private boolean m_searchInProgress = false;
+
+		public ServiceCheckAgent(final RemoteDevice remoteDevice, final int action) {
+			if ((action != SERVICECHECK_REGISTER_IF_HERE) && (action != SERVICECHECK_UNREGISTER_IF_NOT_HERE)) {
+				throw new IllegalArgumentException();
+			}
+			this.m_device = remoteDevice;
+			this.m_action = action;
+		}
+
+		/*
+		 *
+		 * ********* DiscoveryListener **********
+		 */
+		@Override
+		public void deviceDiscovered(final RemoteDevice btDevice, final DeviceClass cod) {
+			// Not used here.
+		}
+
+		void doSearch(final LocalDevice local) {
+			synchronized (this) {
+				this.m_searchInProgress = true;
+				try {
+
+					if (Env.isTestEnvironmentEnabled()) {
+						this.m_logger.warn("=== TEST ENVIRONMENT ENABLED ===");
+					} else {
+						final javax.bluetooth.UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP };
+						local.getDiscoveryAgent().searchServices(null, searchUuidSet, this.m_device, this);
+					}
+					this.wait();
+				} catch (final InterruptedException e) {
+					if (this.m_searchInProgress) {
+						// we're stopping, aborting discovery.
+						this.m_searchInProgress = false;
+						this.m_logger.warn("Interrupting bluetooth service discovery - interruption");
+					} else {
+						// Search done !
+					}
+				} catch (final BluetoothStateException e) {
+					// well ... bad choice. Bluetooth driver not ready
+					// Just abort.
+					this.m_logger.error("Cannot search for bluetooth services", e);
+					BluetoothDeviceDiscovery.this.unregister(this.m_device);
+					return;
+				}
+				// Do nothing
+			}
+		}
+
+		private LocalDevice initialize() {
+			LocalDevice local = null;
+			try {
+				local = LocalDevice.getLocalDevice();
+			} catch (final BluetoothStateException e) {
+				this.m_logger.error("Bluetooth Adapter not started.");
+			}
+			return local;
+		}
+
+		@Override
+		public void inquiryCompleted(final int discType) {
+			// Not used here.
+		}
+
+		@Override
+		public void run() {
+			try {
+				final LocalDevice local = this.initialize();
+				if (!LocalDevice.isPowerOn() || (local == null)) {
+					this.m_logger.error("Bluetooth adapter not ready");
+					BluetoothDeviceDiscovery.this.unregister(this.m_device);
+					return;
+				}
+				this.doSearch(local);
+			} catch (final Throwable e) {
+				this.m_logger.error("Unexpected exception during service inquiry", e);
+				BluetoothDeviceDiscovery.this.unregister(this.m_device);
+			}
+		}
+
+		@Override
+		public void servicesDiscovered(final int transID, final ServiceRecord[] servRecord) {
+			synchronized (this) {
+				if (!this.m_searchInProgress) {
+					// We were stopped.
+					this.notifyAll();
+					return;
+				}
+			}
+			// Do nothing
+		}
+
+		@Override
+		public void serviceSearchCompleted(final int transID, final int respCode) {
+			if (respCode != SERVICE_SEARCH_COMPLETED) {
+				if (this.m_action == SERVICECHECK_UNREGISTER_IF_NOT_HERE) {
+					this.m_logger.info(
+							"Device " + this.m_device.getBluetoothAddress() + " have disappeared : Unregister it.");
+					BluetoothDeviceDiscovery.this.unregister(this.m_device);
+				} else if (this.m_action == SERVICECHECK_REGISTER_IF_HERE) {
+					this.m_logger.info("Device " + this.m_device.getBluetoothAddress() + " is not here");
+				}
+			} else {
+				if (this.m_action == SERVICECHECK_REGISTER_IF_HERE) {
+					this.m_logger.info("Device " + this.m_device.getBluetoothAddress() + " is here : Register it.");
+					BluetoothDeviceDiscovery.this.register(this.m_device);
+				} else if (this.m_action == SERVICECHECK_UNREGISTER_IF_NOT_HERE) {
+					this.m_logger.info("Device " + this.m_device.getBluetoothAddress() + " is still here.");
+				}
+			}
+
+			synchronized (this) {
+				this.m_searchInProgress = false;
+				this.notifyAll();
+			}
+		}
+	}
 
 	/**
 	 * Defines Application Configuration Metatype Id
@@ -102,12 +237,9 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private static final String APP_CONF_ID = "de.tum.in.bluetooth";
 
 	/**
-	 * Configurable Property specifying the time between two inquiries. This
-	 * time is specified in <b>second</b>, and should be carefully chosen. Too
-	 * many inquiries flood the network and block correct discovery. A too big
-	 * period, makes the device dynamism hard to track.
+	 * Defines Application ID for Pi's bluetooth application
 	 */
-	private static final String PERIOD = "bluetooth.discovery.period";
+	private static final String APP_ID = "BLUETOOTH-V1";
 
 	/**
 	 * Configurable property to set list of bluetooth enabled devices to be
@@ -128,10 +260,20 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private static final String DEVICES_LIST_FILTER = "bluetooh.devices.filter";
 
 	/**
+	 * Configurable property specifying the discovery mode among GIAC and LIAC.
+	 */
+	private static final String DISCOVERY_MODE = "bluetooth.discovery.mode";
+
+	/**
 	 * Configuration property enabling the support of unnamed devices. Unnamed
 	 * devices do not communicate their name.
 	 */
 	private static final String IGNORE_UNNAMED_DEVICES = "bluetooth.ignore.unnamed.devices";
+
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(BluetoothDeviceDiscovery.class);
 
 	/**
 	 * This configuration property enables the online check when a device is
@@ -144,15 +286,21 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private static final String ONLINE_CHECK_ON_DISCOVERY = "bluetooth.discovery.onlinecheck";
 
 	/**
-	 * Configuration property enabling the unpairing of matching devices (filter
-	 * given in the fleet description) when they are not reachable anymore.
+	 * Configurable Property specifying the time between two inquiries. This
+	 * time is specified in <b>second</b>, and should be carefully chosen. Too
+	 * many inquiries flood the network and block correct discovery. A too big
+	 * period, makes the device dynamism hard to track.
 	 */
-	private static final String UNPAIR_LOST_DEVICES = "bluetooth.discovery.unpairOnDeparture";
+	private static final String PERIOD = "bluetooth.discovery.period";
+
+	private static final int SERVICECHECK_REGISTER_IF_HERE = 1;
+
+	private static final int SERVICECHECK_UNREGISTER_IF_NOT_HERE = 0;
 
 	/**
-	 * Configurable property specifying the discovery mode among GIAC and LIAC.
+	 * All the supported bluetooth stacks in Service Gateway
 	 */
-	private static final String DISCOVERY_MODE = "bluetooth.discovery.mode";
+	private static final List<String> SUPPORTED_STACKS = Arrays.asList("winsock", "widcomm", "mac", "bluez"); // "bluez-dbus"
 
 	/**
 	 * Watchdog Critical Timeout Component
@@ -160,69 +308,42 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private static final int TIMEOUT_COMPONENT = 10;
 
 	/**
-	 * All the supported bluetooth stacks in Service Gateway
+	 * Configuration property enabling the unpairing of matching devices (filter
+	 * given in the fleet description) when they are not reachable anymore.
 	 */
-	private static final List<String> SUPPORTED_STACKS = Arrays.asList(
-			"winsock", "widcomm", "mac", "bluez"); // "bluez-dbus"
+	private static final String UNPAIR_LOST_DEVICES = "bluetooth.discovery.unpairOnDeparture";
 
 	/**
-	 * Configurable Properties set using Metatype Configuration Management
+	 * Checks whether the given list contains the given device. The check is
+	 * based on the bluetooth address.
+	 *
+	 * @param list
+	 *            a non-null list of remote device
+	 * @param device
+	 *            the device to check
+	 * @return <code>true</code> if the device is in the list,
+	 *         <code>false</code> otherwise.
 	 */
-	private Map<String, Object> m_properties;
 
-	/**
-	 * Placeholder for M_IGNORE_UNNAMED_DEVICES
-	 */
-	private boolean m_ignoreUnnamedDevices;
-
-	/**
-	 * Placeholder for M_DEVICES_LIST
-	 */
-	private String m_devicesList;
-
-	/**
-	 * Placeholder for M_DEVICES_LIST_FILTER
-	 */
-	private String m_devicesListFilter;
-
-	/**
-	 * Placeholder for M_ONLINE_CHECK_ON_DISCOVERY
-	 */
-	private boolean m_onlineCheckOnDiscovery;
-
-	/**
-	 * Placeholder for M_UNPAIR_LOST_DEVICES
-	 */
-	private boolean m_unpairLostDevices;
-
-	/**
-	 * Placeholder for M_PERIOD
-	 */
-	private int m_period;
-
-	/**
-	 * Bluetooth discovery mode (inquiry).
-	 */
-	public enum DiscoveryMode {
-		/**
-		 * Global inquiry.
-		 */
-		GIAC,
-		/**
-		 * Limited inquiry.
-		 */
-		LIAC
+	public static boolean contains(final Set<RemoteDevice> list, final RemoteDevice device) {
+		for (final RemoteDevice d : list) {
+			if (d.getBluetoothAddress().equals(device.getBluetoothAddress())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
-	 * Placeholder for M_DISCOVERY_MODE
+	 * Activity Log Service Dependency
 	 */
-	private DiscoveryMode m_discoveryMode;
+	@Reference(bind = "bindActivityLogService", unbind = "unbindActivityLogService")
+	private volatile ActivityLogService m_activityLogService;
 
 	/**
-	 * Bundle Context.
+	 * Device Discovery Agent to handle bluetooth enabled device detection
 	 */
-	private BundleContext m_context;
+	private DeviceDiscoveryAgent m_agent;
 
 	/**
 	 * Kura Cloud Service Injection
@@ -237,28 +358,45 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private volatile ConfigurationService m_configurationService;
 
 	/**
-	 * Activity Log Service Dependency
+	 * Bundle Context.
 	 */
-	@Reference(bind = "bindActivityLogService", unbind = "unbindActivityLogService")
-	private volatile ActivityLogService m_activityLogService;
+	private BundleContext m_context;
 
 	/**
 	 * Map storing the currently exposed bluetooth device.
 	 */
-	private final Map<RemoteDevice, ServiceRegistration<?>> m_devices = Maps
-			.newHashMap();
+	private final Map<RemoteDevice, ServiceRegistration<?>> m_devices = Maps.newHashMap();
 
 	/**
-	 * Logger.
+	 * Placeholder for M_DEVICES_LIST
 	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(BluetoothDeviceDiscovery.class);
+	private String m_devicesList;
+
+	/**
+	 * Placeholder for M_DEVICES_LIST_FILTER
+	 */
+	private String m_devicesListFilter;
+
+	/**
+	 * Placeholder for M_DISCOVERY_MODE
+	 */
+	private DiscoveryMode m_discoveryMode;
+
+	/**
+	 * The fleet device filter (regex configured in the configuration).
+	 */
+	private Pattern m_filter;
 
 	/**
 	 * Set of devices loaded from the <tt>devices</tt> configuration property.
 	 * This contains the authentication information for the device.
 	 */
 	private DeviceList m_fleet;
+
+	/**
+	 * Placeholder for M_IGNORE_UNNAMED_DEVICES
+	 */
+	private boolean m_ignoreUnnamedDevices;
 
 	/**
 	 * Map storing the MAC address to name association (ex.
@@ -269,14 +407,24 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	private Properties m_names;
 
 	/**
-	 * The fleet device filter (regex configured in the configuration).
+	 * Placeholder for M_ONLINE_CHECK_ON_DISCOVERY
 	 */
-	private Pattern m_filter;
+	private boolean m_onlineCheckOnDiscovery;
 
 	/**
-	 * Device Discovery Agent to handle bluetooth enabled device detection
+	 * Placeholder for M_PERIOD
 	 */
-	private DeviceDiscoveryAgent m_agent;
+	private int m_period;
+
+	/**
+	 * Configurable Properties set using Metatype Configuration Management
+	 */
+	private Map<String, Object> m_properties;
+
+	/**
+	 * Placeholder for M_UNPAIR_LOST_DEVICES
+	 */
+	private boolean m_unpairLostDevices;
 
 	/**
 	 * Creates a {@link BluetoothDeviceDiscovery}.
@@ -291,94 +439,302 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	 * @param context
 	 *            the bundle context
 	 */
-	public BluetoothDeviceDiscovery(BundleContext context) {
+	public BluetoothDeviceDiscovery(final BundleContext context) {
 		super(APP_ID);
-		m_context = checkNotNull(context,
-				"Bluetooth Bundle Context must not be null");
+		this.m_context = checkNotNull(context, "Bluetooth Bundle Context must not be null");
 		;
 	}
 
 	/**
-	 * Kura Cloud Service Binding Callback
+	 * Callback while this component is getting registered
+	 *
+	 * @param properties
+	 *            the service configuration properties
 	 */
-	public synchronized void bindCloudService(CloudService cloudService) {
-		if (m_cloudService == null) {
-			super.setCloudService(m_cloudService = cloudService);
-		}
-	}
-
-	/**
-	 * Kura Cloud Service Callback while deregistering
-	 */
-	public synchronized void unbindCloudService(CloudService cloudService) {
-		if (m_cloudService == cloudService)
-			super.setCloudService(m_cloudService = null);
-	}
-
-	/**
-	 * Callback to be used while {@link ConfigurationService} is registering
-	 */
-	public synchronized void bindConfigurationService(
-			ConfigurationService configurationService) {
-		if (m_configurationService == null) {
-			m_configurationService = configurationService;
-		}
-	}
-
-	/**
-	 * Callback to be used while {@link ConfigurationService} is deregistering
-	 */
-	public synchronized void unbindConfigurationService(
-			ConfigurationService configurationService) {
-		if (m_configurationService == configurationService)
-			m_configurationService = null;
+	@Activate
+	protected synchronized void activate(final ComponentContext context, final Map<String, Object> properties) {
+		LOGGER.info("Activating Bluetooth....");
+		super.setCloudService(this.m_cloudService);
+		super.activate(context);
+		this.m_properties = properties;
+		this.m_context = context.getBundleContext();
+		LOGGER.info("Activating Bluetooth... Done.");
 	}
 
 	/**
 	 * Callback to be used while {@link ActivityLogService} is registering
 	 */
-	public synchronized void bindActivityLogService(
-			ActivityLogService activityLogService) {
-		if (m_activityLogService == null) {
-			m_activityLogService = activityLogService;
+	public synchronized void bindActivityLogService(final ActivityLogService activityLogService) {
+		if (this.m_activityLogService == null) {
+			this.m_activityLogService = activityLogService;
 		}
 	}
 
 	/**
-	 * Callback to be used while {@link ActivityLogService} is deregistering
+	 * Kura Cloud Service Binding Callback
 	 */
-	public synchronized void unbindActivityLogService(
-			ActivityLogService activityLogService) {
-		if (m_activityLogService == activityLogService)
-			m_activityLogService = null;
+	public synchronized void bindCloudService(final CloudService cloudService) {
+		if (this.m_cloudService == null) {
+			super.setCloudService(this.m_cloudService = cloudService);
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link ConfigurationService} is registering
+	 */
+	public synchronized void bindConfigurationService(final ConfigurationService configurationService) {
+		if (this.m_configurationService == null) {
+			this.m_configurationService = configurationService;
+		}
+	}
+
+	/**
+	 * Callback while this component is getting deregistered
+	 *
+	 * @param properties
+	 *            the service configuration properties
+	 */
+	@Deactivate
+	@Override
+	protected synchronized void deactivate(final ComponentContext componentContext) {
+		super.deactivate(componentContext);
+		this.stop();
+	}
+
+	/**
+	 * Callback receiving the new set of reachable devices.
+	 *
+	 * @param discovered
+	 *            the set of found RemoteDevice
+	 */
+	public void discovered(final Set<RemoteDevice> discovered) {
+		if (discovered == null) {
+			// Bluetooth error, we unregister all devices
+			LOGGER.warn("Bluetooth error detected, unregistering all devices");
+			this.unregisterAll();
+			return;
+		}
+
+		// Detect devices that have left
+		// We must create a copy of the list to avoid concurrent modifications
+		Set<RemoteDevice> presents = Sets.newHashSet(this.m_devices.keySet());
+		for (final RemoteDevice old : presents) {
+			LOGGER.info(
+					"Did we lost contact with " + old.getBluetoothAddress() + " => " + (!contains(discovered, old)));
+			if (!contains(discovered, old)) {
+				final ServiceCheckAgent serviceCheckAgent = new ServiceCheckAgent(old,
+						SERVICECHECK_UNREGISTER_IF_NOT_HERE);
+				BluetoothThreadManager.submit(serviceCheckAgent);
+			}
+		}
+
+		// Detect new devices
+		for (final RemoteDevice remote : discovered) {
+			if (!this.m_devices.containsKey(remote)) {
+				if (this.matchesDeviceFilter(remote)) {
+					LOGGER.info("New device found (" + remote.getBluetoothAddress() + ")");
+					this.register(remote); // register the service as
+											// RemoteDevice
+				} else {
+					LOGGER.info("Device ignored because it does not match the device filter");
+				}
+			} else {
+				LOGGER.info("Already known device " + remote.getBluetoothAddress());
+			}
+		}
+
+		if ("bluez".equals(this.getBluetoothStack())) {
+			// Workaround for bluez : trying to keep all the paired devices.
+			// Has bluez doesn't return the paired devices when we have an
+			// inquiry, we can try to search if some of the
+			// cached devices is are reachable
+			LocalDevice local = null;
+			try {
+				local = LocalDevice.getLocalDevice();
+			} catch (final BluetoothStateException e) {
+				LOGGER.error("Bluetooth Adapter not started.");
+			}
+			local = checkNotNull(local, "Local Device can not be null");
+			final RemoteDevice[] cachedDevices = local.getDiscoveryAgent().retrieveDevices(DiscoveryAgent.CACHED);
+			if ((cachedDevices == null) || (cachedDevices.length == 0)) {
+				return;
+			}
+			presents = Sets.newHashSet(this.m_devices.keySet());
+			for (final RemoteDevice cached : cachedDevices) {
+				if (!contains(presents, cached)) {
+					final ServiceCheckAgent serviceCheckAgent = new ServiceCheckAgent(cached,
+							SERVICECHECK_REGISTER_IF_HERE);
+					BluetoothThreadManager.submit(serviceCheckAgent);
+				}
+			}
+		}
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+			final KuraResponsePayload respPayload) throws KuraException {
+
+		switch (reqTopic.getResources()[0]) {
+		case "start":
+			this.start();
+			this.m_activityLogService.saveLog("Bluetooth Started");
+			break;
+
+		case "stop":
+			this.stop();
+			this.m_activityLogService.saveLog("Bluetooth Stopped");
+			break;
+		}
+
+		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+			final KuraResponsePayload respPayload) throws KuraException {
+		LOGGER.info("Bluetooth Configuration Retrieving...");
+		// Retrieve the configurations
+		if ("configurations".equals(reqTopic.getResources()[0])) {
+			final ComponentConfiguration configuration = this.m_configurationService
+					.getComponentConfiguration(APP_CONF_ID);
+
+			final IterableMap map = new HashedMap(configuration.getConfigurationProperties());
+			final MapIterator it = map.mapIterator();
+
+			while (it.hasNext()) {
+				final Object key = it.next();
+				final Object value = it.getValue();
+
+				respPayload.addMetric((String) key, value);
+			}
+			this.m_activityLogService.saveLog("Bluetooth Configuration Retrieved");
+
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		}
+		LOGGER.info("Bluetooth Configuration Retrieved");
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void doPut(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+			final KuraResponsePayload respPayload) throws KuraException {
+		LOGGER.info("Bluetooth Configuration Updating...");
+
+		// Update the configurations
+		if ("configurations".equals(reqTopic.getResources()[0])) {
+			this.m_configurationService.updateConfiguration(APP_CONF_ID, reqPayload.metrics());
+
+			this.m_activityLogService.saveLog("Bluetooth Configuration Updated");
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		}
+		LOGGER.info("Bluetooth Configuration Updated");
+	}
+
+	/**
+	 * Extracting required configuration for the bluetooth device discovery
+	 */
+	private void extractRequiredConfigurations() {
+
+		LOGGER.info("Extracting Required Configurations...");
+
+		this.m_period = (int) this.m_properties.get(PERIOD);
+		this.m_ignoreUnnamedDevices = (boolean) this.m_properties.get(IGNORE_UNNAMED_DEVICES);
+		this.m_onlineCheckOnDiscovery = (boolean) this.m_properties.get(ONLINE_CHECK_ON_DISCOVERY);
+		this.m_unpairLostDevices = (boolean) this.m_properties.get(UNPAIR_LOST_DEVICES);
+		this.m_devicesList = (String) this.m_properties.get(DEVICES_LIST);
+		this.m_devicesListFilter = (String) this.m_properties.get(DEVICES_LIST_FILTER);
+
+		if ("device-filter".equals(this.m_devicesListFilter)) {
+			this.m_filter = null;
+		} else {
+			this.m_filter = Pattern.compile(this.m_devicesListFilter);
+		}
+
+		if ((Integer) this.m_properties.get(DISCOVERY_MODE) == 0) {
+			this.m_discoveryMode = DiscoveryMode.GIAC;
+		} else {
+			this.m_discoveryMode = DiscoveryMode.LIAC;
+		}
+
+		this.m_names = this.loadListOfDevicesToBeDiscovered((String) this.m_properties.get(DEVICES));
+		this.loadAutoPairingConfiguration(this.m_devicesList);
+
+		if (this.m_period == 0) {
+			this.m_period = 10; // Default to 10 seconds.
+		}
+
+		LOGGER.info("Configuration Extraction Complete");
+	}
+
+	@Override
+	public String getBluetoothStack() {
+		return LocalDevice.getProperty("bluecove.stack");
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public String getCriticalComponentName() {
+		return APP_ID;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public int getCriticalComponentTimeout() {
+		return TIMEOUT_COMPONENT;
+	}
+
+	private String getDeviceName(final RemoteDevice device) {
+		String name = this.m_names.getProperty(device.getBluetoothAddress());
+		if (name == null) {
+			try {
+				name = device.getFriendlyName(false);
+				if ((name != null) && (name.length() != 0)) {
+					LOGGER.info("New device name discovered : " + device.getBluetoothAddress() + " => " + name);
+					this.m_names.setProperty(device.getBluetoothAddress(), name);
+				}
+			} catch (final IOException e) {
+				LOGGER.info("Not able to get the device friendly name of " + device.getBluetoothAddress(), e);
+			}
+		} else {
+			LOGGER.info("Found the device name in memory : " + device.getBluetoothAddress() + " => " + name);
+		}
+		return name;
+	}
+
+	@Override
+	public boolean isBluetoothDeviceTurnedOn() {
+		return LocalDevice.isPowerOn();
+	}
+
+	@Override
+	public boolean isBluetoothStackSupported() {
+		return SUPPORTED_STACKS.contains(this.getBluetoothStack());
 	}
 
 	/** Used to get all the configurations for the remote bluetooth devices */
-	private void loadAutoPairingConfiguration(String deviceList) {
+	private void loadAutoPairingConfiguration(final String deviceList) {
 		if (deviceList == null) {
-			m_fleet = null;
+			this.m_fleet = null;
 			LOGGER.warn("No device configuration found, ignoring auto-pairing and device filter");
 		} else {
 			final List<String> devices = Lists.newArrayList();
 			Device device = null;
-			m_fleet = new DeviceList();
+			this.m_fleet = new DeviceList();
 
 			final String DEVICE_SPLITTER = "#";
-			Iterators.addAll(devices,
-					Splitter.on(DEVICE_SPLITTER).split(deviceList).iterator());
+			Iterators.addAll(devices, Splitter.on(DEVICE_SPLITTER).split(deviceList).iterator());
 			for (final String deviceStr : devices) {
 				final String SEPARATOR = ";";
 				final String NEW_LINE = "\n";
 
-				final Splitter splitter = Splitter.on(SEPARATOR)
-						.omitEmptyStrings().trimResults();
-				final Joiner stringDevicesJoiner = Joiner.on(NEW_LINE)
-						.skipNulls();
+				final Splitter splitter = Splitter.on(SEPARATOR).omitEmptyStrings().trimResults();
+				final Joiner stringDevicesJoiner = Joiner.on(NEW_LINE).skipNulls();
 
 				final Properties properties = new Properties();
 
-				final String deviceAsPropertiesFormat = stringDevicesJoiner
-						.join(splitter.splitToList(deviceStr));
+				final String deviceAsPropertiesFormat = stringDevicesJoiner.join(splitter.splitToList(deviceStr));
 
 				if (isNullOrEmpty(deviceAsPropertiesFormat.toString())) {
 					LOGGER.error("No Bluetooth Enabled Device Addess Found");
@@ -396,151 +752,30 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 				device.setPassword(properties.getProperty("password"));
 				device.setPin(properties.getProperty("pin"));
 				device.setRetry(Boolean.valueOf(properties.getProperty("retry")));
-				device.setMaxRetry(new BigInteger(properties
-						.getProperty("max-retry")));
-				m_fleet.getDevices().add(device);
+				device.setMaxRetry(new BigInteger(properties.getProperty("max-retry")));
+				this.m_fleet.getDevices().add(device);
 			}
 		}
 	}
 
 	/**
-	 * Callback while this component is getting registered
-	 * 
-	 * @param properties
-	 *            the service configuration properties
-	 */
-	@Activate
-	protected synchronized void activate(ComponentContext context,
-			Map<String, Object> properties) {
-		LOGGER.info("Activating Bluetooth....");
-		super.setCloudService(m_cloudService);
-		super.activate(context);
-		m_properties = properties;
-		m_context = context.getBundleContext();
-		LOGGER.info("Activating Bluetooth... Done.");
-	}
-
-	/**
-	 * Callback while this component is getting deregistered
-	 * 
-	 * @param properties
-	 *            the service configuration properties
-	 */
-	@Deactivate
-	@Override
-	protected synchronized void deactivate(ComponentContext componentContext) {
-		super.deactivate(componentContext);
-		stop();
-	}
-
-	/**
-	 * Used to be called when configurations will get updated
-	 */
-	public void updated(Map<String, Object> properties) {
-		LOGGER.info("Updated Bluetooth Component...");
-
-		m_properties = properties;
-		properties.keySet().forEach(
-				s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
-
-		LOGGER.info("Updated Bluetooth Component... Done.");
-	}
-
-	/**
-	 * Initializes the discovery.
-	 */
-	@Override
-	public void start() {
-		LOGGER.info("Enabling Bluetooth...");
-
-		extractRequiredConfigurations();
-		registerDeviceListFleetAsService();
-
-		if (m_agent != null) {
-			return;
-		}
-
-		if (!isBluetoothStackSupported()) {
-			LOGGER.error("The Bluetooth stack " + getBluetoothStack()
-					+ " is not supported (" + SUPPORTED_STACKS + ")");
-			return;
-		}
-
-		if ("winsock".equals(getBluetoothStack())) {
-			LOGGER.info("Winsock stack detected, forcing online check and lost device unpairing");
-			m_onlineCheckOnDiscovery = true;
-			m_unpairLostDevices = true;
-		}
-
-		m_agent = new DeviceDiscoveryAgent(this, m_discoveryMode,
-				m_onlineCheckOnDiscovery);
-		BluetoothThreadManager.scheduleJob(m_agent, m_period);
-	}
-
-	/**
-	 * Registering devices configuration as an OSGi service
-	 */
-	private void registerDeviceListFleetAsService() {
-		m_context.registerService(DeviceList.class, m_fleet, null);
-	}
-
-	/**
-	 * Extracting required configuration for the bluetooth device discovery
-	 */
-	private void extractRequiredConfigurations() {
-
-		LOGGER.info("Extracting Required Configurations...");
-
-		m_period = (int) m_properties.get(PERIOD);
-		m_ignoreUnnamedDevices = (boolean) m_properties
-				.get(IGNORE_UNNAMED_DEVICES);
-		m_onlineCheckOnDiscovery = (boolean) m_properties
-				.get(ONLINE_CHECK_ON_DISCOVERY);
-		m_unpairLostDevices = (boolean) m_properties.get(UNPAIR_LOST_DEVICES);
-		m_devicesList = (String) m_properties.get(DEVICES_LIST);
-		m_devicesListFilter = (String) m_properties.get(DEVICES_LIST_FILTER);
-
-		if ("device-filter".equals(m_devicesListFilter))
-			m_filter = null;
-		else
-			m_filter = Pattern.compile(m_devicesListFilter);
-
-		if ((Integer) m_properties.get(DISCOVERY_MODE) == 0)
-			m_discoveryMode = DiscoveryMode.GIAC;
-		else
-			m_discoveryMode = DiscoveryMode.LIAC;
-
-		m_names = loadListOfDevicesToBeDiscovered((String) m_properties
-				.get(DEVICES));
-		loadAutoPairingConfiguration(m_devicesList);
-
-		if (m_period == 0) {
-			m_period = 10; // Default to 10 seconds.
-		}
-
-		LOGGER.info("Configuration Extraction Complete");
-	}
-
-	/**
 	 * Used to parse configuration set to discover specified bluetooth enabled
 	 * devices
-	 * 
+	 *
 	 * @param devices
 	 *            The Configuration input as Property K-V Format
 	 * @return the parsed input as properties
 	 */
-	private Properties loadListOfDevicesToBeDiscovered(String devices) {
+	private Properties loadListOfDevicesToBeDiscovered(final String devices) {
 		final String SEPARATOR = ";";
 		final String NEW_LINE = "\n";
 
-		final Splitter splitter = Splitter.on(SEPARATOR).omitEmptyStrings()
-				.trimResults();
+		final Splitter splitter = Splitter.on(SEPARATOR).omitEmptyStrings().trimResults();
 		final Joiner stringDevicesJoiner = Joiner.on(NEW_LINE).skipNulls();
 
 		final Properties properties = new Properties();
 
-		final String deviceAsPropertiesFormat = stringDevicesJoiner
-				.join(splitter.splitToList(devices));
+		final String deviceAsPropertiesFormat = stringDevicesJoiner.join(splitter.splitToList(devices));
 
 		if (isNullOrEmpty(deviceAsPropertiesFormat.toString())) {
 			LOGGER.error("No Bluetooth Enabled Device Addess Found");
@@ -556,420 +791,22 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 	}
 
 	/**
-	 * Stops the bluetooth discovery
-	 */
-	@Override
-	public void stop() {
-		LOGGER.info("Disabling Bluetooth...");
-		if (m_agent == null) {
-			return;
-		}
-		m_agent = null;
-		BluetoothThreadManager.stopScheduler();
-		unregisterAll();
-		LOGGER.info("Disabling Bluetooth...Done");
-		LOGGER.info("Releasing all subscription...");
-		getCloudApplicationClient().release();
-		LOGGER.info("Releasing all subscription...done");
-
-	}
-
-	@Override
-	public String getBluetoothStack() {
-		return LocalDevice.getProperty("bluecove.stack");
-	}
-
-	@Override
-	public boolean isBluetoothDeviceTurnedOn() {
-		return LocalDevice.isPowerOn();
-	}
-
-	@Override
-	public boolean isBluetoothStackSupported() {
-		return SUPPORTED_STACKS.contains(getBluetoothStack());
-	}
-
-	/**
-	 * Callback receiving the new set of reachable devices.
-	 *
-	 * @param discovered
-	 *            the set of found RemoteDevice
-	 */
-	public void discovered(Set<RemoteDevice> discovered) {
-		if (discovered == null) {
-			// Bluetooth error, we unregister all devices
-			LOGGER.warn("Bluetooth error detected, unregistering all devices");
-			unregisterAll();
-			return;
-		}
-
-		// Detect devices that have left
-		// We must create a copy of the list to avoid concurrent modifications
-		Set<RemoteDevice> presents = Sets.newHashSet(m_devices.keySet());
-		for (final RemoteDevice old : presents) {
-			LOGGER.info("Did we lost contact with " + old.getBluetoothAddress()
-					+ " => " + (!contains(discovered, old)));
-			if (!contains(discovered, old)) {
-				final ServiceCheckAgent serviceCheckAgent = new ServiceCheckAgent(
-						old, SERVICECHECK_UNREGISTER_IF_NOT_HERE);
-				BluetoothThreadManager.submit(serviceCheckAgent);
-			}
-		}
-
-		// Detect new devices
-		for (final RemoteDevice remote : discovered) {
-			if (!m_devices.containsKey(remote)) {
-				if (matchesDeviceFilter(remote)) {
-					LOGGER.info("New device found ("
-							+ remote.getBluetoothAddress() + ")");
-					register(remote); // register the service as RemoteDevice
-				} else {
-					LOGGER.info("Device ignored because it does not match the device filter");
-				}
-			} else {
-				LOGGER.info("Already known device "
-						+ remote.getBluetoothAddress());
-			}
-		}
-
-		if ("bluez".equals(getBluetoothStack())) {
-			// Workaround for bluez : trying to keep all the paired devices.
-			// Has bluez doesn't return the paired devices when we have an
-			// inquiry, we can try to search if some of the
-			// cached devices is are reachable
-			LocalDevice local = null;
-			try {
-				local = LocalDevice.getLocalDevice();
-			} catch (final BluetoothStateException e) {
-				LOGGER.error("Bluetooth Adapter not started.");
-			}
-			local = checkNotNull(local, "Local Device can not be null");
-			final RemoteDevice[] cachedDevices = local.getDiscoveryAgent()
-					.retrieveDevices(DiscoveryAgent.CACHED);
-			if (cachedDevices == null || cachedDevices.length == 0) {
-				return;
-			}
-			presents = Sets.newHashSet(m_devices.keySet());
-			for (final RemoteDevice cached : cachedDevices) {
-				if (!contains(presents, cached)) {
-					final ServiceCheckAgent serviceCheckAgent = new ServiceCheckAgent(
-							cached, SERVICECHECK_REGISTER_IF_HERE);
-					BluetoothThreadManager.submit(serviceCheckAgent);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Checks whether the given list contains the given device. The check is
-	 * based on the bluetooth address.
-	 *
-	 * @param list
-	 *            a non-null list of remote device
-	 * @param device
-	 *            the device to check
-	 * @return <code>true</code> if the device is in the list,
-	 *         <code>false</code> otherwise.
-	 */
-
-	public static boolean contains(Set<RemoteDevice> list, RemoteDevice device) {
-		for (final RemoteDevice d : list) {
-			if (d.getBluetoothAddress().equals(device.getBluetoothAddress())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Filter used to search for remote bluetooth devices
-	 * 
+	 *
 	 * @param device
 	 *            the current device found
 	 * @return true if matches the filter pattern
 	 */
-	public boolean matchesDeviceFilter(RemoteDevice device) {
-		if (m_filter == null) {
+	public boolean matchesDeviceFilter(final RemoteDevice device) {
+		if (this.m_filter == null) {
 			// No filter... all devices are accepted
 			return true;
 		}
 
 		final String address = device.getBluetoothAddress();
-		final String name = getDeviceName(device);
+		final String name = this.getDeviceName(device);
 
-		return (m_filter.matcher(address).matches() || (name != null && m_filter
-				.matcher(name).matches()));
-	}
-
-	private String getDeviceName(RemoteDevice device) {
-		String name = m_names.getProperty(device.getBluetoothAddress());
-		if (name == null) {
-			try {
-				name = device.getFriendlyName(false);
-				if (name != null && name.length() != 0) {
-					LOGGER.info("New device name discovered : "
-							+ device.getBluetoothAddress() + " => " + name);
-					m_names.setProperty(device.getBluetoothAddress(), name);
-				}
-			} catch (final IOException e) {
-				LOGGER.info("Not able to get the device friendly name of "
-						+ device.getBluetoothAddress(), e);
-			}
-		} else {
-			LOGGER.info("Found the device name in memory : "
-					+ device.getBluetoothAddress() + " => " + name);
-		}
-		return name;
-	}
-
-	/** Unregister and unpair all the services */
-	private synchronized void unregisterAll() {
-		for (final Map.Entry<RemoteDevice, ServiceRegistration<?>> entry : m_devices
-				.entrySet()) {
-			entry.getValue().unregister();
-			unpair(entry.getKey());
-		}
-		m_devices.clear();
-	}
-
-	private synchronized void unregister(RemoteDevice device) {
-		final ServiceRegistration<?> reg = m_devices.remove(device);
-		if (reg != null) {
-			reg.unregister();
-		}
-		unpair(device);
-
-	}
-
-	/**
-	 * Used to register a service per device discovered
-	 * 
-	 * @param device
-	 *            The found device
-	 */
-	private synchronized void register(RemoteDevice device) {
-		final Dictionary<String, Object> props = new Hashtable<String, Object>();
-		props.put("device.id", device.getBluetoothAddress());
-		final String name = getDeviceName(device);
-
-		if (name != null) {
-			// Switch device to our own implementation
-			device = new RemoteNamedDevice(device, name);
-			props.put("device.name", name);
-		} else if (m_ignoreUnnamedDevices) {
-			LOGGER.warn("Ignoring device " + device.getBluetoothAddress()
-					+ " - discovery set to ignore " + "unnamed devices");
-			return;
-		}
-
-		LOGGER.info("Registering new service for "
-				+ device.getBluetoothAddress() + " with properties " + props);
-
-		// check autopairing
-		if (!device.isAuthenticated()) {
-			if (!pair(device)) {
-				LOGGER.warn("Aborting registering for "
-						+ device.getBluetoothAddress());
-				return;
-			}
-		}
-
-		final ServiceRegistration<?> reg = m_context.registerService(
-				RemoteDevice.class.getName(), device, props);
-		m_devices.put(device, reg);
-
-	}
-
-	void unpair(final RemoteDevice device) {
-		if (matchesDeviceFilter(device) && m_unpairLostDevices) {
-			try {
-				RemoteDeviceHelper.removeAuthentication(device);
-			} catch (final IOException e) {
-				LOGGER.error(
-						"Can't unpair device " + device.getBluetoothAddress(),
-						e);
-			}
-		}
-	}
-
-	/**
-	 * Used to pair {@link RemoteDevice}
-	 * 
-	 * @param device
-	 *            The currently discovered Remote Device
-	 * @return if paired then true else false
-	 */
-	boolean pair(final RemoteDevice device) {
-		if (m_fleet == null || m_fleet.getDevices() == null) {
-			LOGGER.info("Ignoring autopairing - no fleet configured");
-			return true;
-		}
-
-		final String address = device.getBluetoothAddress();
-		final String name = getDeviceName(device);
-
-		if (name == null && m_ignoreUnnamedDevices) {
-			LOGGER.warn("Pairing not attempted, ignoring unnamed devices");
-			return false;
-		}
-
-		final List<Device> devices = m_fleet.getDevices();
-		for (final Device model : devices) {
-			final String regex = model.getId();
-			final String pin = model.getPin();
-			if (Pattern.matches(regex, address)
-					|| (name != null && Pattern.matches(regex, name))) {
-				LOGGER.info("Paring pattern match for " + address + " / "
-						+ name + " with " + regex);
-				try {
-					RemoteDeviceHelper.authenticate(device, pin);
-					LOGGER.info("Device " + address + " paired");
-					return true;
-				} catch (final IOException e) {
-					LOGGER.error(
-							"Cannot authenticate device despite it match the regex "
-									+ regex, e);
-				}
-			}
-		}
-		return false;
-	}
-
-	private static final int SERVICECHECK_UNREGISTER_IF_NOT_HERE = 0;
-
-	private static final int SERVICECHECK_REGISTER_IF_HERE = 1;
-
-	class ServiceCheckAgent implements Runnable, DiscoveryListener {
-
-		private final RemoteDevice m_device;
-
-		private final int m_action;
-
-		private boolean m_searchInProgress = false;
-
-		private final Logger m_logger = LoggerFactory
-				.getLogger(ServiceCheckAgent.class);
-
-		public ServiceCheckAgent(RemoteDevice remoteDevice, int action) {
-			if (action != SERVICECHECK_REGISTER_IF_HERE
-					&& action != SERVICECHECK_UNREGISTER_IF_NOT_HERE) {
-				throw new IllegalArgumentException();
-			}
-			m_device = remoteDevice;
-			m_action = action;
-		}
-
-		private LocalDevice initialize() {
-			LocalDevice local = null;
-			try {
-				local = LocalDevice.getLocalDevice();
-			} catch (final BluetoothStateException e) {
-				m_logger.error("Bluetooth Adapter not started.");
-			}
-			return local;
-		}
-
-		@Override
-		public void run() {
-			try {
-				final LocalDevice local = initialize();
-				if (!LocalDevice.isPowerOn() || local == null) {
-					m_logger.error("Bluetooth adapter not ready");
-					unregister(m_device);
-					return;
-				}
-				doSearch(local);
-			} catch (final Throwable e) {
-				m_logger.error("Unexpected exception during service inquiry", e);
-				unregister(m_device);
-			}
-		}
-
-		void doSearch(LocalDevice local) {
-			synchronized (this) {
-				m_searchInProgress = true;
-				try {
-
-					if (Env.isTestEnvironmentEnabled()) {
-						m_logger.warn("=== TEST ENVIRONMENT ENABLED ===");
-					} else {
-						final javax.bluetooth.UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP };
-						local.getDiscoveryAgent().searchServices(null,
-								searchUuidSet, m_device, this);
-					}
-					wait();
-				} catch (final InterruptedException e) {
-					if (m_searchInProgress) {
-						// we're stopping, aborting discovery.
-						m_searchInProgress = false;
-						m_logger.warn("Interrupting bluetooth service discovery - interruption");
-					} else {
-						// Search done !
-					}
-				} catch (final BluetoothStateException e) {
-					// well ... bad choice. Bluetooth driver not ready
-					// Just abort.
-					m_logger.error("Cannot search for bluetooth services", e);
-					unregister(m_device);
-					return;
-				}
-				// Do nothing
-			}
-		}
-
-		/*
-		 * 
-		 * ********* DiscoveryListener **********
-		 */
-		@Override
-		public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
-			// Not used here.
-		}
-
-		@Override
-		public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
-			synchronized (this) {
-				if (!m_searchInProgress) {
-					// We were stopped.
-					notifyAll();
-					return;
-				}
-			}
-			// Do nothing
-		}
-
-		@Override
-		public void serviceSearchCompleted(int transID, int respCode) {
-			if (respCode != SERVICE_SEARCH_COMPLETED) {
-				if (m_action == SERVICECHECK_UNREGISTER_IF_NOT_HERE) {
-					m_logger.info("Device " + m_device.getBluetoothAddress()
-							+ " have disappeared : Unregister it.");
-					unregister(m_device);
-				} else if (m_action == SERVICECHECK_REGISTER_IF_HERE) {
-					m_logger.info("Device " + m_device.getBluetoothAddress()
-							+ " is not here");
-				}
-			} else {
-				if (m_action == SERVICECHECK_REGISTER_IF_HERE) {
-					m_logger.info("Device " + m_device.getBluetoothAddress()
-							+ " is here : Register it.");
-					register(m_device);
-				} else if (m_action == SERVICECHECK_UNREGISTER_IF_NOT_HERE) {
-					m_logger.info("Device " + m_device.getBluetoothAddress()
-							+ " is still here.");
-				}
-			}
-
-			synchronized (this) {
-				m_searchInProgress = false;
-				notifyAll();
-			}
-		}
-
-		@Override
-		public void inquiryCompleted(int discType) {
-			// Not used here.
-		}
+		return (this.m_filter.matcher(address).matches() || ((name != null) && this.m_filter.matcher(name).matches()));
 	}
 
 	/** {@inheritDoc} */
@@ -984,80 +821,201 @@ public class BluetoothDeviceDiscovery extends Cloudlet implements
 		LOGGER.info("Disconnected from Message Broker");
 	}
 
-	/** {@inheritDoc} */
-	@Override
-	public String getCriticalComponentName() {
-		return APP_ID;
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public int getCriticalComponentTimeout() {
-		return TIMEOUT_COMPONENT;
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	protected void doExec(CloudletTopic reqTopic,
-			KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
-			throws KuraException {
-
-		switch (reqTopic.getResources()[0]) {
-		case "start":
-			start();
-			m_activityLogService.saveLog("Bluetooth Started");
-			break;
-
-		case "stop":
-			stop();
-			m_activityLogService.saveLog("Bluetooth Stopped");
-			break;
+	/**
+	 * Used to pair {@link RemoteDevice}
+	 *
+	 * @param device
+	 *            The currently discovered Remote Device
+	 * @return if paired then true else false
+	 */
+	boolean pair(final RemoteDevice device) {
+		if ((this.m_fleet == null) || (this.m_fleet.getDevices() == null)) {
+			LOGGER.info("Ignoring autopairing - no fleet configured");
+			return true;
 		}
 
-		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
-	}
+		final String address = device.getBluetoothAddress();
+		final String name = this.getDeviceName(device);
 
-	/** {@inheritDoc} */
-	@Override
-	protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
-			KuraResponsePayload respPayload) throws KuraException {
-		LOGGER.info("Bluetooth Configuration Retrieving...");
-		// Retrieve the configurations
-		if ("configurations".equals(reqTopic.getResources()[0])) {
-			final ComponentConfiguration configuration = m_configurationService
-					.getComponentConfiguration(APP_CONF_ID);
+		if ((name == null) && this.m_ignoreUnnamedDevices) {
+			LOGGER.warn("Pairing not attempted, ignoring unnamed devices");
+			return false;
+		}
 
-			final IterableMap map = new HashedMap(
-					configuration.getConfigurationProperties());
-			final MapIterator it = map.mapIterator();
-
-			while (it.hasNext()) {
-				final Object key = it.next();
-				final Object value = it.getValue();
-
-				respPayload.addMetric((String) key, value);
+		final List<Device> devices = this.m_fleet.getDevices();
+		for (final Device model : devices) {
+			final String regex = model.getId();
+			final String pin = model.getPin();
+			if (Pattern.matches(regex, address) || ((name != null) && Pattern.matches(regex, name))) {
+				LOGGER.info("Paring pattern match for " + address + " / " + name + " with " + regex);
+				try {
+					RemoteDeviceHelper.authenticate(device, pin);
+					LOGGER.info("Device " + address + " paired");
+					return true;
+				} catch (final IOException e) {
+					LOGGER.error("Cannot authenticate device despite it match the regex " + regex, e);
+				}
 			}
-			m_activityLogService.saveLog("Bluetooth Configuration Retrieved");
-
-			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 		}
-		LOGGER.info("Bluetooth Configuration Retrieved");
+		return false;
 	}
 
-	/** {@inheritDoc} */
-	@Override
-	protected void doPut(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
-			KuraResponsePayload respPayload) throws KuraException {
-		LOGGER.info("Bluetooth Configuration Updating...");
+	/**
+	 * Used to register a service per device discovered
+	 *
+	 * @param device
+	 *            The found device
+	 */
+	private synchronized void register(RemoteDevice device) {
+		final Dictionary<String, Object> props = new Hashtable<String, Object>();
+		props.put("device.id", device.getBluetoothAddress());
+		final String name = this.getDeviceName(device);
 
-		// Update the configurations
-		if ("configurations".equals(reqTopic.getResources()[0])) {
-			m_configurationService.updateConfiguration(APP_CONF_ID,
-					reqPayload.metrics());
-
-			m_activityLogService.saveLog("Bluetooth Configuration Updated");
-			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		if (name != null) {
+			// Switch device to our own implementation
+			device = new RemoteNamedDevice(device, name);
+			props.put("device.name", name);
+		} else if (this.m_ignoreUnnamedDevices) {
+			LOGGER.warn("Ignoring device " + device.getBluetoothAddress() + " - discovery set to ignore "
+					+ "unnamed devices");
+			return;
 		}
-		LOGGER.info("Bluetooth Configuration Updated");
+
+		LOGGER.info("Registering new service for " + device.getBluetoothAddress() + " with properties " + props);
+
+		// check autopairing
+		if (!device.isAuthenticated()) {
+			if (!this.pair(device)) {
+				LOGGER.warn("Aborting registering for " + device.getBluetoothAddress());
+				return;
+			}
+		}
+
+		final ServiceRegistration<?> reg = this.m_context.registerService(RemoteDevice.class.getName(), device, props);
+		this.m_devices.put(device, reg);
+
+	}
+
+	/**
+	 * Registering devices configuration as an OSGi service
+	 */
+	private void registerDeviceListFleetAsService() {
+		this.m_context.registerService(DeviceList.class, this.m_fleet, null);
+	}
+
+	/**
+	 * Initializes the discovery.
+	 */
+	@Override
+	public void start() {
+		LOGGER.info("Enabling Bluetooth...");
+
+		this.extractRequiredConfigurations();
+		this.registerDeviceListFleetAsService();
+
+		if (this.m_agent != null) {
+			return;
+		}
+
+		if (!this.isBluetoothStackSupported()) {
+			LOGGER.error(
+					"The Bluetooth stack " + this.getBluetoothStack() + " is not supported (" + SUPPORTED_STACKS + ")");
+			return;
+		}
+
+		if ("winsock".equals(this.getBluetoothStack())) {
+			LOGGER.info("Winsock stack detected, forcing online check and lost device unpairing");
+			this.m_onlineCheckOnDiscovery = true;
+			this.m_unpairLostDevices = true;
+		}
+
+		this.m_agent = new DeviceDiscoveryAgent(this, this.m_discoveryMode, this.m_onlineCheckOnDiscovery);
+		BluetoothThreadManager.scheduleJob(this.m_agent, this.m_period);
+	}
+
+	/**
+	 * Stops the bluetooth discovery
+	 */
+	@Override
+	public void stop() {
+		LOGGER.info("Disabling Bluetooth...");
+		if (this.m_agent == null) {
+			return;
+		}
+		this.m_agent = null;
+		BluetoothThreadManager.stopScheduler();
+		this.unregisterAll();
+		LOGGER.info("Disabling Bluetooth...Done");
+		LOGGER.info("Releasing all subscription...");
+		this.getCloudApplicationClient().release();
+		LOGGER.info("Releasing all subscription...done");
+
+	}
+
+	/**
+	 * Callback to be used while {@link ActivityLogService} is deregistering
+	 */
+	public synchronized void unbindActivityLogService(final ActivityLogService activityLogService) {
+		if (this.m_activityLogService == activityLogService) {
+			this.m_activityLogService = null;
+		}
+	}
+
+	/**
+	 * Kura Cloud Service Callback while deregistering
+	 */
+	public synchronized void unbindCloudService(final CloudService cloudService) {
+		if (this.m_cloudService == cloudService) {
+			super.setCloudService(this.m_cloudService = null);
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link ConfigurationService} is deregistering
+	 */
+	public synchronized void unbindConfigurationService(final ConfigurationService configurationService) {
+		if (this.m_configurationService == configurationService) {
+			this.m_configurationService = null;
+		}
+	}
+
+	void unpair(final RemoteDevice device) {
+		if (this.matchesDeviceFilter(device) && this.m_unpairLostDevices) {
+			try {
+				RemoteDeviceHelper.removeAuthentication(device);
+			} catch (final IOException e) {
+				LOGGER.error("Can't unpair device " + device.getBluetoothAddress(), e);
+			}
+		}
+	}
+
+	private synchronized void unregister(final RemoteDevice device) {
+		final ServiceRegistration<?> reg = this.m_devices.remove(device);
+		if (reg != null) {
+			reg.unregister();
+		}
+		this.unpair(device);
+
+	}
+
+	/** Unregister and unpair all the services */
+	private synchronized void unregisterAll() {
+		for (final Map.Entry<RemoteDevice, ServiceRegistration<?>> entry : this.m_devices.entrySet()) {
+			entry.getValue().unregister();
+			this.unpair(entry.getKey());
+		}
+		this.m_devices.clear();
+	}
+
+	/**
+	 * Used to be called when configurations will get updated
+	 */
+	public void updated(final Map<String, Object> properties) {
+		LOGGER.info("Updated Bluetooth Component...");
+
+		this.m_properties = properties;
+		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
+
+		LOGGER.info("Updated Bluetooth Component... Done.");
 	}
 }

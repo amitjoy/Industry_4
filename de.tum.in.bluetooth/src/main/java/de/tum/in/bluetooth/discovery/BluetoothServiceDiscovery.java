@@ -51,32 +51,29 @@ import de.tum.in.bluetooth.devices.DeviceList;
  * devices and gets all the bluetooth service profiles of each and every
  * discovered device. For each bluetooth service profile, it publishes a
  * {@link ServiceRecord}.
- * 
+ *
  * @author AMIT KUMAR MONDAL
  */
 @Component(immediate = true, name = "de.tum.in.bluetooth.service.discovery")
 public class BluetoothServiceDiscovery {
 
+	/**
+	 * Logger.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(BluetoothServiceDiscovery.class);
+
 	// Used only for RFCOMM Connections
 	private static final int SERVICE_NAME_ATTRIBUTE = ServiceConstants.SERVICE_NAME;
+
+	/**
+	 * List of device under attempts.
+	 */
+	private final Map<RemoteDevice, Integer> m_attempts = Maps.newHashMap();
 
 	/**
 	 * Bundle Context.
 	 */
 	private BundleContext m_context;
-
-	/**
-	 * Logger.
-	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(BluetoothServiceDiscovery.class);
-
-	/**
-	 * Map storing the currently registered ServiceRecord(with their
-	 * ServiceRegistration) by RemoteDevice
-	 */
-	private final Map<RemoteDevice, Map<ServiceRecord, ServiceRegistration>> m_servicesRecord = Maps
-			.newHashMap();
 
 	/**
 	 * Set of devices loaded from the <tt>configuration</tt>. This contains the
@@ -86,9 +83,10 @@ public class BluetoothServiceDiscovery {
 	private volatile DeviceList m_fleet;
 
 	/**
-	 * List of device under attempts.
+	 * Map storing the currently registered ServiceRecord(with their
+	 * ServiceRegistration) by RemoteDevice
 	 */
-	private final Map<RemoteDevice, Integer> m_attempts = Maps.newHashMap();
+	private final Map<RemoteDevice, Map<ServiceRecord, ServiceRegistration>> m_servicesRecord = Maps.newHashMap();
 
 	/**
 	 * Default Constructor Required for DS.
@@ -103,95 +101,166 @@ public class BluetoothServiceDiscovery {
 	 * @param context
 	 *            the Bundle context
 	 */
-	public BluetoothServiceDiscovery(BundleContext context) {
-		m_context = context;
+	public BluetoothServiceDiscovery(final BundleContext context) {
+		this.m_context = context;
 		LOGGER.info("Bluetooth Tracker Started");
+	}
+
+	/**
+	 * Callback during registration of this DS Service Component
+	 *
+	 * @param context
+	 *            The injected reference for this DS Service Component
+	 */
+	@Activate
+	protected synchronized void activate(final ComponentContext context) {
+		LOGGER.info("Activating Bluetooth Service Discovery....");
+		this.m_context = context.getBundleContext();
+		LOGGER.info("Activating Bluetooth Service Discovery....Done");
 	}
 
 	/**
 	 * Device Configuration List Service Binding Callback
 	 */
-	public synchronized void bindDeviceListService(DeviceList deviceList) {
-		if (m_fleet == null) {
-			m_fleet = deviceList;
+	public synchronized void bindDeviceListService(final DeviceList deviceList) {
+		if (this.m_fleet == null) {
+			this.m_fleet = deviceList;
 		}
 	}
 
 	/**
-	 * Device Configuration List Service Service Callback while deregistering
+	 * A new {@link RemoteDevice} is available. Checks if it implements OBEX, if
+	 * so publish the service
+	 *
+	 * @param device
+	 *            the device
 	 */
-	public synchronized void unbindDeviceListService(DeviceList deviceList) {
-		if (m_fleet == deviceList)
-			m_fleet = null;
-	}
-
-	/**
-	 * Callback during registration of this DS Service Component
-	 * 
-	 * @param context
-	 *            The injected reference for this DS Service Component
-	 */
-	@Activate
-	protected synchronized void activate(ComponentContext context) {
-		LOGGER.info("Activating Bluetooth Service Discovery....");
-		m_context = context.getBundleContext();
-		LOGGER.info("Activating Bluetooth Service Discovery....Done");
-	}
-
-	/**
-	 * Stops the discovery. All published services are withdrawn.
-	 */
-	@Deactivate
-	public synchronized void stop() {
-		LOGGER.info("Dectivating Bluetooth Service Discovery....");
-		unregisterAll();
-		m_attempts.clear();
-		LOGGER.info("Deactivating Bluetooth Service Discovery....");
-	}
-
-	private synchronized void unregisterAll() {
-		for (final RemoteDevice remoteDevice : m_servicesRecord.keySet()) {
-			unregister(remoteDevice);
+	public synchronized void bindRemoteDevice(final RemoteDevice device) {
+		LOGGER.info("Binding Remote Device...." + device);
+		try {
+			// We can't run searches concurrently.
+			final ServiceDiscoveryAgent agent = new ServiceDiscoveryAgent(this, device);
+			BluetoothThreadManager.submit(agent);
+		} catch (final Exception e) {
+			LOGGER.error("Cannot discover services from " + device.getBluetoothAddress(),
+					Throwables.getStackTraceAsString(e));
 		}
+		LOGGER.info("Binding Remote Device....Done" + device);
 	}
 
-	private synchronized void unregister(RemoteDevice remote) {
-		LOGGER.info("Deregistering Service Records....");
-		final Map<ServiceRecord, ServiceRegistration> services = m_servicesRecord
-				.remove(remote);
-		if (services == null) {
+	/**
+	 * Callback receiving the set of discovered service from the given
+	 * {@link RemoteDevice}.
+	 *
+	 * @param remote
+	 *            the RemoteDevice
+	 * @param discoveredServices
+	 *            the list of ServiceRecord
+	 */
+	public void discovered(final RemoteDevice remote, final List<ServiceRecord> discoveredServices) {
+		if ((discoveredServices == null) || discoveredServices.isEmpty()) {
+			this.unregister(remote);
+
+			if (this.retry(remote)) {
+				LOGGER.info("Retrying service discovery for device " + remote.getBluetoothAddress() + " - "
+						+ this.m_attempts.get(remote));
+				this.incrementAttempt(remote);
+				final ServiceDiscoveryAgent agent = new ServiceDiscoveryAgent(this, remote);
+				BluetoothThreadManager.submit(agent);
+			} else {
+				// We don't retry, either retry is false or we reached the
+				// number of attempts.
+				this.m_attempts.remove(remote);
+			}
 			return;
 		}
-		for (final ServiceRegistration<?> sr : services.values()) {
-			sr.unregister();
+		LOGGER.info("Agent has discovered " + discoveredServices.size() + " services from "
+				+ remote.getBluetoothAddress() + ".");
+
+		// Service discovery successful, we reset the number of attempts.
+		this.m_attempts.remove(remote);
+		final Device device = this.findDeviceFromFleet(remote);
+
+		for (final ServiceRecord record : discoveredServices) {
+			String url;
+			if (device == null) {
+				url = record.getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
+			} else {
+				url = record.getConnectionURL(ServiceRecord.AUTHENTICATE_NOENCRYPT, false);
+			}
+
+			if (url == null) {
+				LOGGER.warn("Can't compute the service url for device " + remote.getBluetoothAddress()
+						+ " - Ignoring service record");
+			} else {
+				final DataElement serviceName = record.getAttributeValue(SERVICE_NAME_ATTRIBUTE);
+				if (serviceName != null) {
+					LOGGER.info("Service " + serviceName.getValue() + " found " + url);
+				} else {
+					LOGGER.info("Service found " + url);
+				}
+				this.register(remote, record, device, url);
+			}
 		}
-		LOGGER.info("Deregistering Service Records....Done");
+
+	}
+
+	Device findDeviceFromFleet(final RemoteDevice remote) {
+		if (this.m_fleet != null) {
+			final String address = remote.getBluetoothAddress();
+			String sn = null;
+			try {
+				sn = remote.getFriendlyName(false);
+			} catch (final IOException e) {
+				// ignore the exception. Just warn it.
+				LOGGER.warn(Throwables.getStackTraceAsString(e));
+			}
+
+			for (int i = 0; i < this.m_fleet.getDevices().size(); i++) {
+				final Device d = this.m_fleet.getDevices().get(i);
+				final String regex = d.getId(); // id can be regex.
+				if (Pattern.matches(regex, address) || ((sn != null) && Pattern.matches(regex, sn))) {
+					return d;
+				}
+			}
+		}
+		return null;
+	}
+
+	private void incrementAttempt(final RemoteDevice remote) {
+		LOGGER.info("Attempting to retry..Retry On " + remote.getBluetoothAddress());
+		Integer attempt = this.m_attempts.get(remote);
+		if (attempt == null) {
+			attempt = 1;
+			this.m_attempts.put(remote, attempt);
+		} else {
+			this.m_attempts.put(remote, ++attempt);
+		}
 	}
 
 	/**
 	 * Is used to register {@link ServiceRecord} as an OSGi Service for each and
 	 * every {@link RemoteDevice} found as OSGi Service in the Service Registry.
-	 * 
+	 *
 	 * @param remote
 	 *            The Bluetooth Device found
 	 * @param serviceRecord
 	 * @param device
 	 * @param url
 	 */
-	private synchronized void register(RemoteDevice remote,
-			ServiceRecord serviceRecord, Device device, String url) {
+	private synchronized void register(final RemoteDevice remote, final ServiceRecord serviceRecord,
+			final Device device, final String url) {
 		LOGGER.info("Registering Service Records....");
 
-		if (!m_servicesRecord.containsKey(remote)) {
-			m_servicesRecord.put(remote,
-					new HashMap<ServiceRecord, ServiceRegistration>());
+		if (!this.m_servicesRecord.containsKey(remote)) {
+			this.m_servicesRecord.put(remote, new HashMap<ServiceRecord, ServiceRegistration>());
 		}
 
 		final Dictionary<String, Object> props = new Hashtable<String, Object>();
 		props.put("device.id", remote.getBluetoothAddress());
 		final int[] attributeIDs = serviceRecord.getAttributeIDs();
 
-		if (attributeIDs != null && attributeIDs.length > 0) {
+		if ((attributeIDs != null) && (attributeIDs.length > 0)) {
 			final Map<Integer, DataElement> attrs = new HashMap<Integer, DataElement>();
 			for (final int attrID : attributeIDs) {
 				attrs.put(attrID, serviceRecord.getAttributeValue(attrID));
@@ -205,34 +274,54 @@ public class BluetoothServiceDiscovery {
 			props.put("fleet.device", device);
 		}
 
-		final ServiceRegistration<?> sr = m_context.registerService(
-				ServiceRecord.class.getName(), serviceRecord, props);
-		m_servicesRecord.get(remote).put(serviceRecord, sr);
+		final ServiceRegistration<?> sr = this.m_context.registerService(ServiceRecord.class.getName(), serviceRecord,
+				props);
+		this.m_servicesRecord.get(remote).put(serviceRecord, sr);
 
 		LOGGER.info("Registering Service Records....Done");
 	}
 
-	/**
-	 * A new {@link RemoteDevice} is available. Checks if it implements OBEX, if
-	 * so publish the service
-	 *
-	 * @param device
-	 *            the device
-	 */
-	public synchronized void bindRemoteDevice(RemoteDevice device) {
-		LOGGER.info("Binding Remote Device...." + device);
-		try {
-			// We can't run searches concurrently.
-			final ServiceDiscoveryAgent agent = new ServiceDiscoveryAgent(this,
-					device);
-			BluetoothThreadManager.submit(agent);
-		} catch (final Exception e) {
-			LOGGER.error(
-					"Cannot discover services from "
-							+ device.getBluetoothAddress(),
-					Throwables.getStackTraceAsString(e));
+	private boolean retry(final RemoteDevice remote) {
+		LOGGER.info("Retrying for service discovery attempt..." + remote);
+		final Device device = this.findDeviceFromFleet(remote);
+		if (device == null) {
+			return true;
 		}
-		LOGGER.info("Binding Remote Device....Done" + device);
+
+		Integer numberOfTries = this.m_attempts.get(remote);
+		if (numberOfTries == null) {
+			numberOfTries = 0;
+		}
+
+		final BigInteger mr = device.getMaxRetry();
+		int max = 1;
+		if ((mr != null) && (mr.intValue() != 0)) {
+			max = mr.intValue();
+		}
+
+		LOGGER.info("Retrying for service discovery attempt...Done" + remote);
+
+		return (device.isRetry() && (max >= numberOfTries));
+	}
+
+	/**
+	 * Stops the discovery. All published services are withdrawn.
+	 */
+	@Deactivate
+	public synchronized void stop() {
+		LOGGER.info("Dectivating Bluetooth Service Discovery....");
+		this.unregisterAll();
+		this.m_attempts.clear();
+		LOGGER.info("Deactivating Bluetooth Service Discovery....");
+	}
+
+	/**
+	 * Device Configuration List Service Service Callback while deregistering
+	 */
+	public synchronized void unbindDeviceListService(final DeviceList deviceList) {
+		if (this.m_fleet == deviceList) {
+			this.m_fleet = null;
+		}
 	}
 
 	/**
@@ -242,133 +331,28 @@ public class BluetoothServiceDiscovery {
 	 * @param device
 	 *            the device
 	 */
-	public synchronized void unbindRemoteDevice(RemoteDevice device) {
+	public synchronized void unbindRemoteDevice(final RemoteDevice device) {
 		LOGGER.info("Unbinding Remote Device...." + device);
-		unregister(device);
+		this.unregister(device);
 		LOGGER.info("Unbinding Remote Device....Done" + device);
 	}
 
-	/**
-	 * Callback receiving the set of discovered service from the given
-	 * {@link RemoteDevice}.
-	 *
-	 * @param remote
-	 *            the RemoteDevice
-	 * @param discoveredServices
-	 *            the list of ServiceRecord
-	 */
-	public void discovered(final RemoteDevice remote,
-			List<ServiceRecord> discoveredServices) {
-		if (discoveredServices == null || discoveredServices.isEmpty()) {
-			unregister(remote);
-
-			if (retry(remote)) {
-				LOGGER.info("Retrying service discovery for device "
-						+ remote.getBluetoothAddress() + " - "
-						+ m_attempts.get(remote));
-				incrementAttempt(remote);
-				final ServiceDiscoveryAgent agent = new ServiceDiscoveryAgent(
-						this, remote);
-				BluetoothThreadManager.submit(agent);
-			} else {
-				// We don't retry, either retry is false or we reached the
-				// number of attempts.
-				m_attempts.remove(remote);
-			}
+	private synchronized void unregister(final RemoteDevice remote) {
+		LOGGER.info("Deregistering Service Records....");
+		final Map<ServiceRecord, ServiceRegistration> services = this.m_servicesRecord.remove(remote);
+		if (services == null) {
 			return;
 		}
-		LOGGER.info("Agent has discovered " + discoveredServices.size()
-				+ " services from " + remote.getBluetoothAddress() + ".");
-
-		// Service discovery successful, we reset the number of attempts.
-		m_attempts.remove(remote);
-		final Device device = findDeviceFromFleet(remote);
-
-		for (final ServiceRecord record : discoveredServices) {
-			String url;
-			if (device == null) {
-				url = record.getConnectionURL(
-						ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
-			} else {
-				url = record.getConnectionURL(
-						ServiceRecord.AUTHENTICATE_NOENCRYPT, false);
-			}
-
-			if (url == null) {
-				LOGGER.warn("Can't compute the service url for device "
-						+ remote.getBluetoothAddress()
-						+ " - Ignoring service record");
-			} else {
-				final DataElement serviceName = record
-						.getAttributeValue(SERVICE_NAME_ATTRIBUTE);
-				if (serviceName != null) {
-					LOGGER.info("Service " + serviceName.getValue() + " found "
-							+ url);
-				} else {
-					LOGGER.info("Service found " + url);
-				}
-				register(remote, record, device, url);
-			}
+		for (final ServiceRegistration<?> sr : services.values()) {
+			sr.unregister();
 		}
-
+		LOGGER.info("Deregistering Service Records....Done");
 	}
 
-	private void incrementAttempt(final RemoteDevice remote) {
-		LOGGER.info("Attempting to retry..Retry On "
-				+ remote.getBluetoothAddress());
-		Integer attempt = m_attempts.get(remote);
-		if (attempt == null) {
-			attempt = 1;
-			m_attempts.put(remote, attempt);
-		} else {
-			m_attempts.put(remote, ++attempt);
+	private synchronized void unregisterAll() {
+		for (final RemoteDevice remoteDevice : this.m_servicesRecord.keySet()) {
+			this.unregister(remoteDevice);
 		}
-	}
-
-	private boolean retry(final RemoteDevice remote) {
-		LOGGER.info("Retrying for service discovery attempt..." + remote);
-		final Device device = findDeviceFromFleet(remote);
-		if (device == null) {
-			return true;
-		}
-
-		Integer numberOfTries = m_attempts.get(remote);
-		if (numberOfTries == null) {
-			numberOfTries = 0;
-		}
-
-		final BigInteger mr = device.getMaxRetry();
-		int max = 1;
-		if (mr != null && mr.intValue() != 0) {
-			max = mr.intValue();
-		}
-
-		LOGGER.info("Retrying for service discovery attempt...Done" + remote);
-
-		return (device.isRetry() && max >= numberOfTries);
-	}
-
-	Device findDeviceFromFleet(RemoteDevice remote) {
-		if (m_fleet != null) {
-			final String address = remote.getBluetoothAddress();
-			String sn = null;
-			try {
-				sn = remote.getFriendlyName(false);
-			} catch (final IOException e) {
-				// ignore the exception. Just warn it.
-				LOGGER.warn(Throwables.getStackTraceAsString(e));
-			}
-
-			for (int i = 0; i < m_fleet.getDevices().size(); i++) {
-				final Device d = m_fleet.getDevices().get(i);
-				final String regex = d.getId(); // id can be regex.
-				if (Pattern.matches(regex, address)
-						|| (sn != null && Pattern.matches(regex, sn))) {
-					return d;
-				}
-			}
-		}
-		return null;
 	}
 
 }

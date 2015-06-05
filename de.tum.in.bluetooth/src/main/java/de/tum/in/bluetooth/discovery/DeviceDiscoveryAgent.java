@@ -46,9 +46,11 @@ public class DeviceDiscoveryAgent implements Runnable {
 
 	public class DeviceDiscoveryListener implements DiscoveryListener {
 
+		private final DiscoveryAgent m_agent;
+
 		private final Set<RemoteDevice> m_discoveredDevices = new HashSet<RemoteDevice>();
 
-		private final DiscoveryAgent m_agent;
+		private boolean m_inquiryCompleted;
 
 		/**
 		 * Map maintaining the current service discovery on discovered device.
@@ -57,10 +59,8 @@ public class DeviceDiscoveryAgent implements Runnable {
 		 */
 		private final Map<Integer, RemoteDevice> m_serviceDiscoveryInProgress = new HashMap<Integer, RemoteDevice>();
 
-		private boolean m_inquiryCompleted;
-
 		public DeviceDiscoveryListener(final DiscoveryAgent agent) {
-			m_agent = agent;
+			this.m_agent = agent;
 		}
 
 		@Override
@@ -69,7 +69,7 @@ public class DeviceDiscoveryAgent implements Runnable {
 				try {
 					LOGGER.info("Device discovered : " + remote.getBluetoothAddress() + " "
 							+ remote.getFriendlyName(false));
-					if (m_onlineCheckOnDiscovery) {
+					if (DeviceDiscoveryAgent.this.m_onlineCheckOnDiscovery) {
 						// On windows, even lost device may be re-discovered
 						// once they are paired.
 						// We need a way to check their presence => This is a
@@ -78,12 +78,13 @@ public class DeviceDiscoveryAgent implements Runnable {
 						// Paired devices are kept forever.
 						LOGGER.info("Start service discovery on : " + remote.getBluetoothAddress()
 								+ " to ensure availability");
-						final int transId = m_agent.searchServices(null, new UUID[] { new UUID(0x0001) }, remote, this);
-						m_serviceDiscoveryInProgress.put(transId, remote);
+						final int transId = this.m_agent.searchServices(null, new UUID[] { new UUID(0x0001) }, remote,
+								this);
+						this.m_serviceDiscoveryInProgress.put(transId, remote);
 					} else {
 						// We add the device.
 						LOGGER.info("Device discovery completed successfully, injecting device (no online check)");
-						m_discoveredDevices.add(remote);
+						this.m_discoveredDevices.add(remote);
 					}
 				} catch (final Throwable e) {
 					LOGGER.error("Something really bad happened during the device discovery", e);
@@ -92,7 +93,7 @@ public class DeviceDiscoveryAgent implements Runnable {
 		}
 
 		public Set<RemoteDevice> getDiscoveredDevices() {
-			return m_discoveredDevices;
+			return this.m_discoveredDevices;
 		}
 
 		@Override
@@ -100,18 +101,19 @@ public class DeviceDiscoveryAgent implements Runnable {
 			LOGGER.info("Inquiry completed : " + result);
 			if ((result == INQUIRY_ERROR) || (result == INQUIRY_TERMINATED)) {
 				LOGGER.info("The inquiry was not successfully completed");
-				m_discoveredDevices.clear();
+				this.m_discoveredDevices.clear();
 			}
-			m_inquiryCompleted = true;
+			this.m_inquiryCompleted = true;
 			// In the online check is disable the map will never be populated,
 			// so it's empty.
-			if (m_serviceDiscoveryInProgress.isEmpty()) {
-				synchronized (m_lock) {
+			if (this.m_serviceDiscoveryInProgress.isEmpty()) {
+				synchronized (DeviceDiscoveryAgent.this.m_lock) {
 					LOGGER.info("Device inquiry and online check done, releasing lock");
-					m_lock.notifyAll();
+					DeviceDiscoveryAgent.this.m_lock.notifyAll();
 				}
 			} else {
-				LOGGER.info("Waiting for " + m_serviceDiscoveryInProgress.size() + " service discovery to complete");
+				LOGGER.info(
+						"Waiting for " + this.m_serviceDiscoveryInProgress.size() + " service discovery to complete");
 			}
 		}
 
@@ -135,7 +137,7 @@ public class DeviceDiscoveryAgent implements Runnable {
 		public void serviceSearchCompleted(final int transID, final int respCode) {
 			RemoteDevice remote = null; // Stack confinement.
 			synchronized (this) {
-				remote = m_serviceDiscoveryInProgress.remove(transID);
+				remote = this.m_serviceDiscoveryInProgress.remove(transID);
 				if (remote == null) {
 					LOGGER.warn("No remote device associated with the transaction id : " + transID);
 					return;
@@ -146,21 +148,22 @@ public class DeviceDiscoveryAgent implements Runnable {
 			if ((respCode == DiscoveryListener.SERVICE_SEARCH_COMPLETED)
 					|| (respCode == DiscoveryListener.SERVICE_SEARCH_NO_RECORDS)) {
 				LOGGER.info("Service discovery completed successfully, injecting device");
-				m_discoveredDevices.add(remote);
+				this.m_discoveredDevices.add(remote);
 			} else if (respCode == DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE) {
 				LOGGER.warn("Device " + remote + " not reachable");
 			} else {
 				LOGGER.warn("Device " + remote + " has not terminated successfully: " + respCode);
 			}
 
-			if (m_inquiryCompleted && m_serviceDiscoveryInProgress.isEmpty()) {
-				synchronized (m_lock) {
+			if (this.m_inquiryCompleted && this.m_serviceDiscoveryInProgress.isEmpty()) {
+				synchronized (DeviceDiscoveryAgent.this.m_lock) {
 					LOGGER.info("Device inquiry and online check done, releasing lock");
-					m_lock.notifyAll();
+					DeviceDiscoveryAgent.this.m_lock.notifyAll();
 				}
 			} else {
-				LOGGER.info("Waiting for " + m_serviceDiscoveryInProgress.size() + " service discovery to complete "
-						+ "(device inquiry completed: " + m_inquiryCompleted + ")");
+				LOGGER.info(
+						"Waiting for " + this.m_serviceDiscoveryInProgress.size() + " service discovery to complete "
+								+ "(device inquiry completed: " + this.m_inquiryCompleted + ")");
 			}
 		}
 	}
@@ -170,6 +173,8 @@ public class DeviceDiscoveryAgent implements Runnable {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(DeviceDiscoveryAgent.class);
 
+	private DeviceDiscoveryListener m_listener;
+
 	private final Object m_lock = new Object();
 
 	private final DiscoveryMode m_mode;
@@ -178,13 +183,11 @@ public class DeviceDiscoveryAgent implements Runnable {
 
 	private final BluetoothDeviceDiscovery m_parent;
 
-	private DeviceDiscoveryListener m_listener;
-
 	DeviceDiscoveryAgent(final BluetoothDeviceDiscovery parent, final DiscoveryMode mode,
 			final boolean onlineCheckOnDiscovery) {
-		m_mode = mode;
-		m_parent = parent;
-		m_onlineCheckOnDiscovery = onlineCheckOnDiscovery;
+		this.m_mode = mode;
+		this.m_parent = parent;
+		this.m_onlineCheckOnDiscovery = onlineCheckOnDiscovery;
 	}
 
 	void doInquiry(final LocalDevice local) {
@@ -193,31 +196,31 @@ public class DeviceDiscoveryAgent implements Runnable {
 
 			if (!Env.isTestEnvironmentEnabled()) {
 				final DiscoveryAgent agent = local.getDiscoveryAgent();
-				m_listener = new DeviceDiscoveryListener(agent);
-				agent.startInquiry(getDiscoveryMode(), m_listener);
+				this.m_listener = new DeviceDiscoveryListener(agent);
+				agent.startInquiry(this.getDiscoveryMode(), this.m_listener);
 			} else {
 				LOGGER.warn("=== TEST ENVIRONMENT ENABLED ===");
-				m_listener = new DeviceDiscoveryListener(null);
+				this.m_listener = new DeviceDiscoveryListener(null);
 			}
 
 			// Wait until the inquiry is done.
 			try {
-				synchronized (m_lock) {
+				synchronized (this.m_lock) {
 					// TODO Define a timeout.
-					m_lock.wait();
+					this.m_lock.wait();
 				}
 			} catch (final InterruptedException e) {
 				// Ignore but warning
 				LOGGER.warn(Throwables.getStackTraceAsString(e));
 			}
-			final Set<RemoteDevice> discoveredDevices = m_listener.getDiscoveredDevices();
+			final Set<RemoteDevice> discoveredDevices = this.m_listener.getDiscoveredDevices();
 			LOGGER.info("Injecting found devices " + discoveredDevices + " to the parent");
-			m_parent.discovered(discoveredDevices);
+			this.m_parent.discovered(discoveredDevices);
 		} catch (final BluetoothStateException e1) {
 			LOGGER.error("Device discovery aborted", e1);
-			m_parent.discovered(null);
+			this.m_parent.discovered(null);
 		} finally {
-			m_listener = null;
+			this.m_listener = null;
 		}
 
 	}
@@ -228,7 +231,7 @@ public class DeviceDiscoveryAgent implements Runnable {
 	 * @return
 	 */
 	DeviceDiscoveryListener getDeviceDiscoveryListener() {
-		return m_listener;
+		return this.m_listener;
 	}
 
 	/**
@@ -237,10 +240,10 @@ public class DeviceDiscoveryAgent implements Runnable {
 	 * @return the discovery id.
 	 */
 	private int getDiscoveryMode() {
-		if (m_mode == null) {
+		if (this.m_mode == null) {
 			return DiscoveryAgent.GIAC;
 		}
-		switch (m_mode) {
+		switch (this.m_mode) {
 		case GIAC:
 			return DiscoveryAgent.GIAC;
 		case LIAC:
@@ -267,14 +270,14 @@ public class DeviceDiscoveryAgent implements Runnable {
 	public void run() {
 		try {
 			LOGGER.info("Running Device Discovery Agent");
-			final LocalDevice local = initialize();
+			final LocalDevice local = this.initialize();
 			if (!LocalDevice.isPowerOn() || (local == null)) {
 				LOGGER.info("Device discovery aborted - cannot get the local device");
-				m_parent.discovered(null);
+				this.m_parent.discovered(null);
 				return;
 			}
 
-			doInquiry(local);
+			this.doInquiry(local);
 		} catch (final Throwable e) {
 			LOGGER.error("Unexpected exception during device inquiry", e);
 		}

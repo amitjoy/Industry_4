@@ -33,7 +33,7 @@ import com.google.common.base.Throwables;
  * <p/>
  * Bluetooth operation are submitted to this class which executed them when a
  * free slot if available.
- * 
+ *
  * @author AMIT KUMAR MONDAL
  */
 public class BluetoothThreadManager {
@@ -41,39 +41,25 @@ public class BluetoothThreadManager {
 	/**
 	 * Logger.
 	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(BluetoothThreadManager.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BluetoothThreadManager.class);
 
 	/**
 	 * Customization of the thread factory to avoid letting a uncaught exception
 	 * blowing up. The exception is just logged.
 	 */
-	private static final ThreadFactory THREAD_FACTORY = new ThreadFactory() {
-
-		@Override
-		public Thread newThread(final Runnable target) {
-			final Thread thread = new Thread(target);
-			LOGGER.debug("Creating new worker thread");
-			thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-
-				@Override
-				public void uncaughtException(Thread t, Throwable e) {
-					LOGGER.error("Uncaught Exception thrown by " + target,
-							Throwables.getStackTraceAsString(e));
-				}
-
-			});
-			return thread;
-		}
-
+	private static final ThreadFactory S_THREAD_FACTORY = target -> {
+		final Thread thread = new Thread(target);
+		LOGGER.debug("Creating new worker thread");
+		thread.setUncaughtExceptionHandler(
+				(t, e) -> LOGGER.error("Uncaught Exception thrown by " + target, Throwables.getStackTraceAsString(e)));
+		return thread;
 	};
 
 	/**
 	 * The thread pool executing the action. the thread pool size is limited to
 	 * 1.
 	 */
-	private static ScheduledThreadPoolExecutor s_pool = new ScheduledThreadPoolExecutor(
-			1, THREAD_FACTORY);
+	private static ScheduledThreadPoolExecutor s_thread_pool = new ScheduledThreadPoolExecutor(1, S_THREAD_FACTORY);
 
 	/**
 	 * Schedules a periodic job such as the Device Inquiry
@@ -83,35 +69,28 @@ public class BluetoothThreadManager {
 	 * @param period
 	 *            the period
 	 */
-	public static void scheduleJob(Runnable runnable, int period) {
+	public static void scheduleJob(final Runnable runnable, final int period) {
 		try {
 			LOGGER.info("Submitting periodic task " + runnable);
-			s_pool.scheduleWithFixedDelay(runnable, 0, period, TimeUnit.SECONDS);
-			LOGGER.info(runnable + " submitted - waiting queue "
-					+ s_pool.getQueue().size());
+			s_thread_pool.scheduleWithFixedDelay(runnable, 0, period, TimeUnit.SECONDS);
+			LOGGER.info(runnable + " submitted - waiting queue " + s_thread_pool.getQueue().size());
 		} catch (final RejectedExecutionException e) {
-			LOGGER.error("Cannot submit task",
-					Throwables.getStackTraceAsString(e));
+			LOGGER.error("Cannot submit task", Throwables.getStackTraceAsString(e));
 		}
 	}
 
 	/**
-	 * Submits a one-shot job that does not return a result such as a Service
-	 * Inquiry. the job will be executed when possible.
-	 *
-	 * @param runnable
-	 *            the job
+	 * Shutdowns the pool. No task can be submitted once this method is called.
 	 */
-	public static void submit(Runnable runnable) {
+	public static void stopScheduler() {
+		LOGGER.info("Shutting down scheduler...");
 		try {
-			LOGGER.info("Submitting one-shot task " + runnable);
-			s_pool.submit(runnable);
-			LOGGER.info(runnable + " submitted - waiting queue "
-					+ s_pool.getQueue().size());
-		} catch (final RejectedExecutionException e) {
-			LOGGER.error("Cannot submit task",
-					Throwables.getStackTraceAsString(e));
+			s_thread_pool.shutdownNow();
+		} catch (final Throwable e) {
+			// Ignore but warn
+			LOGGER.warn("Exception during shutdown : ", Throwables.getStackTraceAsString(e));
 		}
+		LOGGER.info("Shutting down scheduler...Done");
 	}
 
 	/**
@@ -125,33 +104,33 @@ public class BluetoothThreadManager {
 	 *            the return type
 	 * @return a Future object to retrieve the result
 	 */
-	public static <V> Future<V> submit(Callable<V> task) {
+	public static <V> Future<V> submit(final Callable<V> task) {
 		try {
 			LOGGER.info("Submitting one-shot task " + task);
-			final Future<V> future = s_pool.submit(task);
-			LOGGER.info(task + " submitted - waiting queue "
-					+ s_pool.getQueue().size());
+			final Future<V> future = s_thread_pool.submit(task);
+			LOGGER.info(task + " submitted - waiting queue " + s_thread_pool.getQueue().size());
 			return future;
 		} catch (final RejectedExecutionException e) {
-			LOGGER.error("Cannot submit task",
-					Throwables.getStackTraceAsString(e));
+			LOGGER.error("Cannot submit task", Throwables.getStackTraceAsString(e));
 			return null;
 		}
 	}
 
 	/**
-	 * Shutdowns the pool. No task can be submitted once this method is called.
+	 * Submits a one-shot job that does not return a result such as a Service
+	 * Inquiry. the job will be executed when possible.
+	 *
+	 * @param runnable
+	 *            the job
 	 */
-	public static void stopScheduler() {
-		LOGGER.info("Shutting down scheduler...");
+	public static void submit(final Runnable runnable) {
 		try {
-			s_pool.shutdownNow();
-		} catch (final Throwable e) {
-			// Ignore but warn
-			LOGGER.warn("Exception during shutdown : ",
-					Throwables.getStackTraceAsString(e));
+			LOGGER.info("Submitting one-shot task " + runnable);
+			s_thread_pool.submit(runnable);
+			LOGGER.info(runnable + " submitted - waiting queue " + s_thread_pool.getQueue().size());
+		} catch (final RejectedExecutionException e) {
+			LOGGER.error("Cannot submit task", Throwables.getStackTraceAsString(e));
 		}
-		LOGGER.info("Shutting down scheduler...Done");
 	}
 
 }

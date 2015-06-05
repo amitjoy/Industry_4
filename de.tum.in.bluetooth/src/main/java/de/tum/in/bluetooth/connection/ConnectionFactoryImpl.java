@@ -28,7 +28,7 @@ import com.intel.bluetooth.MicroeditionConnector;
 
 /**
  * Bluetooth Serial Port Profile Connection Factory Implementation
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
@@ -52,14 +52,11 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 	 *             not not be created.
 	 */
 	@Override
-	public Connection createConnection(String name, int mode, boolean timeouts)
-			throws IOException {
+	public Connection createConnection(String name, int mode, final boolean timeouts) throws IOException {
 		name = checkNotNull(name, "Connection URI must not be null");
 		mode = checkNotNull(mode, "Connection Mode must not be null");
 
-		return new WrappedConnection(
-				(StreamConnection) MicroeditionConnector.open(name, mode,
-						timeouts));
+		return new WrappedConnection((StreamConnection) MicroeditionConnector.open(name, mode, timeouts));
 
 	}
 

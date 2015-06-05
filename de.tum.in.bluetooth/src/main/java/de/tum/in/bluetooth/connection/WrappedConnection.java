@@ -30,7 +30,7 @@ import com.google.common.base.Throwables;
 
 /**
  * Used to wrap Bluetooth Serial Profile Connection stream
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
@@ -39,17 +39,16 @@ public class WrappedConnection implements StreamConnection {
 	/**
 	 * slf4j Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(WrappedConnection.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WrappedConnection.class);
 	private final StreamConnection m_connection;
 
 	private DataInputStream m_dataInputStream;
-	private InputStream m_inputStream;
 	private DataOutputStream m_dataOutputStream;
+	private InputStream m_inputStream;
 	private OutputStream m_outputStream;
 
 	/** Constructor */
-	public WrappedConnection(StreamConnection connection) {
+	public WrappedConnection(final StreamConnection connection) {
 		LOGGER.debug("Constructing wrapped connection");
 		this.m_connection = connection;
 	}
@@ -60,18 +59,17 @@ public class WrappedConnection implements StreamConnection {
 
 		try {
 			LOGGER.debug("Closing connection");
-			m_connection.close();
-			if (m_dataInputStream != null) {
+			this.m_connection.close();
+			if (this.m_dataInputStream != null) {
 				LOGGER.debug("Closing dataInputStream");
-				m_dataInputStream.close();
+				this.m_dataInputStream.close();
 			}
-			if (m_inputStream != null) {
+			if (this.m_inputStream != null) {
 				LOGGER.debug("Closing inputStream");
-				m_inputStream.close();
+				this.m_inputStream.close();
 			}
 		} catch (final IOException e) {
-			LOGGER.error("Failed to close connection",
-					Throwables.getStackTraceAsString(e));
+			LOGGER.error("Failed to close connection", Throwables.getStackTraceAsString(e));
 			throw e;
 		}
 
@@ -82,12 +80,24 @@ public class WrappedConnection implements StreamConnection {
 	public DataInputStream openDataInputStream() throws IOException {
 		LOGGER.info("Opening DataInputStream connection");
 		try {
-			m_dataInputStream = m_connection.openDataInputStream();
-			return m_dataInputStream;
+			this.m_dataInputStream = this.m_connection.openDataInputStream();
+			return this.m_dataInputStream;
 		} catch (final IOException e) {
-			LOGGER.error("Failed to open connection",
-					Throwables.getStackTraceAsString(e));
+			LOGGER.error("Failed to open connection", Throwables.getStackTraceAsString(e));
 			throw e;
+		}
+	}
+
+	@Override
+	public DataOutputStream openDataOutputStream() throws IOException {
+		LOGGER.debug("Opening DataOutputStream connection");
+		try {
+			this.m_dataOutputStream = this.m_connection.openDataOutputStream();
+			return this.m_dataOutputStream;
+		} catch (final IOException e) {
+			LOGGER.error("Failed to open connection", Throwables.getStackTraceAsString(e));
+			throw e;
+
 		}
 	}
 
@@ -96,25 +106,10 @@ public class WrappedConnection implements StreamConnection {
 	public InputStream openInputStream() throws IOException {
 		LOGGER.debug("Opening InputStream connection");
 		try {
-			m_inputStream = m_connection.openInputStream();
-			return m_inputStream;
+			this.m_inputStream = this.m_connection.openInputStream();
+			return this.m_inputStream;
 		} catch (final IOException e) {
-			LOGGER.error("Failed to open connection",
-					Throwables.getStackTraceAsString(e));
-			throw e;
-
-		}
-	}
-
-	@Override
-	public DataOutputStream openDataOutputStream() throws IOException {
-		LOGGER.debug("Opening DataOutputStream connection");
-		try {
-			m_dataOutputStream = m_connection.openDataOutputStream();
-			return m_dataOutputStream;
-		} catch (final IOException e) {
-			LOGGER.error("Failed to open connection",
-					Throwables.getStackTraceAsString(e));
+			LOGGER.error("Failed to open connection", Throwables.getStackTraceAsString(e));
 			throw e;
 
 		}
@@ -124,11 +119,10 @@ public class WrappedConnection implements StreamConnection {
 	public OutputStream openOutputStream() throws IOException {
 		LOGGER.debug("Opening OutputStream connection");
 		try {
-			m_outputStream = m_connection.openOutputStream();
-			return m_outputStream;
+			this.m_outputStream = this.m_connection.openOutputStream();
+			return this.m_outputStream;
 		} catch (final IOException e) {
-			LOGGER.error("Failed to open connection",
-					Throwables.getStackTraceAsString(e));
+			LOGGER.error("Failed to open connection", Throwables.getStackTraceAsString(e));
 			throw e;
 
 		}
