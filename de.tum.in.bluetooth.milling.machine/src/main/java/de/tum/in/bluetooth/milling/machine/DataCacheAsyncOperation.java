@@ -32,53 +32,11 @@ import de.tum.in.events.Events;
 
 /**
  * Asynchronous Operation to save the data to a cache
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
-public final class DataCacheAsyncOperation implements
-		AsyncFunction<String, String> {
-
-	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(DataCacheAsyncOperation.class);
-
-	/**
-	 * The Thread Pool to run the function inside
-	 */
-	private final ListeningExecutorService m_poolToRunFunctionIn;
-
-	/**
-	 * OSGi Event Admin Service Reference
-	 */
-	private final EventAdmin m_eventAdmin;
-
-	/**
-	 * OSGi
-	 */
-	private final String m_deviceAddress;
-
-	/**
-	 * Constructor
-	 * 
-	 * @param eventAdmin
-	 * @param remoteDeviceAddress
-	 */
-	public DataCacheAsyncOperation(
-			ListeningExecutorService poolToRunFunctionIn,
-			EventAdmin eventAdmin, String remoteDeviceAddress) {
-		this.m_poolToRunFunctionIn = poolToRunFunctionIn;
-		this.m_eventAdmin = eventAdmin;
-		this.m_deviceAddress = remoteDeviceAddress;
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public ListenableFuture<String> apply(String input) throws Exception {
-		return m_poolToRunFunctionIn.submit(new FunctionWorker(input));
-	}
+public final class DataCacheAsyncOperation implements AsyncFunction<String, String> {
 
 	/**
 	 * 'worker' for the AsyncFunction
@@ -92,7 +50,7 @@ public final class DataCacheAsyncOperation implements
 		/**
 		 * Constructor
 		 */
-		public FunctionWorker(String input) {
+		public FunctionWorker(final String input) {
 			this.input = input;
 		}
 
@@ -102,16 +60,54 @@ public final class DataCacheAsyncOperation implements
 			LOGGER.debug("Asynchronous Operation starting...");
 
 			final Dictionary<String, Object> properties = new Hashtable<>();
-			properties.put("device.id", m_deviceAddress);
-			properties.put("timestamp",
-					String.valueOf(System.currentTimeMillis()));
-			properties.put("data", input);
+			properties.put("device.id", DataCacheAsyncOperation.this.m_deviceAddress);
+			properties.put("timestamp", String.valueOf(System.currentTimeMillis()));
+			properties.put("data", this.input);
 
 			final Event cacheEvent = new Event(Events.DATA_CACHE, properties);
-			m_eventAdmin.postEvent(cacheEvent);
+			DataCacheAsyncOperation.this.m_eventAdmin.postEvent(cacheEvent);
 
-			return input;
+			return this.input;
 		}
+	}
+
+	/**
+	 * Logger
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataCacheAsyncOperation.class);
+
+	/**
+	 * OSGi
+	 */
+	private final String m_deviceAddress;
+
+	/**
+	 * OSGi Event Admin Service Reference
+	 */
+	private final EventAdmin m_eventAdmin;
+
+	/**
+	 * The Thread Pool to run the function inside
+	 */
+	private final ListeningExecutorService m_poolToRunFunctionIn;
+
+	/**
+	 * Constructor
+	 *
+	 * @param eventAdmin
+	 * @param remoteDeviceAddress
+	 */
+	public DataCacheAsyncOperation(final ListeningExecutorService poolToRunFunctionIn, final EventAdmin eventAdmin,
+			final String remoteDeviceAddress) {
+		this.m_poolToRunFunctionIn = poolToRunFunctionIn;
+		this.m_eventAdmin = eventAdmin;
+		this.m_deviceAddress = remoteDeviceAddress;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public ListenableFuture<String> apply(final String input) throws Exception {
+		return this.m_poolToRunFunctionIn.submit(new FunctionWorker(input));
 	}
 
 }

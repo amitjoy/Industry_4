@@ -29,7 +29,7 @@ import com.google.common.base.Throwables;
 /**
  * Worker Thread to retrieve the data from the stream established between the
  * RPi and Bluetooth Device
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
@@ -38,8 +38,7 @@ public final class DataRetrieverWorker implements Callable<String> {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(DataRetrieverWorker.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataRetrieverWorker.class);
 
 	/**
 	 * The Bluetooth Communication Stream Connection
@@ -49,8 +48,8 @@ public final class DataRetrieverWorker implements Callable<String> {
 	/**
 	 * Constructor
 	 */
-	public DataRetrieverWorker(BluetoothConnector bluetoothConnector) {
-		m_bluetoothConnector = bluetoothConnector;
+	public DataRetrieverWorker(final BluetoothConnector bluetoothConnector) {
+		this.m_bluetoothConnector = bluetoothConnector;
 	}
 
 	/** {@inheritDoc} */
@@ -60,14 +59,14 @@ public final class DataRetrieverWorker implements Callable<String> {
 
 		final byte buffer[] = new byte[8];
 		try {
-			final InputStream inputStream = m_bluetoothConnector
-					.getInputStream();
+			final InputStream inputStream = this.m_bluetoothConnector.getInputStream();
 			int bytes_read = inputStream.available();
 
-			if (bytes_read > 0)
+			if (bytes_read > 0) {
 				bytes_read = inputStream.read(buffer, 0, 8);
-			else
+			} else {
 				TimeUnit.SECONDS.sleep(1);
+			}
 
 			final String received = new String(buffer, 0, bytes_read);
 

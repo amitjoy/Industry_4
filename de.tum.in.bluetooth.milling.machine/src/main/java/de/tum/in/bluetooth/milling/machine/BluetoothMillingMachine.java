@@ -66,25 +66,13 @@ import de.tum.in.activity.log.ActivityLogService;
 /**
  * Used to consume all the service record provided by all the paired Bluetooth
  * Enabled Milling Machines
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
 @Component(immediate = false, name = "de.tum.in.bluetooth.milling.machine")
 @Service(value = { BluetoothMillingMachine.class })
-public class BluetoothMillingMachine extends Cloudlet implements
-		ConfigurableComponent {
-
-	/**
-	 * Logger
-	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(BluetoothMillingMachine.class);
-
-	/**
-	 * Application Identifier
-	 */
-	private static final String APP_ID = "MILLING-V1";
+public class BluetoothMillingMachine extends Cloudlet implements ConfigurableComponent {
 
 	/**
 	 * Defines Application Configuration Metatype Id
@@ -92,47 +80,20 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	private static final String APP_CONF_ID = "de.tum.in.bluetooth.milling.machine";
 
 	/**
-	 * Used to control thread while maintaining connections between devices and
-	 * RPi
+	 * Application Identifier
 	 */
-	private final ExecutorService m_deletegate = Executors
-			.newFixedThreadPool(5);
-
-	/**
-	 * Used to control threads while for asynchronous operation of getting data
-	 * from paired bluetooth milling machines
-	 */
-	private final ExecutorService m_deletegateForAsyncFunction = Executors
-			.newFixedThreadPool(5);
-
-	/**
-	 * Represents the thread pool for initiating data retrieval from bluetooth
-	 * devices
-	 */
-	private final ListeningExecutorService m_pool = MoreExecutors
-			.listeningDecorator(m_deletegate);
-
-	/**
-	 * Represents the thread pool to operate async operation
-	 */
-	private final ListeningExecutorService m_poolForAsyncFunction = MoreExecutors
-			.listeningDecorator(m_deletegateForAsyncFunction);
-
-	/**
-	 * The intermediary result retrieved before the async operation
-	 */
-	private ListenableFuture<String> m_resultFromWorker;
-
-	/**
-	 * The final result computed after the async operation
-	 */
-	private ListenableFuture<String> m_finalResult;
+	private static final String APP_ID = "MILLING-V1";
 
 	/**
 	 * Configurable Property for getting list of paired bluetooth enabled
 	 * milling machines
 	 */
 	private static final String BLUETOOH_ENABLED_MILLING_MACHINES = "bluetooth.devices.address";
+
+	/**
+	 * Logger
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(BluetoothMillingMachine.class);
 
 	/**
 	 * Configurable Property to check the setpoint speed for milling machines
@@ -151,12 +112,6 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	private static final String PUBLISH_TOPIC_PROP_NAME = "publish.semanticTopic";
 
 	/**
-	 * OSGi Event Admin Service Dependency
-	 */
-	@Reference(bind = "bindEventAdmin", unbind = "unbindEventAdmin")
-	private volatile EventAdmin m_eventAdmin;
-
-	/**
 	 * Activity Log Service Dependency
 	 */
 	@Reference(bind = "bindActivityLogService", unbind = "unbindActivityLogService")
@@ -169,22 +124,10 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	private volatile CloudService m_cloudService;
 
 	/**
-	 * Eclipse Kura System Service Dependency
-	 */
-	@Reference(bind = "bindSystemService", unbind = "unbindSystemService")
-	private volatile SystemService m_systemService;
-
-	/**
 	 * Eclipse Kura Configuration Service Dependency
 	 */
 	@Reference(bind = "bindConfigurationService", unbind = "unbindConfigurationService")
 	private volatile ConfigurationService m_configurationService;
-
-	/**
-	 * Bluetooth Service Record Dependency for paired bluetooth devices
-	 */
-	@Reference(bind = "bindServiceRecord", unbind = "unbindServiceRecord", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
-	private volatile ServiceRecord m_serviceRecord;
 
 	/**
 	 * Connection Service Dependency
@@ -193,15 +136,16 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	private volatile ConnectorService m_connectorService;
 
 	/**
-	 * Holds List of Service Record for all the paired devices
+	 * Used to control thread while maintaining connections between devices and
+	 * RPi
 	 */
-	private final List<ServiceRecord> m_serviceRecords = Lists
-			.newCopyOnWriteArrayList();;
+	private final ExecutorService m_deletegate = Executors.newFixedThreadPool(5);
 
 	/**
-	 * Place holder for the milling machine speed
+	 * Used to control threads while for asynchronous operation of getting data
+	 * from paired bluetooth milling machines
 	 */
-	private float m_speed;
+	private final ExecutorService m_deletegateForAsyncFunction = Executors.newFixedThreadPool(5);
 
 	/**
 	 * Place holder for all the {@link ServiceRecord} needed for this component
@@ -209,9 +153,59 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	private Properties m_devices;
 
 	/**
+	 * OSGi Event Admin Service Dependency
+	 */
+	@Reference(bind = "bindEventAdmin", unbind = "unbindEventAdmin")
+	private volatile EventAdmin m_eventAdmin;
+
+	/**
+	 * The final result computed after the async operation
+	 */
+	private ListenableFuture<String> m_finalResult;
+
+	/**
+	 * Represents the thread pool for initiating data retrieval from bluetooth
+	 * devices
+	 */
+	private final ListeningExecutorService m_pool = MoreExecutors.listeningDecorator(this.m_deletegate);
+
+	/**
+	 * Represents the thread pool to operate async operation
+	 */
+	private final ListeningExecutorService m_poolForAsyncFunction = MoreExecutors
+			.listeningDecorator(this.m_deletegateForAsyncFunction);
+
+	/**
 	 * Map to store list of configurations
 	 */
 	private Map<String, Object> m_properties;
+
+	/**
+	 * The intermediary result retrieved before the async operation
+	 */
+	private ListenableFuture<String> m_resultFromWorker;
+
+	/**
+	 * Bluetooth Service Record Dependency for paired bluetooth devices
+	 */
+	@Reference(bind = "bindServiceRecord", unbind = "unbindServiceRecord", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+	private volatile ServiceRecord m_serviceRecord;;
+
+	/**
+	 * Holds List of Service Record for all the paired devices
+	 */
+	private final List<ServiceRecord> m_serviceRecords = Lists.newCopyOnWriteArrayList();
+
+	/**
+	 * Place holder for the milling machine speed
+	 */
+	private float m_speed;
+
+	/**
+	 * Eclipse Kura System Service Dependency
+	 */
+	@Reference(bind = "bindSystemService", unbind = "unbindSystemService")
+	private volatile SystemService m_systemService;
 
 	/* Constructor */
 	public BluetoothMillingMachine() {
@@ -219,183 +213,264 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	}
 
 	/**
-	 * Callback to be used while {@link ServiceRecord} is registering
+	 * Callback used when this service component is activating
 	 */
-	public synchronized void bindServiceRecord(ServiceRecord serviceRecord) {
-		if (!m_serviceRecords.contains(serviceRecord)) {
-			m_serviceRecords.add(serviceRecord);
-		}
-	}
+	@Activate
+	protected synchronized void activate(final ComponentContext componentContext,
+			final Map<String, Object> properties) {
+		LOGGER.info("Activating Bluetooth Milling Machine Component...");
 
-	/**
-	 * Callback to be used while {@link ServiceRecord} is deregistering
-	 */
-	public synchronized void unbindServiceRecord(ServiceRecord serviceRecord) {
-		if (m_serviceRecords.size() > 0
-				&& m_serviceRecords.contains(serviceRecord))
-			m_serviceRecords.remove(serviceRecord);
+		this.m_properties = properties;
+
+		super.setCloudService(this.m_cloudService);
+		super.activate(componentContext);
+
+		this.doLoadMachines();
+		LOGGER.info("Activating Bluetooth Milling Machine Component... Done.");
 	}
 
 	/**
 	 * Callback to be used while {@link ActivityLogService} is registering
 	 */
-	public synchronized void bindActivityLogService(
-			ActivityLogService activityLogService) {
-		if (m_activityLogService == null) {
-			m_activityLogService = activityLogService;
+	public synchronized void bindActivityLogService(final ActivityLogService activityLogService) {
+		if (this.m_activityLogService == null) {
+			this.m_activityLogService = activityLogService;
 		}
-	}
-
-	/**
-	 * Callback to be used while {@link ActivityLogService} is deregistering
-	 */
-	public synchronized void unbindActivityLogService(
-			ActivityLogService activityLogService) {
-		if (m_activityLogService == activityLogService)
-			m_activityLogService = null;
-	}
-
-	/**
-	 * Callback to be used while {@link ConnectorService} is registering
-	 */
-	public synchronized void bindConnectorService(
-			ConnectorService connectorService) {
-		if (m_connectorService == null)
-			m_connectorService = connectorService;
-	}
-
-	/**
-	 * Callback to be used while {@link ConnectorService} is deregistering
-	 */
-	public synchronized void unbindConnectorService(
-			ConnectorService connectorService) {
-		if (m_connectorService != null)
-			m_connectorService = null;
-	}
-
-	/**
-	 * Callback to be used while {@link EventAdmin} is registering
-	 */
-	public synchronized void bindEventAdmin(EventAdmin eventAdmin) {
-		if (m_eventAdmin == null) {
-			m_eventAdmin = eventAdmin;
-		}
-	}
-
-	/**
-	 * Callback to be used while {@link EventAdmin} is deregistering
-	 */
-	public synchronized void unbindEventAdmin(EventAdmin eventAdmin) {
-		if (m_cloudService == eventAdmin)
-			m_eventAdmin = null;
 	}
 
 	/**
 	 * Callback to be used while {@link CloudService} is registering
 	 */
-	public synchronized void bindCloudService(CloudService cloudService) {
-		if (m_cloudService == null) {
-			super.setCloudService(m_cloudService = cloudService);
+	public synchronized void bindCloudService(final CloudService cloudService) {
+		if (this.m_cloudService == null) {
+			super.setCloudService(this.m_cloudService = cloudService);
 		}
-	}
-
-	/**
-	 * Callback to be used while {@link CloudService} is deregistering
-	 */
-	public synchronized void unbindCloudService(CloudService cloudService) {
-		if (m_cloudService == cloudService)
-			super.setCloudService(m_cloudService = null);
 	}
 
 	/**
 	 * Callback to be used while {@link ConfigurationService} is registering
 	 */
-	public synchronized void bindConfigurationService(
-			ConfigurationService configurationService) {
-		if (m_configurationService == null) {
-			m_configurationService = configurationService;
+	public synchronized void bindConfigurationService(final ConfigurationService configurationService) {
+		if (this.m_configurationService == null) {
+			this.m_configurationService = configurationService;
 		}
 	}
 
 	/**
-	 * Callback to be used while {@link ConfigurationService} is deregistering
+	 * Callback to be used while {@link ConnectorService} is registering
 	 */
-	public synchronized void unbindConfigurationService(
-			ConfigurationService configurationService) {
-		if (m_configurationService == configurationService)
-			m_configurationService = null;
+	public synchronized void bindConnectorService(final ConnectorService connectorService) {
+		if (this.m_connectorService == null) {
+			this.m_connectorService = connectorService;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link EventAdmin} is registering
+	 */
+	public synchronized void bindEventAdmin(final EventAdmin eventAdmin) {
+		if (this.m_eventAdmin == null) {
+			this.m_eventAdmin = eventAdmin;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link ServiceRecord} is registering
+	 */
+	public synchronized void bindServiceRecord(final ServiceRecord serviceRecord) {
+		if (!this.m_serviceRecords.contains(serviceRecord)) {
+			this.m_serviceRecords.add(serviceRecord);
+		}
 	}
 
 	/**
 	 * Callback to be used while {@link SystemService} is registering
 	 */
-	public synchronized void bindSystemService(SystemService systemService) {
-		if (m_systemService == null)
-			m_systemService = systemService;
+	public synchronized void bindSystemService(final SystemService systemService) {
+		if (this.m_systemService == null) {
+			this.m_systemService = systemService;
+		}
 	}
 
 	/**
-	 * Callback to be used while {@link SystemService} is deregistering
+	 * Callback used when this service component is deactivating
 	 */
-	public synchronized void unbindSystemService(SystemService systemService) {
-		if (m_systemService == systemService)
-			m_systemService = null;
+	@Override
+	@Deactivate
+	protected void deactivate(final ComponentContext context) {
+		LOGGER.debug("Deactivating Bluetooth Milling Machine Component...");
+		LOGGER.info("Releasing CloudApplicationClient for {}...", APP_ID);
+
+		super.deactivate(context);
+		this.m_pool.shutdown();
+		this.m_poolForAsyncFunction.shutdown();
+		this.m_serviceRecords.clear();
+
+		LOGGER.debug("Deactivating Bluetooth Milling Machine Component... Done.");
 	}
 
-	/**
-	 * Callback used when this service component is activating
-	 */
-	@Activate
-	protected synchronized void activate(ComponentContext componentContext,
-			Map<String, Object> properties) {
-		LOGGER.info("Activating Bluetooth Milling Machine Component...");
+	/** {@inheritDoc} */
+	@Override
+	protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+			final KuraResponsePayload respPayload) throws KuraException {
+		LOGGER.info("Bluetooth Milling Machine Communication Termination Started...");
 
-		m_properties = properties;
+		// Terminate bluetooth communication
+		if ("terminate".equals(reqTopic.getResources()[0])) {
+			if (!this.m_pool.isShutdown()) {
+				this.m_pool.shutdown();
+				this.m_poolForAsyncFunction.shutdown();
+			}
+		}
+		this.m_activityLogService.saveLog("Bluetooth Milling Machine Communication Terminated");
 
-		super.setCloudService(m_cloudService);
-		super.activate(componentContext);
+		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 
-		doLoadMachines();
-		LOGGER.info("Activating Bluetooth Milling Machine Component... Done.");
+		LOGGER.info("Bluetooth Milling Machine Communication Termination Done");
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+			final KuraResponsePayload respPayload) throws KuraException {
+		LOGGER.info("Bluetooth Milling Machine Component GET handler");
+
+		// Retrieve the configurations
+		if ("configurations".equals(reqTopic.getResources()[0])) {
+			LOGGER.info("Bluetooth Milling Machine Configuration Retrieval Started...");
+
+			final ComponentConfiguration configuration = this.m_configurationService
+					.getComponentConfiguration(APP_CONF_ID);
+
+			final IterableMap map = (IterableMap) configuration.getConfigurationProperties();
+			final MapIterator it = map.mapIterator();
+
+			while (it.hasNext()) {
+				final Object key = it.next();
+				final Object value = it.getValue();
+
+				respPayload.addMetric((String) key, value);
+			}
+			this.m_activityLogService.saveLog("Bluetooth Milling Machine Configuration Retrieved");
+
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+
+			LOGGER.info("Bluetooth Milling Machine Configuration Retrieval Finished");
+		}
+
+		// Retrieve the list of paired bluetooth devices
+		if ("devices".equals(reqTopic.getResources()[0])) {
+			LOGGER.info("Bluetooth Milling Machine Paired Device List Retrieval Started...");
+			// if the communication is not in progress and the client asks for
+			// list
+			// of paired bluetooth devices, it must return nothing
+			if (!this.m_pool.isShutdown()) {
+				final String devicesAsString = this.getDevicelist();
+				respPayload.setBody(devicesAsString.getBytes());
+				respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+			}
+			this.m_activityLogService.saveLog("List of Bluetooth Milling Machines Retrieved");
+			LOGGER.info("Bluetooth Milling Machine Paired Device List Retrieval Finished");
+		}
 	}
 
 	/**
 	 * Loads Milling Machines
 	 */
 	private void doLoadMachines() {
-		m_devices = loadMillingMachines((String) m_properties
-				.get(BLUETOOH_ENABLED_MILLING_MACHINES));
+		this.m_devices = this.loadMillingMachines((String) this.m_properties.get(BLUETOOH_ENABLED_MILLING_MACHINES));
 
 		// If the device is mentioned in the configuration of this
 		// component, then we have to publish the realtime data
-		m_serviceRecords
-				.stream()
-				.filter(serviceRecord -> m_devices.contains(serviceRecord
-						.getHostDevice().getBluetoothAddress()))
-				.forEach(serviceRecord -> doPublish(serviceRecord));
+		this.m_serviceRecords.stream()
+				.filter(serviceRecord -> this.m_devices.contains(serviceRecord.getHostDevice().getBluetoothAddress()))
+				.forEach(serviceRecord -> this.doPublish(serviceRecord));
 
+	}
+
+	/**
+	 * Used to publish realtime data retrieved from all the milling machines and
+	 * cache it
+	 */
+	private void doPublish(final ServiceRecord serviceRecord) {
+
+		final String remoteDeviceAddress = serviceRecord.getHostDevice().getBluetoothAddress();
+
+		final BluetoothConnector bluetoothConnector = new BluetoothConnector.Builder()
+				.setConnectorService(this.m_connectorService).setServiceRecord(serviceRecord).build();
+
+		bluetoothConnector.connect();
+
+		// first retrieve the bluetooth realtime data from the data retriever
+		// thread
+		this.m_resultFromWorker = this.m_pool.submit(new DataRetrieverWorker(bluetoothConnector));
+
+		// next do the async operation to save the result to cache retrieved by
+		// the
+		// data retriever thread
+		this.m_finalResult = Futures.transform(this.m_resultFromWorker,
+				new DataCacheAsyncOperation(this.m_poolForAsyncFunction, this.m_eventAdmin, remoteDeviceAddress));
+
+		final String topic = (String) this.m_properties.get(PUBLISH_TOPIC_PROP_NAME);
+
+		// finally publish the final transformed result to our listenable thread
+		// callback
+		Futures.addCallback(this.m_finalResult, new FuturePublishDataCallback(this.getCloudApplicationClient(),
+				topic + "/" + remoteDeviceAddress, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY));
+
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	protected void doPut(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+			final KuraResponsePayload respPayload) throws KuraException {
+
+		LOGGER.info("Bluetooth Milling Machine Configuration Updating...");
+
+		// Update the configurations
+		if ("configurations".equals(reqTopic.getResources()[0])) {
+			this.m_configurationService.updateConfiguration(APP_CONF_ID, reqPayload.metrics());
+
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		}
+		this.m_activityLogService.saveLog("Bluetooth Milling Machine Configuration Updated");
+
+		LOGGER.info("Bluetooth Milling Machine Configuration Updated");
+	}
+
+	/**
+	 * Returns the list of devices paired with this component
+	 */
+	private String getDevicelist() {
+
+		final StringWriter writer = new StringWriter();
+
+		try {
+			this.m_devices.store(writer, "");
+		} catch (final IOException e) {
+			LOGGER.error(Throwables.getStackTraceAsString(e));
+		}
+		return writer.getBuffer().toString();
 	}
 
 	/**
 	 * Used to parse configuration set to discover specified bluetooth enabled
 	 * devices
-	 * 
+	 *
 	 * @param devices
 	 *            The Configuration input as Property K-V Format
 	 * @return the parsed input as properties
 	 */
-	private Properties loadMillingMachines(String devices) {
+	private Properties loadMillingMachines(final String devices) {
 		final String SEPARATOR = ";";
 		final String NEW_LINE = "\n";
 
-		final Splitter splitter = Splitter.on(SEPARATOR).omitEmptyStrings()
-				.trimResults();
+		final Splitter splitter = Splitter.on(SEPARATOR).omitEmptyStrings().trimResults();
 		final Joiner stringDevicesJoiner = Joiner.on(NEW_LINE).skipNulls();
 
 		final Properties properties = new Properties();
 
-		final String deviceAsPropertiesFormat = stringDevicesJoiner
-				.join(splitter.splitToList(devices));
+		final String deviceAsPropertiesFormat = stringDevicesJoiner.join(splitter.splitToList(devices));
 
 		if (isNullOrEmpty(deviceAsPropertiesFormat.toString())) {
 			LOGGER.error("No Bluetooth Enabled Device Addess Found");
@@ -411,176 +486,78 @@ public class BluetoothMillingMachine extends Cloudlet implements
 	}
 
 	/**
-	 * Used to publish realtime data retrieved from all the milling machines and
-	 * cache it
+	 * Callback to be used while {@link ActivityLogService} is deregistering
 	 */
-	private void doPublish(ServiceRecord serviceRecord) {
-
-		final String remoteDeviceAddress = serviceRecord.getHostDevice()
-				.getBluetoothAddress();
-
-		final BluetoothConnector bluetoothConnector = new BluetoothConnector.Builder()
-				.setConnectorService(m_connectorService)
-				.setServiceRecord(serviceRecord).build();
-
-		bluetoothConnector.connect();
-
-		// first retrieve the bluetooth realtime data from the data retriever
-		// thread
-		m_resultFromWorker = m_pool.submit(new DataRetrieverWorker(
-				bluetoothConnector));
-
-		// next do the async operation to save the result to cache retrieved by
-		// the
-		// data retriever thread
-		m_finalResult = Futures.transform(m_resultFromWorker,
-				new DataCacheAsyncOperation(m_poolForAsyncFunction,
-						m_eventAdmin, remoteDeviceAddress));
-
-		final String topic = (String) m_properties.get(PUBLISH_TOPIC_PROP_NAME);
-
-		// finally publish the final transformed result to our listenable thread
-		// callback
-		Futures.addCallback(m_finalResult, new FuturePublishDataCallback(
-				getCloudApplicationClient(), topic + "/" + remoteDeviceAddress,
-				DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY));
-
+	public synchronized void unbindActivityLogService(final ActivityLogService activityLogService) {
+		if (this.m_activityLogService == activityLogService) {
+			this.m_activityLogService = null;
+		}
 	}
 
 	/**
-	 * Callback used when this service component is deactivating
+	 * Callback to be used while {@link CloudService} is deregistering
 	 */
-	@Override
-	@Deactivate
-	protected void deactivate(ComponentContext context) {
-		LOGGER.debug("Deactivating Bluetooth Milling Machine Component...");
-		LOGGER.info("Releasing CloudApplicationClient for {}...", APP_ID);
+	public synchronized void unbindCloudService(final CloudService cloudService) {
+		if (this.m_cloudService == cloudService) {
+			super.setCloudService(this.m_cloudService = null);
+		}
+	}
 
-		super.deactivate(context);
-		m_pool.shutdown();
-		m_poolForAsyncFunction.shutdown();
-		m_serviceRecords.clear();
+	/**
+	 * Callback to be used while {@link ConfigurationService} is deregistering
+	 */
+	public synchronized void unbindConfigurationService(final ConfigurationService configurationService) {
+		if (this.m_configurationService == configurationService) {
+			this.m_configurationService = null;
+		}
+	}
 
-		LOGGER.debug("Deactivating Bluetooth Milling Machine Component... Done.");
+	/**
+	 * Callback to be used while {@link ConnectorService} is deregistering
+	 */
+	public synchronized void unbindConnectorService(final ConnectorService connectorService) {
+		if (this.m_connectorService != null) {
+			this.m_connectorService = null;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link EventAdmin} is deregistering
+	 */
+	public synchronized void unbindEventAdmin(final EventAdmin eventAdmin) {
+		if (this.m_cloudService == eventAdmin) {
+			this.m_eventAdmin = null;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link ServiceRecord} is deregistering
+	 */
+	public synchronized void unbindServiceRecord(final ServiceRecord serviceRecord) {
+		if ((this.m_serviceRecords.size() > 0) && this.m_serviceRecords.contains(serviceRecord)) {
+			this.m_serviceRecords.remove(serviceRecord);
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link SystemService} is deregistering
+	 */
+	public synchronized void unbindSystemService(final SystemService systemService) {
+		if (this.m_systemService == systemService) {
+			this.m_systemService = null;
+		}
 	}
 
 	/**
 	 * Used to be called when configurations will get updated
 	 */
-	public void updated(Map<String, Object> properties) {
+	public void updated(final Map<String, Object> properties) {
 		LOGGER.info("Updated Bluetooth Milling Machine Component...");
 
-		m_properties = properties;
-		properties.keySet().forEach(
-				s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
-		doLoadMachines();
+		this.m_properties = properties;
+		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
+		this.doLoadMachines();
 
 		LOGGER.info("Updated Bluetooth Milling Machine Component... Done.");
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	protected void doGet(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
-			KuraResponsePayload respPayload) throws KuraException {
-		LOGGER.info("Bluetooth Milling Machine Component GET handler");
-
-		// Retrieve the configurations
-		if ("configurations".equals(reqTopic.getResources()[0])) {
-			LOGGER.info("Bluetooth Milling Machine Configuration Retrieval Started...");
-
-			final ComponentConfiguration configuration = m_configurationService
-					.getComponentConfiguration(APP_CONF_ID);
-
-			final IterableMap map = (IterableMap) configuration
-					.getConfigurationProperties();
-			final MapIterator it = map.mapIterator();
-
-			while (it.hasNext()) {
-				final Object key = it.next();
-				final Object value = it.getValue();
-
-				respPayload.addMetric((String) key, value);
-			}
-			m_activityLogService
-					.saveLog("Bluetooth Milling Machine Configuration Retrieved");
-
-			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
-
-			LOGGER.info("Bluetooth Milling Machine Configuration Retrieval Finished");
-		}
-
-		// Retrieve the list of paired bluetooth devices
-		if ("devices".equals(reqTopic.getResources()[0])) {
-			LOGGER.info("Bluetooth Milling Machine Paired Device List Retrieval Started...");
-			// if the communication is not in progress and the client asks for
-			// list
-			// of paired bluetooth devices, it must return nothing
-			if (!m_pool.isShutdown()) {
-				final String devicesAsString = getDevicelist();
-				respPayload.setBody(devicesAsString.getBytes());
-				respPayload
-						.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
-			}
-			m_activityLogService
-					.saveLog("List of Bluetooth Milling Machines Retrieved");
-			LOGGER.info("Bluetooth Milling Machine Paired Device List Retrieval Finished");
-		}
-	}
-
-	/**
-	 * Returns the list of devices paired with this component
-	 */
-	private String getDevicelist() {
-
-		final StringWriter writer = new StringWriter();
-
-		try {
-			m_devices.store(writer, "");
-		} catch (final IOException e) {
-			LOGGER.error(Throwables.getStackTraceAsString(e));
-		}
-		return writer.getBuffer().toString();
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	protected void doExec(CloudletTopic reqTopic,
-			KuraRequestPayload reqPayload, KuraResponsePayload respPayload)
-			throws KuraException {
-		LOGGER.info("Bluetooth Milling Machine Communication Termination Started...");
-
-		// Terminate bluetooth communication
-		if ("terminate".equals(reqTopic.getResources()[0])) {
-			if (!m_pool.isShutdown()) {
-				m_pool.shutdown();
-				m_poolForAsyncFunction.shutdown();
-			}
-		}
-		m_activityLogService
-				.saveLog("Bluetooth Milling Machine Communication Terminated");
-
-		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
-
-		LOGGER.info("Bluetooth Milling Machine Communication Termination Done");
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	protected void doPut(CloudletTopic reqTopic, KuraRequestPayload reqPayload,
-			KuraResponsePayload respPayload) throws KuraException {
-
-		LOGGER.info("Bluetooth Milling Machine Configuration Updating...");
-
-		// Update the configurations
-		if ("configurations".equals(reqTopic.getResources()[0])) {
-			m_configurationService.updateConfiguration(APP_CONF_ID,
-					reqPayload.metrics());
-
-			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
-		}
-		m_activityLogService
-				.saveLog("Bluetooth Milling Machine Configuration Updated");
-
-		LOGGER.info("Bluetooth Milling Machine Configuration Updated");
 	}
 }

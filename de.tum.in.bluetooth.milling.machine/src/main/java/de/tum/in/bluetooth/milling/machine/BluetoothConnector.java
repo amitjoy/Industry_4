@@ -30,17 +30,46 @@ import com.google.common.base.Throwables;
 
 /**
  * Used to establish connection between the paired bluetooth device and RPi
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
 public final class BluetoothConnector {
 
 	/**
+	 * Builder class to set Service Records and Connector Service
+	 */
+	public static class Builder {
+
+		/**
+		 * builder to build the object
+		 */
+		public BluetoothConnector build() {
+			return new BluetoothConnector();
+		}
+
+		/**
+		 * Setter to set OSGi Connector Service
+		 */
+		public Builder setConnectorService(final ConnectorService connectorService) {
+			s_connectorService = connectorService;
+			return this;
+		}
+
+		/**
+		 * Setter to set bluetooth Service record for paired device
+		 */
+		public Builder setServiceRecord(final ServiceRecord record) {
+			s_serviceRecord = record;
+			return this;
+		}
+
+	}
+
+	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(BluetoothConnector.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BluetoothConnector.class);
 
 	/**
 	 * OSGi Connector Service
@@ -53,11 +82,6 @@ public final class BluetoothConnector {
 	private static ServiceRecord s_serviceRecord;
 
 	/**
-	 * Stream connection between paired bluetooth device and RPi
-	 */
-	private StreamConnection m_streamConnection;
-
-	/**
 	 * Input Connection Stream for the paired bluetooth device
 	 */
 	private InputStream m_inputStream;
@@ -67,69 +91,37 @@ public final class BluetoothConnector {
 	 */
 	private OutputStream m_outputStream;
 
+	/**
+	 * Stream connection between paired bluetooth device and RPi
+	 */
+	private StreamConnection m_streamConnection;
+
 	/* Constructor */
 	private BluetoothConnector() {
-	}
-
-	/**
-	 * Builder class to set Service Records and Connector Service
-	 */
-	public static class Builder {
-
-		/**
-		 * Setter to set bluetooth Service record for paired device
-		 */
-		public Builder setServiceRecord(ServiceRecord record) {
-			s_serviceRecord = record;
-			return this;
-		}
-
-		/**
-		 * Setter to set OSGi Connector Service
-		 */
-		public Builder setConnectorService(ConnectorService connectorService) {
-			s_connectorService = connectorService;
-			return this;
-		}
-
-		/**
-		 * builder to build the object
-		 */
-		public BluetoothConnector build() {
-			return new BluetoothConnector();
-		}
-
 	}
 
 	/**
 	 * Used to establish connection between the paired bluetooth device and RPi
 	 */
 	public void connect() {
-		LOGGER.info("Bluetooth Connection initiating for ... "
-				+ s_serviceRecord.getHostDevice().getBluetoothAddress());
+		LOGGER.info("Bluetooth Connection initiating for ... " + s_serviceRecord.getHostDevice().getBluetoothAddress());
 
 		final String connectionURL = s_serviceRecord.getConnectionURL(0, false);
 		try {
-			LOGGER.info("Connecting to..."
-					+ s_serviceRecord.getHostDevice().getBluetoothAddress());
-			m_streamConnection = (StreamConnection) s_connectorService.open(
-					connectionURL, ConnectorService.READ, true);
+			LOGGER.info("Connecting to..." + s_serviceRecord.getHostDevice().getBluetoothAddress());
+			this.m_streamConnection = (StreamConnection) s_connectorService.open(connectionURL, ConnectorService.READ,
+					true);
 		} catch (final IOException e) {
-			LOGGER.error("Not able to connect to the remote device",
-					Throwables.getStackTraceAsString(e));
+			LOGGER.error("Not able to connect to the remote device", Throwables.getStackTraceAsString(e));
 		}
 
-		LOGGER.info("Connection Established with "
-				+ s_serviceRecord.getHostDevice().getBluetoothAddress());
+		LOGGER.info("Connection Established with " + s_serviceRecord.getHostDevice().getBluetoothAddress());
 		try {
-			LOGGER.info("Getting IO Streams for "
-					+ s_serviceRecord.getHostDevice().getBluetoothAddress());
-			m_inputStream = m_streamConnection.openInputStream();
-			m_outputStream = m_streamConnection.openOutputStream();
+			LOGGER.info("Getting IO Streams for " + s_serviceRecord.getHostDevice().getBluetoothAddress());
+			this.m_inputStream = this.m_streamConnection.openInputStream();
+			this.m_outputStream = this.m_streamConnection.openOutputStream();
 		} catch (final IOException e) {
-			LOGGER.error(
-					"Unable to retrieve stream connection for remote device",
-					Throwables.getStackTraceAsString(e));
+			LOGGER.error("Unable to retrieve stream connection for remote device", Throwables.getStackTraceAsString(e));
 		}
 	}
 
@@ -137,14 +129,14 @@ public final class BluetoothConnector {
 	 * Getter to retrieve the established input connection
 	 */
 	public InputStream getInputStream() {
-		return m_inputStream;
+		return this.m_inputStream;
 	}
 
 	/**
 	 * Getter to retrieve the established output connection
 	 */
 	public OutputStream getOutputStream() {
-		return m_outputStream;
+		return this.m_outputStream;
 	}
 
 }

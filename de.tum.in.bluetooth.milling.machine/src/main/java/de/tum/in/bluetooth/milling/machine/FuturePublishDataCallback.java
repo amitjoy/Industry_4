@@ -26,7 +26,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * Callback to be used when {@link ListenableFuture} would be processed
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
@@ -35,8 +35,7 @@ public final class FuturePublishDataCallback implements FutureCallback<String> {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(FuturePublishDataCallback.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(FuturePublishDataCallback.class);
 
 	/**
 	 * Cloud Application Client
@@ -44,9 +43,9 @@ public final class FuturePublishDataCallback implements FutureCallback<String> {
 	private final CloudClient m_cloudApplicationClient;
 
 	/**
-	 * The Bluetooth address of the milling machine
+	 * Publish Message Priority
 	 */
-	private final String m_remoteDeviceAddress;
+	int m_dfltPriority;
 
 	/**
 	 * Publish Message QoS
@@ -59,16 +58,15 @@ public final class FuturePublishDataCallback implements FutureCallback<String> {
 	boolean m_dfltRetain;
 
 	/**
-	 * Publish Message Priority
+	 * The Bluetooth address of the milling machine
 	 */
-	int m_dfltPriority;
+	private final String m_remoteDeviceAddress;
 
 	/**
 	 * Constructor
 	 */
-	public FuturePublishDataCallback(CloudClient cloudApplicationClient,
-			String remoteDeviceAddress, int dfltPubQos, boolean dfltRetain,
-			int dfltPriority) {
+	public FuturePublishDataCallback(final CloudClient cloudApplicationClient, final String remoteDeviceAddress,
+			final int dfltPubQos, final boolean dfltRetain, final int dfltPriority) {
 		this.m_cloudApplicationClient = cloudApplicationClient;
 		this.m_remoteDeviceAddress = remoteDeviceAddress;
 		this.m_dfltPubQos = dfltPubQos;
@@ -77,21 +75,20 @@ public final class FuturePublishDataCallback implements FutureCallback<String> {
 
 	/** {@inheritDoc} */
 	@Override
-	public void onSuccess(String result) {
-		try {
-			// will publish data to
-			// $EDC/app_id/client_id/milling_machine/{some_bluetooth_address}
-			m_cloudApplicationClient.controlPublish("milling_machine",
-					m_remoteDeviceAddress, result.getBytes(), m_dfltPubQos,
-					m_dfltRetain, m_dfltPriority);
-		} catch (final KuraException e) {
-			LOGGER.error(Throwables.getStackTraceAsString(e));
-		}
+	public void onFailure(final Throwable t) {
+		Throwables.propagate(t);
 	}
 
 	/** {@inheritDoc} */
 	@Override
-	public void onFailure(Throwable t) {
-		Throwables.propagate(t);
+	public void onSuccess(final String result) {
+		try {
+			// will publish data to
+			// $EDC/app_id/client_id/milling_machine/{some_bluetooth_address}
+			this.m_cloudApplicationClient.controlPublish("milling_machine", this.m_remoteDeviceAddress,
+					result.getBytes(), this.m_dfltPubQos, this.m_dfltRetain, this.m_dfltPriority);
+		} catch (final KuraException e) {
+			LOGGER.error(Throwables.getStackTraceAsString(e));
+		}
 	}
 }

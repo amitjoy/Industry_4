@@ -37,7 +37,7 @@ import de.tum.in.mongodb.MongoDBService;
 
 /**
  * OSGi Event Listener to cache the data in a Concurrent Map
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
@@ -47,28 +47,7 @@ public class DataCache implements EventHandler {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(DataCache.class);
-
-	/**
-	 * Placeholder to store the device address from the event properties
-	 */
-	private String m_deviceAddress;
-
-	/**
-	 * Placeholder to store the data timestamp name from the event properties
-	 */
-	private String m_timestamp;
-
-	/**
-	 * Placeholder to store the data from the event properties
-	 */
-	private String m_realtimeData;
-
-	/**
-	 * Placeholder to store the extra information from the event properties
-	 */
-	private Object m_extraInformation;
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataCache.class);
 
 	/**
 	 * The cache to store data
@@ -77,46 +56,52 @@ public class DataCache implements EventHandler {
 	private Cache<String, Object> m_cache;
 
 	/**
+	 * Placeholder to store the device address from the event properties
+	 */
+	private String m_deviceAddress;
+
+	/**
+	 * Placeholder to store the extra information from the event properties
+	 */
+	private Object m_extraInformation;
+
+	/**
 	 * Mongo DB Service
 	 */
 	@Reference(bind = "bindMongoDbService", unbind = "unbindMongoDbService")
 	private volatile MongoDBService m_mongoDbService;
 
 	/**
-	 * Callback when MongoDB Service is getting registered
+	 * Placeholder to store the data from the event properties
 	 */
-	protected synchronized void bindMongoDbService(MongoDBService mongoDBService) {
-		if (this.m_mongoDbService == null)
-			m_mongoDbService = mongoDBService;
-	}
+	private String m_realtimeData;
 
 	/**
-	 * Callback when MongoDB Service is getting deregistered
+	 * Placeholder to store the data timestamp name from the event properties
 	 */
-	protected synchronized void unbindMongoDbService(
-			MongoDBService mongoDBService) {
-		if (this.m_mongoDbService == mongoDBService)
-			m_mongoDbService = null;
-	}
+	private String m_timestamp;
 
 	/**
 	 * The callback while the component gets registered in the service registry
 	 */
 	@Activate
-	protected synchronized void activate(ComponentContext componentContext) {
+	protected synchronized void activate(final ComponentContext componentContext) {
 		LOGGER.info("Activating Caching Component...");
 
-		m_cache = CacheBuilder
-				.newBuilder()
-				.concurrencyLevel(5)
-				.weakValues()
-				.maximumSize(50000)
+		this.m_cache = CacheBuilder.newBuilder().concurrencyLevel(5).weakValues().maximumSize(50000)
 				.expireAfterWrite(2, TimeUnit.HOURS)
-				.removalListener(
-						new RemoveRealtimeDataListener(m_mongoDbService))
-				.build();
+				.removalListener(new RemoveRealtimeDataListener(this.m_mongoDbService)).build();
 
 		LOGGER.info("Activating Caching Component...Done");
+	}
+
+	/**
+	 * Callback when MongoDB Service is getting registered
+	 */
+	protected synchronized void bindMongoDbService(final MongoDBService mongoDBService) {
+		if (this.m_mongoDbService == null) {
+			this.m_mongoDbService = mongoDBService;
+		}
 	}
 
 	/**
@@ -124,17 +109,17 @@ public class DataCache implements EventHandler {
 	 * registry
 	 */
 	@Deactivate
-	protected synchronized void deactivate(ComponentContext componentContext) {
+	protected synchronized void deactivate(final ComponentContext componentContext) {
 		LOGGER.info("Deactivating Caching Component...");
-		m_cache.cleanUp();
-		m_cache = null;
+		this.m_cache.cleanUp();
+		this.m_cache = null;
 		LOGGER.info("Deactivating Caching Component...Done");
 	}
 
 	/** {@inheritDoc} */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void handleEvent(Event event) {
+	public void handleEvent(final Event event) {
 		LOGGER.debug("Cache Event Handler starting....");
 
 		Preconditions.checkNotNull(event);
@@ -142,21 +127,29 @@ public class DataCache implements EventHandler {
 			LOGGER.debug("Cache Event Handler caching....");
 
 			// Extract all the event properties
-			m_deviceAddress = (String) event.getProperty("device.id");
-			m_timestamp = (String) event.getProperty("timestamp");
-			m_realtimeData = (String) event.getProperty("data");
-			m_extraInformation = event.getProperty("extra.info");
+			this.m_deviceAddress = (String) event.getProperty("device.id");
+			this.m_timestamp = (String) event.getProperty("timestamp");
+			this.m_realtimeData = (String) event.getProperty("data");
+			this.m_extraInformation = event.getProperty("extra.info");
 
 			// Prepare the data and wrap it
-			final RealtimeData data = new RealtimeData.Builder()
-					.setDeviceAddress(m_deviceAddress)
-					.setTimestamp(m_timestamp).setValue(m_realtimeData)
-					.setExtraBody(m_extraInformation).build();
+			final RealtimeData data = new RealtimeData.Builder().setDeviceAddress(this.m_deviceAddress)
+					.setTimestamp(this.m_timestamp).setValue(this.m_realtimeData).setExtraBody(this.m_extraInformation)
+					.build();
 
 			// Now put the data in the cache
-			m_cache.put(String.valueOf(System.currentTimeMillis()), data);
+			this.m_cache.put(String.valueOf(System.currentTimeMillis()), data);
 
 			LOGGER.debug("Cache Event Handler Caching...done");
+		}
+	}
+
+	/**
+	 * Callback when MongoDB Service is getting deregistered
+	 */
+	protected synchronized void unbindMongoDbService(final MongoDBService mongoDBService) {
+		if (this.m_mongoDbService == mongoDBService) {
+			this.m_mongoDbService = null;
 		}
 	}
 }
