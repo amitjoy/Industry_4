@@ -33,13 +33,13 @@ public class RemoveRealtimeDataListener implements RemovalListener<String, Objec
 
 	/** Constructor */
 	public RemoveRealtimeDataListener(final MongoDBService mongoDbService) {
-		m_mongoDBService = mongoDbService;
+		this.m_mongoDBService = mongoDbService;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void onRemoval(final RemovalNotification<String, Object> notification) {
-		m_mongoDBService.getDatabase().getCollection("BLUETOOTH-MILLING");
+		this.m_mongoDBService.getDatabase().getCollection("BLUETOOTH-MILLING");
 
 		// TODO Insert the data
 	}

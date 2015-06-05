@@ -41,7 +41,7 @@ import de.tum.in.mongodb.MongoDBService;
  * @author AMIT KUMAR MONDAL
  *
  */
-@Component
+@Component(name = "de.tum.in.realtime.data.cache")
 public class DataCache implements EventHandler {
 
 	/**
@@ -52,7 +52,6 @@ public class DataCache implements EventHandler {
 	/**
 	 * The cache to store data
 	 */
-	@SuppressWarnings("unchecked")
 	private Cache<String, Object> m_cache;
 
 	/**
@@ -117,7 +116,6 @@ public class DataCache implements EventHandler {
 	}
 
 	/** {@inheritDoc} */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void handleEvent(final Event event) {
 		LOGGER.debug("Cache Event Handler starting....");
