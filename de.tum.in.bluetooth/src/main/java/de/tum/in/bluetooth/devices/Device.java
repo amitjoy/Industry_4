@@ -17,8 +17,16 @@ package de.tum.in.bluetooth.devices;
 
 import java.math.BigInteger;
 
+import javax.bluetooth.RemoteDevice;
+
 import com.google.common.base.MoreObjects;
 
+/**
+ * Represents a {@link RemoteDevice} in an abstract way
+ * 
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public class Device {
 
 	private String id;
