@@ -59,10 +59,10 @@ public class SPPServer {
 	private void startServer() throws IOException {
 		// Create a UUID for SPP
 		final UUID uuid = new UUID("0000110100001000800000805F9B34FB", false);
-		// Create the servicve url
-		final String connectionString = "btspp://localhost:" + uuid + ";name=Sample SPP Server";
+		// Create the service URL
+		final String connectionString = "btspp://localhost:" + uuid + ";name=Bluetooth Milling Machine Simulation";
 
-		// open server url
+		// open server URL
 		final StreamConnectionNotifier streamConnNotifier = (StreamConnectionNotifier) Connector.open(connectionString);
 
 		// Wait for client connection
