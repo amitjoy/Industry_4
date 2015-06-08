@@ -767,7 +767,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	 * @return the parsed input as properties
 	 */
 	private Properties loadListOfDevicesToBeDiscovered(final String devices) {
-		final String SEPARATOR = ";";
+		final String SEPARATOR = "#";
 		final String NEW_LINE = "\n";
 
 		final Splitter splitter = Splitter.on(SEPARATOR).omitEmptyStrings().trimResults();
