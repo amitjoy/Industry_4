@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Tue Jun 02 13:39:52 CEST 2015
+#Sun Jun 21 00:11:01 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.commons_build.xml
 build.dp.file=<.>/de.tum.in.dp.commons.dp
 build.location=
@@ -38,7 +38,14 @@ bundles.4.missing=false
 bundles.4.name=de.tum.in.heartbeat-1.0-SNAPSHOT.jar
 bundles.4.symbolic_name=de.tum.in.heartbeat
 bundles.4.version=1.0.0.SNAPSHOT
-bundles.count=5
+bundles.5.bundle_path=/Users/AMIT/IoT_IDP/Pi/de.tum.in.splunk/target/de.tum.in.splunk-1.0-SNAPSHOT.jar
+bundles.5.customizer=false
+bundles.5.headers.count=0
+bundles.5.missing=false
+bundles.5.name=de.tum.in.splunk-1.0-SNAPSHOT.jar
+bundles.5.symbolic_name=de.tum.in.splunk
+bundles.5.version=1.0.0.SNAPSHOT
+bundles.count=6
 certificates.count=0
 general.signbundles=true
 headers.contact.address=admin@amitinside.com

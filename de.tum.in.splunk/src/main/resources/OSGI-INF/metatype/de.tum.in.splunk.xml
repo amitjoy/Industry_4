@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
+	localization="en_us">
+	<OCD id="de.tum.in.splunk" name="Splunk"
+		description="This bundle is used to configure information bus end-points">
+
+		<Icon
+			resource="http://icons.iconarchive.com/icons/custom-icon-design/flatastic-8/128/Open-folder-info-icon.png"
+			size="32" />
+
+		<AD id="bluetooth.realtime.topic" name="bluetooth.realtime.topic" type="String"
+			cardinality="0" required="true" default="$EDC/bluetooth/realtime"
+			description="Configurable property to set Bluetooth Realtime Topic Namespace" />
+
+		<AD id="opcua.realtime.topic" name="opcua.realtime.topic"
+			type="String" cardinality="0" required="true" default="$EDC/opcua/realtime"
+			description="Configurable Property to set OPC-UA Realtime Topic Namespace" />
+
+		<AD id="wifi.realtime.topic" name="wifi.realtime.topic"
+			type="String" cardinality="0" required="true" default="$EDC/wifi/realtime"
+			description="Configurable Property to set Wifi Realtime Topic Namespace" />
+
+		<AD id="event.log.topic" name="event.log.topic"
+			type="String" cardinality="0" required="true" default="$EDC/event/log"
+			description="Configurable Property to set Activity Events Topic Namespace" />
+
+	</OCD>
+
+	<Designate pid="de.tum.in.splunk">
+		<Object ocdref="de.tum.in.splunk" />
+	</Designate>
+</MetaData>
