@@ -19,44 +19,15 @@ import com.google.common.base.MoreObjects;
 
 /**
  * The realtime data format must align with this
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
 public final class RealtimeData {
 
 	/**
-	 * The bluetooth address of the device which spawned the result
-	 */
-	private final String m_deviceAddress;
-
-	/**
-	 * The value retrieved during communication
-	 */
-	private final Object m_value;
-
-	/**
-	 * The timestamp of the data
-	 */
-	private final String m_timestamp;
-
-	/**
-	 * Extra Information if needed can be provided
-	 */
-	private final Object m_extraBody;
-
-	/* Constructor */
-	private RealtimeData(String deviceAddress, Object value, String timeStamp,
-			Object extraBody) {
-		m_deviceAddress = deviceAddress;
-		m_value = value;
-		m_timestamp = timeStamp;
-		m_extraBody = extraBody;
-	}
-
-	/**
 	 * Builder class to set optional values
-	 * 
+	 *
 	 * @author AMIT KUMAR MONDAL
 	 *
 	 */
@@ -68,9 +39,9 @@ public final class RealtimeData {
 		private String m_deviceAddress;
 
 		/**
-		 * The value retrieved
+		 * Extra Information
 		 */
-		private Object m_value;
+		private Object m_extraBody;
 
 		/**
 		 * The timestamp of the data
@@ -78,85 +49,112 @@ public final class RealtimeData {
 		private String m_timestamp;
 
 		/**
-		 * Extra Information
+		 * The value retrieved
 		 */
-		private Object m_extraBody;
+		private Object m_value;
+
+		/**
+		 * Final Building of the object
+		 */
+		public RealtimeData build() {
+			return new RealtimeData(this.m_deviceAddress, this.m_value, this.m_timestamp, this.m_extraBody);
+		}
 
 		/**
 		 * Setter for device address
 		 */
-		public Builder setDeviceAddress(String deviceAddress) {
-			m_deviceAddress = deviceAddress;
-			return this;
-		}
-
-		/**
-		 * Setter for realtime data
-		 */
-		public Builder setValue(Object value) {
-			m_value = value;
-			return this;
-		}
-
-		/**
-		 * Setter for timestamp
-		 */
-		public Builder setTimestamp(String timestamp) {
-			m_timestamp = timestamp;
+		public Builder setDeviceAddress(final String deviceAddress) {
+			this.m_deviceAddress = deviceAddress;
 			return this;
 		}
 
 		/**
 		 * Setter for extra body
 		 */
-		public Builder setExtraBody(Object extraBody) {
-			m_extraBody = extraBody;
+		public Builder setExtraBody(final Object extraBody) {
+			this.m_extraBody = extraBody;
 			return this;
 		}
 
 		/**
-		 * Final Building of the object
+		 * Setter for timestamp
 		 */
-		public RealtimeData build() {
-			return new RealtimeData(m_deviceAddress, m_value, m_timestamp,
-					m_extraBody);
+		public Builder setTimestamp(final String timestamp) {
+			this.m_timestamp = timestamp;
+			return this;
 		}
 
+		/**
+		 * Setter for realtime data
+		 */
+		public Builder setValue(final Object value) {
+			this.m_value = value;
+			return this;
+		}
+
+	}
+
+	/**
+	 * The bluetooth address of the device which spawned the result
+	 */
+	private final String m_deviceAddress;
+
+	/**
+	 * Extra Information if needed can be provided
+	 */
+	private final Object m_extraBody;
+
+	/**
+	 * The timestamp of the data
+	 */
+	private final String m_timestamp;
+
+	/**
+	 * The value retrieved during communication
+	 */
+	private final Object m_value;
+
+	/* Constructor */
+	private RealtimeData(final String deviceAddress, final Object value, final String timeStamp,
+			final Object extraBody) {
+		this.m_deviceAddress = deviceAddress;
+		this.m_value = value;
+		this.m_timestamp = timeStamp;
+		this.m_extraBody = extraBody;
 	}
 
 	/**
 	 * The Getter for bluetooth address
 	 */
 	public String getDeviceAddress() {
-		return m_deviceAddress;
-	}
-
-	/**
-	 * The getter for the value
-	 */
-	public Object getValue() {
-		return m_value;
-	}
-
-	/**
-	 * The getter for the timestamp
-	 */
-	public String getTimestamp() {
-		return m_timestamp;
+		return this.m_deviceAddress;
 	}
 
 	/**
 	 * The getter for the extra body
 	 */
 	public Object getExtraBody() {
-		return m_extraBody;
+		return this.m_extraBody;
+	}
+
+	/**
+	 * The getter for the timestamp
+	 */
+	public String getTimestamp() {
+		return this.m_timestamp;
+	}
+
+	/**
+	 * The getter for the value
+	 */
+	public Object getValue() {
+		return this.m_value;
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).addValue(m_extraBody)
-				.addValue(m_value).addValue(m_deviceAddress)
-				.addValue(m_timestamp).toString();
+		return MoreObjects.toStringHelper(this).addValue(this.m_extraBody).addValue(this.m_value)
+				.addValue(this.m_deviceAddress).addValue(this.m_timestamp).toString();
 	}
 }

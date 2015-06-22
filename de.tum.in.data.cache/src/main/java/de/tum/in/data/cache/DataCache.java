@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -34,7 +33,6 @@ import com.google.common.cache.CacheBuilder;
 
 import de.tum.in.data.format.RealtimeData;
 import de.tum.in.events.Events;
-import de.tum.in.mongodb.MongoDBService;
 
 /**
  * OSGi Event Listener to cache the data in a Concurrent Map
@@ -67,12 +65,6 @@ public class DataCache implements EventHandler {
 	private Object m_extraInformation;
 
 	/**
-	 * Mongo DB Service
-	 */
-	@Reference(bind = "bindMongoDbService", unbind = "unbindMongoDbService")
-	private volatile MongoDBService m_mongoDbService;
-
-	/**
 	 * Placeholder to store the data from the event properties
 	 */
 	private String m_realtimeData;
@@ -90,19 +82,9 @@ public class DataCache implements EventHandler {
 		LOGGER.info("Activating Caching Component...");
 
 		this.m_cache = CacheBuilder.newBuilder().concurrencyLevel(5).weakValues().maximumSize(50000)
-				.expireAfterWrite(2, TimeUnit.HOURS)
-				.removalListener(new RemoveRealtimeDataListener(this.m_mongoDbService)).build();
+				.expireAfterWrite(3, TimeUnit.HOURS).removalListener(new RemoveRealtimeDataListener()).build();
 
 		LOGGER.info("Activating Caching Component...Done");
-	}
-
-	/**
-	 * Callback when MongoDB Service is getting registered
-	 */
-	protected synchronized void bindMongoDbService(final MongoDBService mongoDBService) {
-		if (this.m_mongoDbService == null) {
-			this.m_mongoDbService = mongoDBService;
-		}
 	}
 
 	/**
@@ -141,15 +123,6 @@ public class DataCache implements EventHandler {
 			this.m_cache.put(String.valueOf(System.currentTimeMillis()), data);
 
 			LOGGER.debug("Cache Event Handler Caching...done");
-		}
-	}
-
-	/**
-	 * Callback when MongoDB Service is getting deregistered
-	 */
-	protected synchronized void unbindMongoDbService(final MongoDBService mongoDBService) {
-		if (this.m_mongoDbService == mongoDBService) {
-			this.m_mongoDbService = null;
 		}
 	}
 }

@@ -86,7 +86,7 @@ public final class FuturePublishDataCallback implements FutureCallback<Object> {
 		try {
 			// will publish data to
 			// $EDC/account_name/device_id/MILLING-V1/milling_machine for Mobile
-			// Client
+			// Clients
 			final KuraPayload kuraPayload = new KuraPayload();
 			kuraPayload.addMetric("result", result);
 
@@ -94,8 +94,8 @@ public final class FuturePublishDataCallback implements FutureCallback<Object> {
 					this.m_dfltRetain, this.m_dfltPriority);
 
 			// will publish data to
-			// $EDC/account_name/splunk/MILLING-V1/milling_machine for Mobile
-			// Client
+			// $EDC/account_name/splunk/MILLING-V1/milling_machine for Splunk
+			// Logging
 			this.m_cloudApplicationClient.controlPublish("splunk", "milling_machine", result.toString().getBytes(), 1,
 					true, this.m_dfltPriority);
 		} catch (final KuraException e) {

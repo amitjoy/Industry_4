@@ -101,12 +101,6 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	private static final String PROGRAM_SETPOINT_NAME = "program.setPoint";
 
 	/**
-	 * Configurable Property to set the rate by which the realtime data would be
-	 * pushed to the clients
-	 */
-	private static final String PUBLISH_RATE_PROP_NAME = "publish.rate";
-
-	/**
 	 * Configurable Property for topic to publish realtime data
 	 */
 	private static final String PUBLISH_TOPIC_PROP_NAME = "publish.semanticTopic";
