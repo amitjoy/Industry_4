@@ -45,7 +45,7 @@ import com.google.common.io.Files;
  * @see IActivityLogService
  * @author AMIT KUMAR MONDAL
  */
-@Component(immediate = true, name = "com.swissbit.activity.log.service")
+@Component(immediate = true, name = "de.tum.in.activity.log.service")
 @Service(value = { IActivityLogService.class })
 public class ActivityLogService extends Cloudlet implements IActivityLogService {
 
@@ -149,7 +149,7 @@ public class ActivityLogService extends Cloudlet implements IActivityLogService 
 	public void saveLog(final String log) {
 		LOGGER.debug("Saving log to the Activity Logs Database...");
 		try {
-			Files.append(LocalDateTime.now() + " " + log + System.lineSeparator(), new File(LOCATION_KURA_LOG),
+			Files.append(LocalDateTime.now() + " " + log + System.lineSeparator(), new File(LOCATION_TUM_LOG),
 					Charsets.UTF_8);
 		} catch (final IOException e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
