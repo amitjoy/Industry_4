@@ -15,8 +15,6 @@
  *******************************************************************************/
 package de.tum.in.activity.log;
 
-import java.util.List;
-
 /**
  * Used to save and retrieve activity logs
  *
@@ -46,9 +44,11 @@ public interface IActivityLogService {
 	/**
 	 * Used to retrieve saved activity logs
 	 *
+	 *  @param type type of log to retrieve
+	 *
 	 * @return the list of logs
 	 */
-	public List<String> retrieveLogs(LogFileType type);
+	public String retrieveLogs(LogFileType type);
 
 	/**
 	 * Used to save log to the database

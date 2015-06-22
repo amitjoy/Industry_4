@@ -18,7 +18,6 @@ package de.tum.in.activity.log;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -126,20 +125,20 @@ public class ActivityLogService extends Cloudlet implements IActivityLogService 
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<String> retrieveLogs(final LogFileType type) {
+	public String retrieveLogs(final LogFileType type) {
 		LOGGER.debug("Retrieving logs from the Activity Logs Database...");
 		try {
 			if (type == LogFileType.KURA) {
-				return Files.readLines(new File(LOCATION_KURA_LOG), Charsets.UTF_8);
+				return new String(Files.asByteSource(new File(LOCATION_KURA_LOG)).read(), Charsets.UTF_8);
 			}
 			if (type == LogFileType.TUM) {
-				return Files.readLines(new File(LOCATION_TUM_LOG), Charsets.UTF_8);
+				return new String(Files.asByteSource(new File(LOCATION_TUM_LOG)).read(), Charsets.UTF_8);
 			}
 		} catch (final Exception e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
 		LOGGER.debug("Retrieving logs from the Activity Logs Database...Done");
-		return null;
+		return "";
 	}
 
 	/**
