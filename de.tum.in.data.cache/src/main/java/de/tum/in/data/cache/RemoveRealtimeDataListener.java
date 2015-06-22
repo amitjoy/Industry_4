@@ -30,7 +30,7 @@ public class RemoveRealtimeDataListener implements RemovalListener<String, Objec
 	@Override
 	public void onRemoval(final RemovalNotification<String, Object> notification) {
 
-		// TODO Insert the data
+		// TODO Log the data to application specific log file
 	}
 
 }

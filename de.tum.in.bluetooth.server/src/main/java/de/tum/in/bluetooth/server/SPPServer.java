@@ -84,7 +84,6 @@ public class SPPServer {
 		System.out.println("Message from mobile device: " + lineRead);
 
 		// send response to spp client
-		// TODO Send Dummy Data in every 1 sec
 		final OutputStream outStream = connection.openOutputStream();
 		final PrintWriter pWriter = new PrintWriter(new OutputStreamWriter(outStream));
 		System.out.println("Sending response (" + RESPONSE + ")");
