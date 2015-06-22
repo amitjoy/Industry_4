@@ -17,6 +17,7 @@ package de.tum.in.bluetooth.milling.machine;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
+import org.eclipse.kura.message.KuraPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * @author AMIT KUMAR MONDAL
  *
  */
-public final class FuturePublishDataCallback implements FutureCallback<String> {
+public final class FuturePublishDataCallback implements FutureCallback<Object> {
 
 	/**
 	 * Logger
@@ -81,12 +82,22 @@ public final class FuturePublishDataCallback implements FutureCallback<String> {
 
 	/** {@inheritDoc} */
 	@Override
-	public void onSuccess(final String result) {
+	public void onSuccess(final Object result) {
 		try {
 			// will publish data to
-			// $EDC/app_id/client_id/milling_machine/{some_bluetooth_address}
-			this.m_cloudApplicationClient.controlPublish("milling_machine", this.m_remoteDeviceAddress,
-					result.getBytes(), this.m_dfltPubQos, this.m_dfltRetain, this.m_dfltPriority);
+			// $EDC/account_name/device_id/MILLING-V1/milling_machine for Mobile
+			// Client
+			final KuraPayload kuraPayload = new KuraPayload();
+			kuraPayload.addMetric("result", result);
+
+			this.m_cloudApplicationClient.controlPublish("milling_machine", kuraPayload, this.m_dfltPubQos,
+					this.m_dfltRetain, this.m_dfltPriority);
+
+			// will publish data to
+			// $EDC/account_name/splunk/MILLING-V1/milling_machine for Mobile
+			// Client
+			this.m_cloudApplicationClient.controlPublish("splunk", "milling_machine", result.toString().getBytes(), 1,
+					true, this.m_dfltPriority);
 		} catch (final KuraException e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}

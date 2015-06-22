@@ -15,37 +15,47 @@
  *******************************************************************************/
 package de.tum.in.activity.log;
 
+import java.util.List;
+
 /**
- * Represents the Activity Log
- * 
+ * Used to save and retrieve activity logs
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
-public final class ActivityLog {
+public interface IActivityLogService {
 
-	/** Log Timestamp */
-	private final String timestamp;
-
-	/** Log Description */
-	private final String description;
-
-	public ActivityLog(String timestamp, String log) {
-		this.timestamp = timestamp;
-		this.description = log;
+	/**
+	 * Represents Log File Types
+	 *
+	 */
+	public enum LogFileType {
+		KURA, TUM
 	}
 
 	/**
-	 * @return the timestamp
+	 * The location of the swissbit application specific log file
 	 */
-	public String getTimestamp() {
-		return timestamp;
-	}
+	public static String LOCATION_KURA_LOG = "/var/log/kura.log";
 
 	/**
-	 * @return the description
+	 * The location of the kura specific log file
 	 */
-	public String getDescription() {
-		return description;
-	}
+	public static String LOCATION_TUM_LOG = "/home/pi/tum/tum.log";
+
+	/**
+	 * Used to retrieve saved activity logs
+	 *
+	 * @return the list of logs
+	 */
+	public List<String> retrieveLogs(LogFileType type);
+
+	/**
+	 * Used to save log to the database
+	 *
+	 * @param log
+	 *            the log to be saved
+	 */
+	public void saveLog(String log);
 
 }
