@@ -442,7 +442,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	public BluetoothDeviceDiscovery(final BundleContext context) {
 		super(APP_ID);
 		this.m_context = checkNotNull(context, "Bluetooth Bundle Context must not be null");
-		;
 	}
 
 	/**
