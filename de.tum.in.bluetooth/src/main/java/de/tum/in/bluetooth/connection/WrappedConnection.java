@@ -88,6 +88,7 @@ public class WrappedConnection implements StreamConnection {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public DataOutputStream openDataOutputStream() throws IOException {
 		LOGGER.debug("Opening DataOutputStream connection");
@@ -115,6 +116,7 @@ public class WrappedConnection implements StreamConnection {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public OutputStream openOutputStream() throws IOException {
 		LOGGER.debug("Opening OutputStream connection");

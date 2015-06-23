@@ -172,11 +172,13 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 			return local;
 		}
 
+		/** {@inheritDoc} */
 		@Override
 		public void inquiryCompleted(final int discType) {
 			// Not used here.
 		}
 
+		/** {@inheritDoc} */
 		@Override
 		public void run() {
 			try {
@@ -193,6 +195,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 			}
 		}
 
+		/** {@inheritDoc} */
 		@Override
 		public void servicesDiscovered(final int transID, final ServiceRecord[] servRecord) {
 			synchronized (this) {
@@ -205,6 +208,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 			// Do nothing
 		}
 
+		/** {@inheritDoc} */
 		@Override
 		public void serviceSearchCompleted(final int transID, final int respCode) {
 			if (respCode != SERVICE_SEARCH_COMPLETED) {
