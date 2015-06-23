@@ -848,11 +848,10 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 			if (Pattern.matches(regex, address) || ((name != null) && Pattern.matches(regex, name))) {
 				LOGGER.info("Paring pattern match for " + address + " / " + name + " with " + regex);
 				try {
-					RemoteDeviceHelper.authenticate(device, pin);
-					LOGGER.info("Device " + address + " paired");
-					return true;
+					LOGGER.info("Device " + address + " pairing started..");
+					return RemoteDeviceHelper.authenticate(device, pin);
 				} catch (final IOException e) {
-					LOGGER.error("Cannot authenticate device despite it match the regex " + regex, e);
+					LOGGER.error("Cannot authenticate device despite it matches the regex " + regex, e);
 				}
 			}
 		}
