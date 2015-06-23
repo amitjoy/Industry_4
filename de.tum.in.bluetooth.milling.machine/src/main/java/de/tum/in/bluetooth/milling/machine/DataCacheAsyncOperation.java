@@ -64,6 +64,8 @@ public final class DataCacheAsyncOperation implements AsyncFunction<String, Stri
 			properties.put("timestamp", String.valueOf(System.currentTimeMillis()));
 			properties.put("data", this.input);
 
+			// TODO Wrap data in BluetoothData
+
 			final Event cacheEvent = new Event(Events.DATA_CACHE, properties);
 			DataCacheAsyncOperation.this.m_eventAdmin.postEvent(cacheEvent);
 

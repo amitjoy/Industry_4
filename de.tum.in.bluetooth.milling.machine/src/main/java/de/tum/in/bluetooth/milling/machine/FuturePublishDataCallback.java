@@ -31,7 +31,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * @author AMIT KUMAR MONDAL
  *
  */
-public final class FuturePublishDataCallback implements FutureCallback<Object> {
+public final class FuturePublishDataCallback implements FutureCallback<String> {
 
 	/**
 	 * Logger
@@ -59,17 +59,17 @@ public final class FuturePublishDataCallback implements FutureCallback<Object> {
 	boolean m_dfltRetain;
 
 	/**
-	 * The Bluetooth address of the milling machine
+	 * The topic to publish for logging
 	 */
-	private final String m_remoteDeviceAddress;
+	private final String m_topic;
 
 	/**
 	 * Constructor
 	 */
-	public FuturePublishDataCallback(final CloudClient cloudApplicationClient, final String remoteDeviceAddress,
-			final int dfltPubQos, final boolean dfltRetain, final int dfltPriority) {
+	public FuturePublishDataCallback(final CloudClient cloudApplicationClient, final String topic, final int dfltPubQos,
+			final boolean dfltRetain, final int dfltPriority) {
 		this.m_cloudApplicationClient = cloudApplicationClient;
-		this.m_remoteDeviceAddress = remoteDeviceAddress;
+		this.m_topic = topic;
 		this.m_dfltPubQos = dfltPubQos;
 		this.m_dfltRetain = dfltRetain;
 	}
@@ -82,7 +82,7 @@ public final class FuturePublishDataCallback implements FutureCallback<Object> {
 
 	/** {@inheritDoc} */
 	@Override
-	public void onSuccess(final Object result) {
+	public void onSuccess(final String result) {
 		try {
 			// will publish data to
 			// $EDC/account_name/device_id/MILLING-V1/milling_machine for Mobile
@@ -93,11 +93,9 @@ public final class FuturePublishDataCallback implements FutureCallback<Object> {
 			this.m_cloudApplicationClient.controlPublish("milling_machine", kuraPayload, this.m_dfltPubQos,
 					this.m_dfltRetain, this.m_dfltPriority);
 
-			// will publish data to
-			// $EDC/account_name/splunk/MILLING-V1/milling_machine for Splunk
-			// Logging
-			this.m_cloudApplicationClient.controlPublish("splunk", "milling_machine", result.toString().getBytes(), 1,
-					true, this.m_dfltPriority);
+			// will publish data for Splunk Logging
+			this.m_cloudApplicationClient.publish(this.m_topic, result.toString().getBytes(), 1, true,
+					this.m_dfltPriority);
 		} catch (final KuraException e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}

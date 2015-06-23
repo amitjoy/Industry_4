@@ -91,6 +91,11 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	private static final String BLUETOOH_ENABLED_MILLING_MACHINES = "bluetooth.devices.address";
 
 	/**
+	 * Configurable property to set Bluetooth Realtime Topic Namespace
+	 */
+	private static final String BLUETOOTH_REALTIME_TOPIC = "bluetooth.realtime.topic";
+
+	/**
 	 * Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BluetoothMillingMachine.class);
@@ -99,11 +104,6 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	 * Configurable Property to check the setpoint speed for milling machines
 	 */
 	private static final String PROGRAM_SETPOINT_NAME = "program.setPoint";
-
-	/**
-	 * Configurable Property for topic to publish realtime data
-	 */
-	private static final String PUBLISH_TOPIC_PROP_NAME = "publish.semanticTopic";
 
 	/**
 	 * Activity Log Service Dependency
@@ -183,12 +183,12 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	 * Bluetooth Service Record Dependency for paired bluetooth devices
 	 */
 	@Reference(bind = "bindServiceRecord", unbind = "unbindServiceRecord", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
-	private volatile ServiceRecord m_serviceRecord;;
+	private volatile ServiceRecord m_serviceRecord;
 
 	/**
 	 * Holds List of Service Record for all the paired devices
 	 */
-	private final List<ServiceRecord> m_serviceRecords = Lists.newCopyOnWriteArrayList();
+	private final List<ServiceRecord> m_serviceRecords = Lists.newCopyOnWriteArrayList();;
 
 	/**
 	 * Place holder for the milling machine speed
@@ -400,17 +400,16 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 		this.m_resultFromWorker = this.m_pool.submit(new DataRetrieverWorker(bluetoothConnector));
 
 		// next do the async operation to save the result to cache retrieved by
-		// the
-		// data retriever thread
+		// the data retriever thread
 		this.m_finalResult = Futures.transform(this.m_resultFromWorker,
 				new DataCacheAsyncOperation(this.m_poolForAsyncFunction, this.m_eventAdmin, remoteDeviceAddress));
 
-		final String topic = (String) this.m_properties.get(PUBLISH_TOPIC_PROP_NAME);
+		final String topic = this.m_systemService.getProperties().getProperty(BLUETOOTH_REALTIME_TOPIC);
 
 		// finally publish the final transformed result to our listenable thread
 		// callback
-		Futures.addCallback(this.m_finalResult, new FuturePublishDataCallback(this.getCloudApplicationClient(),
-				topic + "/" + remoteDeviceAddress, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY));
+		Futures.addCallback(this.m_finalResult,
+				new FuturePublishDataCallback(this.getCloudApplicationClient(), topic, 1, false, DFLT_PRIORITY));
 
 	}
 
