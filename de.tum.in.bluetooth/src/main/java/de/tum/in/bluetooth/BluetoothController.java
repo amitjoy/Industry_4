@@ -15,30 +15,50 @@
  *******************************************************************************/
 package de.tum.in.bluetooth;
 
-import com.google.common.base.Throwables;
-
 /**
  * All required services for Bluetooth Operation
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
 public interface BluetoothController {
 
+	/**
+	 * Exception class for Bluetooth Communication Problem
+	 *
+	 */
 	final class BluetoothException extends Exception {
 
-		private static final long serialVersionUID = 1L;
 		private static final String MESSAGE = "Bluetooth Initiation Failed";
+		private static final long serialVersionUID = 1L;
 
 		public BluetoothException() {
 			super(MESSAGE);
 		}
 
-		public BluetoothException(Throwable cause) {
-			this();
-			Throwables.propagateIfPossible(cause);
-		}
 	}
+
+	/**
+	 * Used to get the current bluetooth device stack
+	 *
+	 * @return the name for the bluetooth stack
+	 */
+	public String getBluetoothStack();
+
+	/**
+	 * Used to check whether the local bluetooth device is turned on or not
+	 *
+	 * @return true if on else off
+	 */
+	public boolean isBluetoothDeviceTurnedOn();
+
+	/**
+	 * Used to check whether the stack used for bluetooth discovery is supported
+	 * or not
+	 *
+	 * @return
+	 */
+	public boolean isBluetoothStackSupported();
 
 	/**
 	 * Initializes the Bluetooth Discovery
@@ -49,27 +69,5 @@ public interface BluetoothController {
 	 * Stops the Bluetooth Discovery
 	 */
 	public void stop();
-
-	/**
-	 * Used to get the current bluetooth device stack
-	 * 
-	 * @return the name for the bluetooth stack
-	 */
-	public String getBluetoothStack();
-
-	/**
-	 * Used to check whether the local bluetooth device is turned on or not
-	 * 
-	 * @return true if on else off
-	 */
-	public boolean isBluetoothDeviceTurnedOn();
-
-	/**
-	 * Used to check whether the stack used for bluetooth discovery is supported
-	 * or not
-	 * 
-	 * @return
-	 */
-	public boolean isBluetoothStackSupported();
 
 }

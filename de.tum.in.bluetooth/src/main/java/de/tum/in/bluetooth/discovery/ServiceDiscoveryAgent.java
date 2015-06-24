@@ -48,7 +48,7 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDiscoveryAgent.class);
 
-	// TO-DO Validation of SDP
+	// TODO Validation of SDP
 	// private static UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP };
 	private static UUID[] searchUuidSet = { UUIDs.RFCOMM };
 
@@ -76,6 +76,7 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 	 *
 	 * ********* DiscoveryListener **********
 	 */
+	/** {@inheritDoc} */
 	@Override
 	public void deviceDiscovered(final RemoteDevice btDevice, final DeviceClass cod) {
 		// Not used here.
@@ -131,11 +132,13 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void inquiryCompleted(final int discType) {
 		// Not used here.
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void run() {
 		try {
@@ -154,6 +157,7 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void servicesDiscovered(final int transID, final ServiceRecord[] servRecord) {
 		synchronized (this) {
@@ -168,6 +172,7 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 		this.m_discoveredServices.addAll(Arrays.asList(servRecord));
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void serviceSearchCompleted(final int transID, final int respCode) {
 		synchronized (this) {

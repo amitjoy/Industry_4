@@ -40,8 +40,8 @@ public class WrappedConnection implements StreamConnection {
 	 * slf4j Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(WrappedConnection.class);
-	private final StreamConnection m_connection;
 
+	private final StreamConnection m_connection;
 	private DataInputStream m_dataInputStream;
 	private DataOutputStream m_dataOutputStream;
 	private InputStream m_inputStream;

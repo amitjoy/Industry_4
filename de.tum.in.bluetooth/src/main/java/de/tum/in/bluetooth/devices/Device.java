@@ -23,11 +23,11 @@ import com.google.common.base.MoreObjects;
 
 /**
  * Represents a {@link RemoteDevice} in an abstract way
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
-public class Device {
+public final class Device {
 
 	private String id;
 	private BigInteger maxRetry;

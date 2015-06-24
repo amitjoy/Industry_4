@@ -18,7 +18,8 @@ package de.tum.in.bluetooth.discovery;
 import javax.bluetooth.UUID;
 
 /**
- *
+ * All the UUIDs needed for communication
+ * 
  * @author AMIT KUMAR MONDAL
  *
  */

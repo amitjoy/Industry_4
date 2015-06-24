@@ -25,7 +25,7 @@ import com.google.common.collect.Lists;
  *
  * @author AMIT KUMAR MONDAL
  */
-public class DeviceList {
+public final class DeviceList {
 
 	private List<Device> devices;
 

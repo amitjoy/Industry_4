@@ -26,7 +26,7 @@ import javax.microedition.io.Connection;
  * @See {@link RemoteDevice}
  * @author AMIT KUMAR MONDAL
  */
-public class RemoteNamedDevice extends RemoteDevice {
+public final class RemoteNamedDevice extends RemoteDevice {
 
 	public final RemoteDevice device;
 
@@ -38,51 +38,61 @@ public class RemoteNamedDevice extends RemoteDevice {
 		this.friendlyName = name;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean authenticate() throws IOException {
 		return this.device.authenticate();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean authorize(final Connection conn) throws IOException {
 		return this.device.authorize(conn);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean encrypt(final Connection conn, final boolean on) throws IOException {
 		return this.device.encrypt(conn, on);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean equals(final Object obj) {
 		return this.device.equals(obj);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String getFriendlyName(final boolean alwaysAsk) throws IOException {
 		return this.friendlyName;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public int hashCode() {
 		return this.device.hashCode();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean isAuthenticated() {
 		return this.device.isAuthenticated();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean isAuthorized(final Connection conn) throws IOException {
 		return this.device.isAuthorized(conn);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean isEncrypted() {
 		return this.device.isEncrypted();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean isTrustedDevice() {
 		return this.device.isTrustedDevice();
