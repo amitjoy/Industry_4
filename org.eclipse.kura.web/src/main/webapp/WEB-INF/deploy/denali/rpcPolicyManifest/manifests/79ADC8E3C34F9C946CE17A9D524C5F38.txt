@@ -1,0 +1,2 @@
+serviceClass: org.eclipse.kura.web.shared.service.GwtComponentService
+path: 5C5C0F0F8A760B67FBBFAA6B2AFE9880.gwt.rpc

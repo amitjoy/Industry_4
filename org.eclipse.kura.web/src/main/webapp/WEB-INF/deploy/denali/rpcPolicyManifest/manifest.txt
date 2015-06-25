@@ -1,0 +1,9 @@
+# Module denali
+# RPC service class, partial path of RPC policy file
+org.eclipse.kura.web.shared.service.GwtStatusService, 3EA5F97A6FBA5A87C585D1B2E7E7CF31.gwt.rpc
+org.eclipse.kura.web.shared.service.GwtSnapshotService, 1CC91D77E8F472F912A844FE4749A407.gwt.rpc
+org.eclipse.kura.web.shared.service.GwtPackageService, C87344633C7C63BED770DD1F50F5194D.gwt.rpc
+org.eclipse.kura.web.shared.service.GwtComponentService, 5C5C0F0F8A760B67FBBFAA6B2AFE9880.gwt.rpc
+org.eclipse.kura.web.shared.service.GwtDeviceService, AAC68F551702B7B015A9BD9B6C88670D.gwt.rpc
+org.eclipse.kura.web.shared.service.GwtNetworkService, 540917F985BDD2FAF21784D9D4B0BD19.gwt.rpc
+org.eclipse.kura.web.shared.service.GwtCertificatesService, CCF44D20078E758DB9BCD992981EE0CF.gwt.rpc

@@ -1,0 +1,2 @@
+serviceClass: org.eclipse.kura.web.shared.service.GwtSnapshotService
+path: 1CC91D77E8F472F912A844FE4749A407.gwt.rpc

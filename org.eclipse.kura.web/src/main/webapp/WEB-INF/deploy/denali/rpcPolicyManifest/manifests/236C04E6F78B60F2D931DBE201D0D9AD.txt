@@ -1,0 +1,2 @@
+serviceClass: org.eclipse.kura.web.shared.service.GwtStatusService
+path: 3EA5F97A6FBA5A87C585D1B2E7E7CF31.gwt.rpc

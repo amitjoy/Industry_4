@@ -1,0 +1,2 @@
+serviceClass: org.eclipse.kura.web.shared.service.GwtCertificatesService
+path: CCF44D20078E758DB9BCD992981EE0CF.gwt.rpc
