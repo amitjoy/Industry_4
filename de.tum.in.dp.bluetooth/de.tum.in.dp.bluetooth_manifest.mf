@@ -7,7 +7,7 @@ DeploymentPackage-Description: This deployment package is used to configure Blue
 DeploymentPackage-Name: Bluetooth Serial Port Profile Configuration
 
 Name: de.tum.in.bluecove.fragment-1.0-SNAPSHOT.jar
-Bundle-SymbolicName: de.tum.in.bluecove.fragment
+Bundle-SymbolicName: de.tum.in.de.tum.in.bluecove.fragment
 Bundle-Version: 1.0.0.SNAPSHOT
 
 Name: de.tum.in.bluecove-2.1.0.jar

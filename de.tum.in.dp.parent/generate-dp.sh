@@ -27,7 +27,7 @@ b="_build.xml"
 c="/"
 
 # The root directory of all the aforementioned projects.
-home_dir="/Users/AMIT/IoT_IDP/Pi/"
+home_dir="/Users/AMIT/Industry_4.0/"
 
 # The DP file extension
 ext=".dp"

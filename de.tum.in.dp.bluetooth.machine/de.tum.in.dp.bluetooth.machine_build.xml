@@ -5,7 +5,7 @@
   <fail message="Can not find file ../de.tum.in.bluetooth.milling.machine/target/de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar"/>
 </target>
 <target name="all">
-  <mkdir dir="/Users/AMIT/IoT_IDP/Pi/de.tum.in.dp.bluetooth.machine"/>
+  <mkdir dir="/Users/AMIT/Industry_4.0/de.tum.in.dp.bluetooth.machine"/>
   <antcall target="check.file.exists ../de.tum.in.bluetooth.milling.machine/target/de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar"/>
   <jar destfile="de.tum.in.dp.bluetooth.machine.dp" manifest="de.tum.in.dp.bluetooth.machine_manifest.mf">
     <zipfileset file="../de.tum.in.bluetooth.milling.machine/target/de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar" fullpath="de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar" />

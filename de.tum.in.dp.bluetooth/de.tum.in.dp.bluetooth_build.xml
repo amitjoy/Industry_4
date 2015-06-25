@@ -13,7 +13,7 @@
   <fail message="Can not find file ../de.tum.in.bluetooth/target/de.tum.in.bluetooth-0.0.1-SNAPSHOT.jar"/>
 </target>
 <target name="all">
-  <mkdir dir="/Users/AMIT/IoT_IDP/Pi/de.tum.in.dp.bluetooth"/>
+  <mkdir dir="/Users/AMIT/Industry_4.0/de.tum.in.dp.bluetooth"/>
   <antcall target="check.file.exists ../de.tum.in.bluecove.fragment/target/de.tum.in.bluecove.fragment-1.0-SNAPSHOT.jar"/>
   <antcall target="check.file.exists ../de.tum.in.bluecove/target/de.tum.in.bluecove-2.1.0.jar"/>
   <antcall target="check.file.exists ../de.tum.in.bluetooth/target/de.tum.in.bluetooth-0.0.1-SNAPSHOT.jar"/>

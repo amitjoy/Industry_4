@@ -6,5 +6,5 @@ DeploymentPackage-ContactAddress: admin@amitinside.com
 DeploymentPackage-Name: Bluetooth Enabled Milling Machine Deployment Definition
 
 Name: de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar
-Bundle-SymbolicName: de.tum.in.bluetooth.milling.machine
+Bundle-SymbolicName: de.tum.in.de.tum.in.bluetooth.milling.machine
 Bundle-Version: 1.0.0.SNAPSHOT
