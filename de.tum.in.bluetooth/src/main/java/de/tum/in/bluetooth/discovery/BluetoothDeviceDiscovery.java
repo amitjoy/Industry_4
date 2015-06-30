@@ -95,16 +95,18 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	 * Bluetooth discovery mode (inquiry).
 	 */
 	public enum DiscoveryMode {
-		/**
-		 * Global inquiry.
-		 */
-		GIAC, /**
-				 * Limited inquiry.
-				 */
+		// Global inquiry
+		GIAC,
+		// Local Inquiry
 		LIAC
 	}
 
-	class ServiceCheckAgent implements Runnable, DiscoveryListener {
+	/**
+	 * Used to search for new set of reachable bluetooth devices
+	 *
+	 * @see BluetoothDeviceDiscovery#discovered(Set)
+	 */
+	private class ServiceCheckAgent implements Runnable, DiscoveryListener {
 
 		private final int m_action;
 
@@ -456,12 +458,12 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	 */
 	@Activate
 	protected synchronized void activate(final ComponentContext context, final Map<String, Object> properties) {
-		LOGGER.info("Activating Bluetooth....");
+		LOGGER.info("Activating Bluetooth Component....");
 		super.setCloudService(this.m_cloudService);
 		super.activate(context);
 		this.m_properties = properties;
 		this.m_context = context.getBundleContext();
-		LOGGER.info("Activating Bluetooth... Done.");
+		LOGGER.info("Activating Bluetooth Component... Done.");
 	}
 
 	/**
@@ -500,8 +502,10 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	@Deactivate
 	@Override
 	protected synchronized void deactivate(final ComponentContext componentContext) {
+		LOGGER.info("Deactivating Bluetooth Component....");
 		super.deactivate(componentContext);
 		this.stop();
+		LOGGER.info("Deactivating Bluetooth Component....Done");
 	}
 
 	/**
@@ -522,8 +526,8 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 		// We must create a copy of the list to avoid concurrent modifications
 		Set<RemoteDevice> presents = Sets.newHashSet(this.m_devices.keySet());
 		for (final RemoteDevice old : presents) {
-			LOGGER.info(
-					"Did we lost contact with " + old.getBluetoothAddress() + " => " + (!contains(discovered, old)));
+			LOGGER.info("Have we lost connection with " + old.getBluetoothAddress() + " => "
+					+ (!contains(discovered, old)));
 			if (!contains(discovered, old)) {
 				final ServiceCheckAgent serviceCheckAgent = new ServiceCheckAgent(old,
 						SERVICECHECK_UNREGISTER_IF_NOT_HERE);
@@ -536,8 +540,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 			if (!this.m_devices.containsKey(remote)) {
 				if (this.matchesDeviceFilter(remote)) {
 					LOGGER.info("New device found (" + remote.getBluetoothAddress() + ")");
-					this.register(remote); // register the service as
-											// RemoteDevice
+					this.register(remote); // register service as RemoteDevice
 				} else {
 					LOGGER.info("Device ignored because it does not match the device filter");
 				}
@@ -547,22 +550,30 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 		}
 
 		if ("bluez".equals(this.getBluetoothStack())) {
+
 			// Workaround for bluez : trying to keep all the paired devices.
-			// Has bluez doesn't return the paired devices when we have an
+			// bluez doesn't return the paired devices when we have an
 			// inquiry, we can try to search if some of the
-			// cached devices is are reachable
+			// cached devices are reachable
+
 			LocalDevice local = null;
+
 			try {
 				local = LocalDevice.getLocalDevice();
 			} catch (final BluetoothStateException e) {
 				LOGGER.error("Bluetooth Adapter not started.");
 			}
+
 			local = checkNotNull(local, "Local Device can not be null");
+
 			final RemoteDevice[] cachedDevices = local.getDiscoveryAgent().retrieveDevices(DiscoveryAgent.CACHED);
+
 			if ((cachedDevices == null) || (cachedDevices.length == 0)) {
 				return;
 			}
+
 			presents = Sets.newHashSet(this.m_devices.keySet());
+
 			for (final RemoteDevice cached : cachedDevices) {
 				if (!contains(presents, cached)) {
 					final ServiceCheckAgent serviceCheckAgent = new ServiceCheckAgent(cached,
@@ -616,6 +627,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 		}
+
 		LOGGER.info("Bluetooth Configuration Retrieved");
 	}
 
@@ -632,6 +644,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 			this.m_activityLogService.saveLog("Bluetooth Configuration Updated");
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 		}
+
 		LOGGER.info("Bluetooth Configuration Updated");
 	}
 
@@ -688,6 +701,9 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 		return TIMEOUT_COMPONENT;
 	}
 
+	/**
+	 * Returns the user-defined friendly name of the {@link RemoteDevice}
+	 */
 	private String getDeviceName(final RemoteDevice device) {
 		String name = this.m_names.getProperty(device.getBluetoothAddress());
 		if (name == null) {
@@ -706,11 +722,13 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 		return name;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean isBluetoothDeviceTurnedOn() {
 		return LocalDevice.isPowerOn();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean isBluetoothStackSupported() {
 		return SUPPORTED_STACKS.contains(this.getBluetoothStack());
@@ -794,7 +812,8 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	}
 
 	/**
-	 * Filter used to search for remote bluetooth devices
+	 * Filter used to search for remote bluetooth devices. Regular expression
+	 * character is allowed.
 	 *
 	 * @param device
 	 *            the current device found
@@ -831,7 +850,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	 *            The currently discovered Remote Device
 	 * @return if paired then true else false
 	 */
-	boolean pair(final RemoteDevice device) {
+	private boolean pair(final RemoteDevice device) {
 		if ((this.m_fleet == null) || (this.m_fleet.getDevices() == null)) {
 			LOGGER.info("Ignoring autopairing - no fleet configured");
 			return true;
