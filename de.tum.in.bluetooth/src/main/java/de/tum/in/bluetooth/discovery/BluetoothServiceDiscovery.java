@@ -62,7 +62,9 @@ public class BluetoothServiceDiscovery {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BluetoothServiceDiscovery.class);
 
-	// Used only for RFCOMM Connections
+	/**
+	 * RFCOMM Communication Service Constant
+	 */
 	private static final int SERVICE_NAME_ATTRIBUTE = ServiceConstants.SERVICE_NAME;
 
 	/**
@@ -281,6 +283,10 @@ public class BluetoothServiceDiscovery {
 		LOGGER.info("Registering Service Records....Done");
 	}
 
+	/**
+	 * Used to reattempt for discovering provided services of the bluetooth
+	 * device
+	 */
 	private boolean retry(final RemoteDevice remote) {
 		LOGGER.info("Retrying for service discovery attempt..." + remote);
 		final Device device = this.findDeviceFromFleet(remote);
@@ -337,6 +343,9 @@ public class BluetoothServiceDiscovery {
 		LOGGER.info("Unbinding Remote Device....Done" + device);
 	}
 
+	/**
+	 * Deregisters the provided Service Record
+	 */
 	private synchronized void unregister(final RemoteDevice remote) {
 		LOGGER.info("Deregistering Service Records....");
 		final Map<ServiceRecord, ServiceRegistration> services = this.m_servicesRecord.remove(remote);
@@ -349,6 +358,9 @@ public class BluetoothServiceDiscovery {
 		LOGGER.info("Deregistering Service Records....Done");
 	}
 
+	/**
+	 * Deregisters all Service Records
+	 */
 	private synchronized void unregisterAll() {
 		for (final RemoteDevice remoteDevice : this.m_servicesRecord.keySet()) {
 			this.unregister(remoteDevice);

@@ -39,10 +39,14 @@ public class Activator implements BundleActivator {
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger(Activator.class);
 
-	// Schema provided for connections
+	/**
+	 * Schema provided for connections
+	 */
 	private static final String SCHEMA = "btspp";
 
-	// The ConnectionFactory Service implementation
+	/**
+	 * The ConnectionFactory Service implementation
+	 */
 	private ConnectionFactory m_connectionFactory;
 
 	/** {@inheritDoc} */

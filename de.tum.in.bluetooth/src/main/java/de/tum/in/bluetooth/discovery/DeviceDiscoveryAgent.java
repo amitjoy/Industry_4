@@ -63,6 +63,7 @@ public class DeviceDiscoveryAgent implements Runnable {
 			this.m_agent = agent;
 		}
 
+		/** {@inheritDoc}} */
 		@Override
 		public void deviceDiscovered(final RemoteDevice remote, final DeviceClass clazz) {
 			synchronized (this) {
@@ -96,6 +97,7 @@ public class DeviceDiscoveryAgent implements Runnable {
 			return this.m_discoveredDevices;
 		}
 
+		/** {@inheritDoc}} */
 		@Override
 		public void inquiryCompleted(final int result) {
 			LOGGER.info("Inquiry completed : " + result);
@@ -117,9 +119,10 @@ public class DeviceDiscoveryAgent implements Runnable {
 			}
 		}
 
+		/** {@inheritDoc}} */
 		@Override
 		public void servicesDiscovered(final int arg0, final ServiceRecord[] arg1) {
-			// Not uses here.
+			// Not used here.
 			// We ignore the found services.
 		}
 
@@ -133,6 +136,7 @@ public class DeviceDiscoveryAgent implements Runnable {
 		 * @param respCode
 		 *            the response code
 		 */
+		/** {@inheritDoc}} */
 		@Override
 		public void serviceSearchCompleted(final int transID, final int respCode) {
 			RemoteDevice remote = null; // Stack confinement.

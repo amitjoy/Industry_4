@@ -87,7 +87,7 @@ import de.tum.in.bluetooth.devices.DeviceList;
  * @author AMIT KUMAR MONDAL
  */
 @Component(policy = ConfigurationPolicy.REQUIRE, name = "de.tum.in.bluetooth")
-@Service(value = { BluetoothDeviceDiscovery.class })
+@Service(value = { BluetoothController.class })
 public class BluetoothDeviceDiscovery extends Cloudlet
 		implements BluetoothController, ConfigurableComponent, CriticalComponent {
 
