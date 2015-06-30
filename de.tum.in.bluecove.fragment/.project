@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
 	<name>de.tum.in.bluecove.fragment</name>
-	<comment></comment>
+	<comment>Bluecove GPL Dependency as Fragment</comment>
 	<projects>
 	</projects>
 	<buildSpec>
