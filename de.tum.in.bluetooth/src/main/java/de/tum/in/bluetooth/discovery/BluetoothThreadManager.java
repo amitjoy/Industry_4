@@ -87,7 +87,6 @@ public class BluetoothThreadManager {
 		try {
 			s_thread_pool.shutdownNow();
 		} catch (final Throwable e) {
-			// Ignore but warn
 			LOGGER.warn("Exception during shutdown : ", Throwables.getStackTraceAsString(e));
 		}
 		LOGGER.info("Shutting down scheduler...Done");

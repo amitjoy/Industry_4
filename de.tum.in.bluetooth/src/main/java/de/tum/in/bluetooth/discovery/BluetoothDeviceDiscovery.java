@@ -1000,7 +1000,10 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 		}
 	}
 
-	void unpair(final RemoteDevice device) {
+	/**
+	 * Unpair the {@link RemoteDevice}
+	 */
+	private void unpair(final RemoteDevice device) {
 		if (this.matchesDeviceFilter(device) && this.m_unpairLostDevices) {
 			try {
 				RemoteDeviceHelper.removeAuthentication(device);
@@ -1010,16 +1013,20 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 		}
 	}
 
+	/**
+	 * Deregister the {@link RemoteDevice} OSGi Service and unpair the device
+	 */
 	private synchronized void unregister(final RemoteDevice device) {
 		final ServiceRegistration<?> reg = this.m_devices.remove(device);
 		if (reg != null) {
 			reg.unregister();
 		}
 		this.unpair(device);
-
 	}
 
-	/** Unregister and unpair all the services */
+	/**
+	 * Unregister and unpair all the services
+	 */
 	private synchronized void unregisterAll() {
 		for (final Map.Entry<RemoteDevice, ServiceRegistration<?>> entry : this.m_devices.entrySet()) {
 			entry.getValue().unregister();

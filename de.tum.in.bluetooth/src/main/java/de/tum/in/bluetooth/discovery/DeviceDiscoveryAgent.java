@@ -136,7 +136,6 @@ public class DeviceDiscoveryAgent implements Runnable {
 		 * @param respCode
 		 *            the response code
 		 */
-		/** {@inheritDoc}} */
 		@Override
 		public void serviceSearchCompleted(final int transID, final int respCode) {
 			RemoteDevice remote = null; // Stack confinement.
@@ -231,10 +230,8 @@ public class DeviceDiscoveryAgent implements Runnable {
 
 	/**
 	 * For testing purpose <b>only</b>.
-	 *
-	 * @return
 	 */
-	DeviceDiscoveryListener getDeviceDiscoveryListener() {
+	private DeviceDiscoveryListener getDeviceDiscoveryListener() {
 		return this.m_listener;
 	}
 
@@ -270,6 +267,7 @@ public class DeviceDiscoveryAgent implements Runnable {
 
 	}
 
+	/** {@inheritDoc}} */
 	@Override
 	public void run() {
 		try {
