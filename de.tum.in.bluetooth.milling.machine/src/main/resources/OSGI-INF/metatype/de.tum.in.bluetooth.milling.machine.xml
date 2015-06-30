@@ -13,13 +13,9 @@
 			default="0003C92DB48F=Milling_Machine_1;0015C94DA14A=Milling_Machine_2;0246BBADA53B=Milling_Machine_3"
 			description="Configurable property to set list of bluetooth enabled milling machines" />
 
-		<AD id="program.setPoint" name="program.setPoint" type="Float"
+		<AD id="milling.machine.setPoint" name="milling.machine.setPoint" type="Float"
 			cardinality="0" required="false" default="20.5" min="5.0" max="40.0"
 			description="Configurable Property to check the setpoint speed for milling machines." />
-
-		<AD id="publish.rate" name="publish.rate" type="Integer"
-			cardinality="0" required="true" default="6" min="1"
-			description="Default message publishing rate in seconds (min 1)." />
 
 	</OCD>
 

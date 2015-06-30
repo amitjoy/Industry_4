@@ -103,7 +103,7 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	/**
 	 * Configurable Property to check the setpoint speed for milling machines
 	 */
-	private static final String PROGRAM_SETPOINT_NAME = "program.setPoint";
+	private static final String PROGRAM_SETPOINT_NAME = "milling.machine.setPoint";
 
 	/**
 	 * Activity Log Service Dependency
@@ -189,11 +189,6 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	 * Holds List of Service Record for all the paired devices
 	 */
 	private final List<ServiceRecord> m_serviceRecords = Lists.newCopyOnWriteArrayList();;
-
-	/**
-	 * Place holder for the milling machine speed
-	 */
-	private float m_speed;
 
 	/**
 	 * Eclipse Kura System Service Dependency
