@@ -171,8 +171,9 @@ public class KuraMQTTClient implements IKuraMQTTClient {
 	@Override
 	public void disconnect() {
 		try {
-			this.connectionLock.tryLock(5, TimeUnit.SECONDS);
-			this.safelyDisconnect();
+			if (this.connectionLock.tryLock(5, TimeUnit.SECONDS)) {
+				this.safelyDisconnect();
+			}
 		} catch (final Exception e) {
 			LOGGER.debug("Exception while disconnecting");
 		}
