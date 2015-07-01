@@ -65,12 +65,6 @@
 				<artifactId>bluecove-gpl</artifactId>
 				<version>${bluecove.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.ow2.chameleon.bluetooth</groupId>
-				<artifactId>bluecove-for-osgi</artifactId>
-				<version>${bluecove.version}</version>
-			</dependency>
-
 			<!-- OSGi -->
 			<dependency>
 				<groupId>org.osgi</groupId>
