@@ -27,7 +27,6 @@
 	</parent>
 
 	<packaging>bundle</packaging>
-	<groupId>de.tum.in</groupId>
 	<artifactId>de.tum.in.heartbeat</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<name>MQTT Heartbeat</name>

@@ -26,7 +26,6 @@
 		<relativePath>../de.tum.in.parent/pom.xml</relativePath>
 	</parent>
 
-	<groupId>de.tum.in</groupId>
 	<artifactId>de.tum.in.dp.commons</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>

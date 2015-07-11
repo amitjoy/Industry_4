@@ -24,7 +24,6 @@
 		<relativePath>../de.tum.in.parent/pom.xml</relativePath>
 	</parent>
 
-	<groupId>de.tum.in</groupId>
 	<artifactId>de.tum.in.bluecove</artifactId>
 	<version>${bluecove.version}</version>
 	<name>Bluecove for OSGi</name>

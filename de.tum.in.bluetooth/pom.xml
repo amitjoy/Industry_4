@@ -25,9 +25,7 @@
 		<relativePath>../de.tum.in.parent/pom.xml</relativePath>
 	</parent>
 
-	<groupId>de.tum.in</groupId>
 	<artifactId>de.tum.in.bluetooth</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>Bluetooth OSGi Service</name>
 	<description>Bundle exposing OSGi services from discovered bluetooth devices and services. Apart from this, it also registers a Connection Factory Implementation for Bluetooth Serial Port Profile</description>
 	<packaging>bundle</packaging>

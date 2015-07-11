@@ -27,7 +27,6 @@
 		<relativePath>../de.tum.in.parent/pom.xml</relativePath>
 	</parent>
 
-	<groupId>de.tum.in</groupId>
 	<artifactId>de.tum.in.mqtt.client</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>

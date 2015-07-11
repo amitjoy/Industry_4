@@ -28,7 +28,6 @@
 	</parent>
 
 	<packaging>bundle</packaging>
-	<groupId>de.tum.in</groupId>
 	<artifactId>de.tum.in.splunk</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<name>Splunk Configuration</name>
