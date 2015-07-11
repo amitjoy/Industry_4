@@ -41,7 +41,7 @@
 			description="Configurable Property to set SMTP Server Username" />
 
 		<AD id="smtp.password" name="smtp.password"
-			type="Password" cardinality="0" required="true" default="password"
+			type="String" cardinality="0" required="true" default="password"
 			description="Configurable Property to set SMTP Server Password" />
 
 	</OCD>
