@@ -29,7 +29,7 @@ public interface IFTTTConfiguration {
 	public static final String TRIGGER_EMAIL = "trigger@recipe.ifttt.com";
 
 	/**
-	 * Used to send a dummy email with the subject specified
+	 * Used to send an email to IFTTT trigger
 	 */
 	public void trigger();
 
