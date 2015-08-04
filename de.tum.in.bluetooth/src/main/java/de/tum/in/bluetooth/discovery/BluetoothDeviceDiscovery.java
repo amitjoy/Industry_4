@@ -72,6 +72,7 @@ import com.google.common.collect.Sets;
 import com.intel.bluetooth.RemoteDeviceHelper;
 
 import de.tum.in.activity.log.ActivityLogService;
+import de.tum.in.activity.log.IActivityLogService;
 import de.tum.in.bluetooth.BluetoothController;
 import de.tum.in.bluetooth.devices.Device;
 import de.tum.in.bluetooth.devices.DeviceList;
@@ -344,7 +345,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	 * Activity Log Service Dependency
 	 */
 	@Reference(bind = "bindActivityLogService", unbind = "unbindActivityLogService")
-	private volatile ActivityLogService m_activityLogService;
+	private volatile IActivityLogService m_activityLogService;
 
 	/**
 	 * Device Discovery Agent to handle bluetooth enabled device detection
@@ -469,7 +470,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	/**
 	 * Callback to be used while {@link ActivityLogService} is registering
 	 */
-	public synchronized void bindActivityLogService(final ActivityLogService activityLogService) {
+	public synchronized void bindActivityLogService(final IActivityLogService activityLogService) {
 		if (this.m_activityLogService == null) {
 			this.m_activityLogService = activityLogService;
 		}
@@ -976,7 +977,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	/**
 	 * Callback to be used while {@link ActivityLogService} is deregistering
 	 */
-	public synchronized void unbindActivityLogService(final ActivityLogService activityLogService) {
+	public synchronized void unbindActivityLogService(final IActivityLogService activityLogService) {
 		if (this.m_activityLogService == activityLogService) {
 			this.m_activityLogService = null;
 		}
