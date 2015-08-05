@@ -71,18 +71,6 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.compendium</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>com.swissbit</groupId>
-			<artifactId>com.swissbit.activity.log</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.swissbit</groupId>
-			<artifactId>com.swissbit.assd.comm</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -132,7 +120,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Vendor>Swissbit AG</Bundle-Vendor>
+						<Bundle-Vendor>TU Munich</Bundle-Vendor>
 						<Bundle-Developer>Amit Kumar Mondal</Bundle-Developer>
 					</instructions>
 				</configuration>

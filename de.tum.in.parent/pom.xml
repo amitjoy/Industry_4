@@ -222,6 +222,7 @@
 		<module>../de.tum.in.hsql.conf</module>
 		<module>../de.tum.in.heartbeat</module>
 		<module>../de.tum.in.splunk</module>
+		<module>../de.tum.in.ifttt</module>
 		<module>../de.tum.in.dp.parent</module>
 	</modules>
 

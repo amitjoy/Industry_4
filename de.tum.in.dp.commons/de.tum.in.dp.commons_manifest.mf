@@ -28,3 +28,7 @@ Bundle-Version: 1.0.0.SNAPSHOT
 Name: de.tum.in.splunk-1.0-SNAPSHOT.jar
 Bundle-SymbolicName: de.tum.in.splunk
 Bundle-Version: 1.0.0.SNAPSHOT
+
+Name: de.tum.in.ifttt-1.0-SNAPSHOT.jar
+Bundle-SymbolicName: de.tum.in.ifttt
+Bundle-Version: 1.0.0.SNAPSHOT

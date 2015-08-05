@@ -40,6 +40,10 @@
 <target name="check.file.exists ../de.tum.in.splunk/target/de.tum.in.splunk-1.0-SNAPSHOT.jar" unless="file.exists.../de.tum.in.splunk/target/de.tum.in.splunk-1.0-SNAPSHOT.jar">
   <fail message="Can not find file ../de.tum.in.splunk/target/de.tum.in.splunk-1.0-SNAPSHOT.jar"/>
 </target>
+<available property="file.exists.../de.tum.in.ifttt/target/de.tum.in.ifttt-1.0-SNAPSHOT.jar" file="../de.tum.in.ifttt/target/de.tum.in.ifttt-1.0-SNAPSHOT.jar"/>
+<target name="check.file.exists ../de.tum.in.ifttt/target/de.tum.in.ifttt-1.0-SNAPSHOT.jar" unless="file.exists.../de.tum.in.ifttt/target/de.tum.in.ifttt-1.0-SNAPSHOT.jar">
+  <fail message="Can not find file ../de.tum.in.ifttt/target/de.tum.in.ifttt-1.0-SNAPSHOT.jar"/>
+</target>
 <target name="all">
   <mkdir dir="/Users/AMIT/Industry_4.0/de.tum.in.dp.commons"/>
   <antcall target="check.file.exists ../de.tum.in.events/target/de.tum.in.events-1.0-SNAPSHOT.jar"/>
@@ -48,6 +52,7 @@
   <antcall target="check.file.exists ../de.tum.in.hsql.conf/target/de.tum.in.hsql.conf-1.0-SNAPSHOT.jar"/>
   <antcall target="check.file.exists ../de.tum.in.heartbeat/target/de.tum.in.heartbeat-1.0-SNAPSHOT.jar"/>
   <antcall target="check.file.exists ../de.tum.in.splunk/target/de.tum.in.splunk-1.0-SNAPSHOT.jar"/>
+  <antcall target="check.file.exists ../de.tum.in.ifttt/target/de.tum.in.ifttt-1.0-SNAPSHOT.jar"/>
   <jar destfile="de.tum.in.dp.commons.dp" manifest="de.tum.in.dp.commons_manifest.mf">
     <zipfileset file="../de.tum.in.events/target/de.tum.in.events-1.0-SNAPSHOT.jar" fullpath="de.tum.in.events-1.0-SNAPSHOT.jar" />
     <zipfileset file="../de.tum.in.mongodb/target/de.tum.in.mongodb-1.0-SNAPSHOT.jar" fullpath="de.tum.in.mongodb-1.0-SNAPSHOT.jar" />
@@ -55,6 +60,7 @@
     <zipfileset file="../de.tum.in.hsql.conf/target/de.tum.in.hsql.conf-1.0-SNAPSHOT.jar" fullpath="de.tum.in.hsql.conf-1.0-SNAPSHOT.jar" />
     <zipfileset file="../de.tum.in.heartbeat/target/de.tum.in.heartbeat-1.0-SNAPSHOT.jar" fullpath="de.tum.in.heartbeat-1.0-SNAPSHOT.jar" />
     <zipfileset file="../de.tum.in.splunk/target/de.tum.in.splunk-1.0-SNAPSHOT.jar" fullpath="de.tum.in.splunk-1.0-SNAPSHOT.jar" />
+    <zipfileset file="../de.tum.in.ifttt/target/de.tum.in.ifttt-1.0-SNAPSHOT.jar" fullpath="de.tum.in.ifttt-1.0-SNAPSHOT.jar" />
   </jar>
 </target>
 

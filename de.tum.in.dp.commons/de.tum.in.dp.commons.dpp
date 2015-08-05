@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Thu Jun 25 01:59:38 CEST 2015
+#Wed Aug 05 09:22:29 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.commons_build.xml
 build.dp.file=<.>/de.tum.in.dp.commons.dp
 build.location=
@@ -45,7 +45,14 @@ bundles.5.missing=false
 bundles.5.name=de.tum.in.splunk-1.0-SNAPSHOT.jar
 bundles.5.symbolic_name=de.tum.in.splunk
 bundles.5.version=1.0.0.SNAPSHOT
-bundles.count=6
+bundles.6.bundle_path=/Users/AMIT/Industry_4.0/de.tum.in.ifttt/target/de.tum.in.ifttt-1.0-SNAPSHOT.jar
+bundles.6.customizer=false
+bundles.6.headers.count=0
+bundles.6.missing=false
+bundles.6.name=de.tum.in.ifttt-1.0-SNAPSHOT.jar
+bundles.6.symbolic_name=de.tum.in.ifttt
+bundles.6.version=1.0.0.SNAPSHOT
+bundles.count=7
 certificates.count=0
 general.signbundles=true
 headers.contact.address=admin@amitinside.com
