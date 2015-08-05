@@ -37,7 +37,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 
 /**
- * This is used to configure HypeSQL Connection
+ * This is used to configure IFTTT Email Channel
  *
  * @author AMIT KUMAR MONDAL
  *

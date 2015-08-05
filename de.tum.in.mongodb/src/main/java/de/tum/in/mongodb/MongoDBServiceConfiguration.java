@@ -48,11 +48,6 @@ import com.mongodb.ServerAddress;
 public class MongoDBServiceConfiguration extends Cloudlet implements ConfigurableComponent {
 
 	/**
-	 * Defines Application Configuration Metatype Id
-	 */
-	private static final String APP_CONF_ID = "de.tum.in.mongodb";
-
-	/**
 	 * Application Identifier
 	 */
 	private static final String APP_ID = "MONGODB-V1";
@@ -127,6 +122,7 @@ public class MongoDBServiceConfiguration extends Cloudlet implements Configurabl
 	/**
 	 * Place holder for port
 	 */
+	@SuppressWarnings("unused")
 	private int m_port;
 
 	/**
@@ -195,7 +191,7 @@ public class MongoDBServiceConfiguration extends Cloudlet implements Configurabl
 	}
 
 	/**
-	 * Register MongoDB Service
+	 * Registers MongoDB Service
 	 */
 	private void doRegister(final ComponentContext componentContext, final Map<String, Object> properties) {
 		this.m_properties = properties;
@@ -206,8 +202,8 @@ public class MongoDBServiceConfiguration extends Cloudlet implements Configurabl
 		this.m_password = (String) this.m_properties.get(MONGO_DB_PASSWORD);
 
 		if (this.m_username != null) {
-			final MongoCredential credential = MongoCredential.createCredential("user1", "test",
-					"password1".toCharArray());
+			final MongoCredential credential = MongoCredential.createCredential(this.m_username, this.m_dbname,
+					this.m_password.toCharArray());
 			this.m_mongoClient = new MongoClient(new ServerAddress(this.m_host), Arrays.asList(credential));
 			LOGGER.info("Authenticated as '" + this.m_username + "'");
 		}
@@ -215,6 +211,9 @@ public class MongoDBServiceConfiguration extends Cloudlet implements Configurabl
 		this.registerMongoDBService(componentContext);
 	}
 
+	/**
+	 * Registers {@link MongoDBService}
+	 */
 	private void registerMongoDBService(final ComponentContext componentContext) {
 		final Hashtable<String, String> properties = new Hashtable<String, String>();
 		properties.put("dbName", this.m_dbname);

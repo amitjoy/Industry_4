@@ -88,6 +88,7 @@ public class BluetoothServiceDiscovery {
 	 * Map storing the currently registered ServiceRecord(with their
 	 * ServiceRegistration) by RemoteDevice
 	 */
+	@SuppressWarnings("rawtypes")
 	private final Map<RemoteDevice, Map<ServiceRecord, ServiceRegistration>> m_servicesRecord = Maps.newHashMap();
 
 	/**
@@ -250,6 +251,7 @@ public class BluetoothServiceDiscovery {
 	 * @param device
 	 * @param url
 	 */
+	@SuppressWarnings("rawtypes")
 	private synchronized void register(final RemoteDevice remote, final ServiceRecord serviceRecord,
 			final Device device, final String url) {
 		LOGGER.info("Registering Service Records....");
@@ -346,6 +348,7 @@ public class BluetoothServiceDiscovery {
 	/**
 	 * Deregisters the provided Service Record
 	 */
+	@SuppressWarnings("rawtypes")
 	private synchronized void unregister(final RemoteDevice remote) {
 		LOGGER.info("Deregistering Service Records....");
 		final Map<ServiceRecord, ServiceRegistration> services = this.m_servicesRecord.remove(remote);

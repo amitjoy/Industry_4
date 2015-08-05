@@ -48,11 +48,6 @@ import com.google.common.base.Throwables;
 public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 
 	/**
-	 * Defines Application Configuration Metatype Id
-	 */
-	private static final String APP_CONF_ID = "de.tum.in.mqtt.heartbeat";
-
-	/**
 	 * Application Identifier
 	 */
 	private static final String APP_ID = "HEARTBEAT-V1";

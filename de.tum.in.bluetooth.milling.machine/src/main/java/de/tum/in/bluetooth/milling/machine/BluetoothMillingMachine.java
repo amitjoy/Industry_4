@@ -91,7 +91,7 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	private static final String BLUETOOH_ENABLED_MILLING_MACHINES = "bluetooth.devices.address";
 
 	/**
-	 * Configurable property to set Bluetooth Realtime Topic Namespace
+	 * Configurable property to set Bluetooth Real-time Topic Namespace
 	 */
 	private static final String BLUETOOTH_REALTIME_TOPIC = "bluetooth.realtime.topic";
 
@@ -99,11 +99,6 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	 * Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(BluetoothMillingMachine.class);
-
-	/**
-	 * Configurable Property to check the setpoint speed for milling machines
-	 */
-	private static final String PROGRAM_SETPOINT_NAME = "milling.machine.setPoint";
 
 	/**
 	 * Activity Log Service Dependency
@@ -370,7 +365,7 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 		this.m_devices = this.loadMillingMachines((String) this.m_properties.get(BLUETOOH_ENABLED_MILLING_MACHINES));
 
 		// If the device is mentioned in the configuration of this
-		// component, then we have to publish the realtime data
+		// component, then we have to publish the real-time data
 		this.m_serviceRecords.stream()
 				.filter(serviceRecord -> this.m_devices.contains(serviceRecord.getHostDevice().getBluetoothAddress()))
 				.forEach(serviceRecord -> this.doPublish(serviceRecord));
@@ -378,8 +373,8 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	}
 
 	/**
-	 * Used to publish realtime data retrieved from all the milling machines and
-	 * cache it
+	 * Used to publish real-time data retrieved from all the milling machines
+	 * and cache it
 	 */
 	private void doPublish(final ServiceRecord serviceRecord) {
 
@@ -390,7 +385,7 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 
 		bluetoothConnector.connect();
 
-		// first retrieve the bluetooth realtime data from the data retriever
+		// first retrieve the bluetooth real-time data from the data retriever
 		// thread
 		this.m_resultFromWorker = this.m_pool.submit(new DataRetrieverWorker(bluetoothConnector));
 
@@ -418,9 +413,9 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 		// Update the configurations
 		if ("configurations".equals(reqTopic.getResources()[0])) {
 			this.m_configurationService.updateConfiguration(APP_CONF_ID, reqPayload.metrics());
-
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 		}
+
 		this.m_activityLogService.saveLog("Bluetooth Milling Machine Configuration Updated");
 
 		LOGGER.info("Bluetooth Milling Machine Configuration Updated");

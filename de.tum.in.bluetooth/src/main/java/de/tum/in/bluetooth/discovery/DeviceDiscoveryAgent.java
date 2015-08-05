@@ -229,13 +229,6 @@ public class DeviceDiscoveryAgent implements Runnable {
 	}
 
 	/**
-	 * For testing purpose <b>only</b>.
-	 */
-	private DeviceDiscoveryListener getDeviceDiscoveryListener() {
-		return this.m_listener;
-	}
-
-	/**
 	 * Computes the discovery Id according to the configured discovery mode.
 	 *
 	 * @return the discovery id.

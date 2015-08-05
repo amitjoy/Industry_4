@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 public class SplunkConfiguration implements ConfigurableComponent {
 
 	/**
-	 * Configurable property to set Bluetooth Realtime Topic Namespace
+	 * Configurable property to set Bluetooth Real-time Topic Namespace
 	 */
 	private static final String BLUETOOTH_REALTIME_TOPIC = "bluetooth.realtime.topic";
 
@@ -54,12 +54,12 @@ public class SplunkConfiguration implements ConfigurableComponent {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SplunkConfiguration.class);
 
 	/**
-	 * Configurable Property to set OPC-UA Realtime Topic Namespace
+	 * Configurable Property to set OPC-UA Topic Namespace
 	 */
 	private static final String OPCUA_REALTIME_TOPIC = "opcua.realtime.topic";
 
 	/**
-	 * Configurable Property to set Wifi Realtime Topic Namespace
+	 * Configurable Property to set WiFi Topic Namespace
 	 */
 	private static final String WIFI_REALTIME_TOPIC = "wifi.realtime.topic";
 
