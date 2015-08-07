@@ -29,10 +29,8 @@ import com.google.common.base.Throwables;
 
 /**
  * This static class manages the Bluetooth action. It ensures that only one
- * bluetooth action is executed at a time.
- * <p/>
- * Bluetooth operation are submitted to this class which executed them when a
- * free slot if available.
+ * bluetooth action is executed at a time. Bluetooth operation are submitted to
+ * this class which executed them when a free slot if available.
  *
  * @author AMIT KUMAR MONDAL
  */

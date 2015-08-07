@@ -17,7 +17,7 @@
 
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
 	localization="en_us">
-	<OCD id="de.tum.in.bluetooth" name="Bluetooth"
+	<OCD id="de.tum.in.bluetooth" name="Bluetooth SPP"
 		description="Settings for the bluetooth application.">
 
 		<Icon

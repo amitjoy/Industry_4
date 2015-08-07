@@ -56,7 +56,7 @@ public interface BluetoothController {
 	 * Used to check whether the stack used for bluetooth discovery is supported
 	 * or not
 	 *
-	 * @return
+	 * @return true if bluetooth stack is supported or false
 	 */
 	public boolean isBluetoothStackSupported();
 

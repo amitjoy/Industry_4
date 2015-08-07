@@ -35,5 +35,4 @@ public class Env {
 	public static boolean isTestEnvironmentEnabled() {
 		return Boolean.getBoolean("bluetooth.test");
 	}
-
 }

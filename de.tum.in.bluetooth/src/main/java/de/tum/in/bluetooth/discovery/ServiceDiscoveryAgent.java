@@ -52,12 +52,21 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 	// private static UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP };
 	private static UUID[] searchUuidSet = { UUIDs.RFCOMM };
 
+	/**
+	 * The target {@link RemoteDevice} to search for {@link ServiceRecord}
+	 */
 	private final RemoteDevice m_device;
 
+	/**
+	 * The List of discovered {@link ServiceRecord}
+	 */
 	private final List<ServiceRecord> m_discoveredServices = Lists.newArrayList();
 
 	private String m_name;
 
+	/**
+	 * Bluetooth Service Discovery Agent
+	 */
 	private final BluetoothServiceDiscovery m_parent;
 
 	private boolean m_searchInProgress = false;
@@ -118,6 +127,9 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 		}
 	}
 
+	/**
+	 * Initialize Bluetooth Adapter
+	 */
 	private LocalDevice initialize() {
 		LocalDevice local = null;
 		try {
