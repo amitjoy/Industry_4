@@ -38,7 +38,7 @@ import com.intel.bluetooth.RemoteDeviceHelper;
  * @author AMIT KUMAR MONDAL
  *
  */
-public class SPPServer {
+public final class SPPServer {
 
 	private static final String RESPONSE = "Greetings from serverland";
 
@@ -55,7 +55,7 @@ public class SPPServer {
 
 	}
 
-	// start server
+	// start SPP server
 	private void startServer() throws IOException {
 		// Create a UUID for SPP
 		final UUID uuid = new UUID("0000110100001000800000805F9B34FB", false);
@@ -69,24 +69,26 @@ public class SPPServer {
 		System.out.println("\nServer Started. Waiting for clients to connect...");
 		final StreamConnection connection = streamConnNotifier.acceptAndOpen();
 
-		// Authenticate the Remote Device
+		// Authenticate the Remote Device with dummy PIN
 		final RemoteDevice device = RemoteDevice.getRemoteDevice(connection);
 		if (!RemoteDeviceHelper.isAuthenticated(device)) {
-			RemoteDeviceHelper.authenticate(device, "1111"); // Dummy PIN
+			if (!RemoteDeviceHelper.authenticate(device, "1111")) {
+				return;
+			}
 		}
 		System.out.println("Remote device address: " + device.getBluetoothAddress());
 		System.out.println("Remote device name: " + device.getFriendlyName(true));
 
-		// read string from spp client
+		// read string from SPP client
 		final InputStream inStream = connection.openInputStream();
 		final BufferedReader bReader = new BufferedReader(new InputStreamReader(inStream));
 		final String lineRead = bReader.readLine();
-		System.out.println("Message from mobile device: " + lineRead);
+		System.out.println("Message from remote device: " + lineRead);
 
-		// send response to spp client
+		// send response to SPP client
 		final OutputStream outStream = connection.openOutputStream();
 		final PrintWriter pWriter = new PrintWriter(new OutputStreamWriter(outStream));
-		System.out.println("Sending response (" + RESPONSE + ")");
+		System.out.println("Sending response to remote device (" + RESPONSE + ")");
 		pWriter.write(RESPONSE + "\r\n");
 		pWriter.flush();
 
