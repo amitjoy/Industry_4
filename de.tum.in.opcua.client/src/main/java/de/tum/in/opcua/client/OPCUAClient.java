@@ -18,19 +18,32 @@ package de.tum.in.opcua.client;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.IterableMap;
+import org.apache.commons.collections.MapIterator;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.cloud.Cloudlet;
+import org.eclipse.kura.cloud.CloudletTopic;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.message.KuraRequestPayload;
+import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.digitalpetri.opcua.stack.core.security.SecurityPolicy;
 import com.google.common.collect.Lists;
+
+import de.tum.in.activity.log.ActivityLogService;
 
 /**
  * This bundle is responsible for communicating with the OPC-UA Server
@@ -40,7 +53,12 @@ import com.google.common.collect.Lists;
  */
 @Component(immediate = true, name = "de.tum.in.opcua.client")
 @Service(value = { OpcUaClient.class })
-public class OpcUaClient implements ConfigurableComponent {
+public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
+
+	/**
+	 * Application Identifier
+	 */
+	private static final String APP_ID = "OPCUA-V1";
 
 	/**
 	 * Configurable property to set client alias for the keystore
@@ -91,6 +109,24 @@ public class OpcUaClient implements ConfigurableComponent {
 	 * Configurable property specifying the Security Policy
 	 */
 	private static final String OPCUA_SECURITY_POLICY = "opcua.security.policy";
+
+	/**
+	 * Activity Log Service Dependency
+	 */
+	@Reference(bind = "bindActivityLogService", unbind = "unbindActivityLogService")
+	private volatile ActivityLogService m_activityLogService;
+
+	/**
+	 * Eclipse Kura Cloud Service Dependency
+	 */
+	@Reference(bind = "bindCloudService", unbind = "unbindCloudService")
+	private volatile CloudService m_cloudService;
+
+	/**
+	 * Eclipse Kura Configuration Service Dependency
+	 */
+	@Reference(bind = "bindConfigurationService", unbind = "unbindConfigurationService")
+	private volatile ConfigurationService m_configurationService;
 
 	/**
 	 * Placeholder for keystore client alias
@@ -160,6 +196,7 @@ public class OpcUaClient implements ConfigurableComponent {
 
 	/* Constructor */
 	public OpcUaClient() {
+		super(APP_ID);
 	}
 
 	/**
@@ -170,10 +207,39 @@ public class OpcUaClient implements ConfigurableComponent {
 			final Map<String, Object> properties) {
 		LOGGER.info("Activating OPC-UA Component...");
 
+		super.setCloudService(this.m_cloudService);
+		super.activate(componentContext);
 		this.reinitializeConfiguration(properties);
 
 		LOGGER.info("Activating OPC-UA Component... Done.");
 
+	}
+
+	/**
+	 * Callback to be used while {@link ActivityLogService} is registering
+	 */
+	public synchronized void bindActivityLogService(final ActivityLogService activityLogService) {
+		if (this.m_activityLogService == null) {
+			this.m_activityLogService = activityLogService;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link CloudService} is registering
+	 */
+	public synchronized void bindCloudService(final CloudService cloudService) {
+		if (this.m_cloudService == null) {
+			super.setCloudService(this.m_cloudService = cloudService);
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link ConfigurationService} is registering
+	 */
+	public synchronized void bindConfigurationService(final ConfigurationService configurationService) {
+		if (this.m_configurationService == null) {
+			this.m_configurationService = configurationService;
+		}
 	}
 
 	/**
@@ -208,11 +274,78 @@ public class OpcUaClient implements ConfigurableComponent {
 	/**
 	 * Callback used when this service component is deactivating
 	 */
+	@Override
 	@Deactivate
 	protected void deactivate(final ComponentContext context) {
 		LOGGER.debug("Deactivating OPC-UA Component...");
 
 		LOGGER.debug("Deactivating OPC-UA Component... Done.");
+	}
+
+	/** {@inheritDoc}} */
+	@Override
+	protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+			final KuraResponsePayload respPayload) throws KuraException {
+		LOGGER.info("OPC-UA Client Actions Started...");
+
+		this.m_opcuaClientActions.forEach(opcuaClientAction -> {
+			final OpcUaClientActionRunner clientActionRunner = new OpcUaClientActionRunner.Builder()
+					.setApplicationName(this.m_opcuaApplicationName).setApplicationUri(this.m_opcuaApplicationUri)
+					.setApplicationCertificate(this.m_opcuaApplicationCert).setRequestTimeout(this.m_requestTimeout)
+					.setKeyStoreClientAlias(this.m_keystoreClientAlias).setKeyStorePassword(this.m_keystorePassword)
+					.setKeyStoreServerAlias(this.m_keystoreServerAlias).setKeystoreType(this.m_keystoreType)
+					.setEndpointUrl(opcuaClientAction.getEndpointUrl()).setSecurityPolicy(this.m_opcuaSecurityPolicy)
+					.build();
+			clientActionRunner.run();
+		});
+		this.m_activityLogService.saveLog("OPC-UA Client Actions Executed");
+
+		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+
+		LOGGER.info("OPC-UA Client Actions Communication Done");
+	}
+
+	/** {@inheritDoc}} */
+	@Override
+	protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+			final KuraResponsePayload respPayload) throws KuraException {
+		LOGGER.info("OPC-UA Configuration Retrieving...");
+		// Retrieve the configurations
+		if ("configurations".equals(reqTopic.getResources()[0])) {
+			final ComponentConfiguration configuration = this.m_configurationService.getComponentConfiguration(APP_ID);
+
+			final IterableMap map = new HashedMap(configuration.getConfigurationProperties());
+			final MapIterator it = map.mapIterator();
+
+			while (it.hasNext()) {
+				final Object key = it.next();
+				final Object value = it.getValue();
+
+				respPayload.addMetric((String) key, value);
+			}
+			this.m_activityLogService.saveLog("OPC-UA Configuration Retrieved");
+
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		}
+
+		LOGGER.info("OPC-UA Configuration Retrieved");
+	}
+
+	/** {@inheritDoc}} */
+	@Override
+	protected void doPut(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
+			final KuraResponsePayload respPayload) throws KuraException {
+		LOGGER.info("OPC-UA Configuration Updating...");
+
+		// Update the configurations
+		if ("configurations".equals(reqTopic.getResources()[0])) {
+			this.m_configurationService.updateConfiguration(APP_ID, reqPayload.metrics());
+
+			this.m_activityLogService.saveLog("OPC-UA Configuration Updated");
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		}
+
+		LOGGER.info("OPC-UA Configuration Updated");
 	}
 
 	/**
@@ -238,17 +371,33 @@ public class OpcUaClient implements ConfigurableComponent {
 		this.m_properties = properties;
 		this.extractConfiguration();
 		this.configureSecurityPolicy();
+	}
 
-		this.m_opcuaClientActions.forEach(opcuaClientAction -> {
-			final OpcUaClientActionRunner clientActionRunner = new OpcUaClientActionRunner.Builder()
-					.setApplicationName(this.m_opcuaApplicationName).setApplicationUri(this.m_opcuaApplicationUri)
-					.setApplicationCertificate(this.m_opcuaApplicationCert).setRequestTimeout(this.m_requestTimeout)
-					.setKeyStoreClientAlias(this.m_keystoreClientAlias).setKeyStorePassword(this.m_keystorePassword)
-					.setKeyStoreServerAlias(this.m_keystoreServerAlias).setKeystoreType(this.m_keystoreType)
-					.setEndpointUrl(opcuaClientAction.getEndpointUrl()).setSecurityPolicy(this.m_opcuaSecurityPolicy)
-					.build();
-			clientActionRunner.run();
-		});
+	/**
+	 * Callback to be used while {@link ActivityLogService} is deregistering
+	 */
+	public synchronized void unbindActivityLogService(final ActivityLogService activityLogService) {
+		if (this.m_activityLogService == activityLogService) {
+			this.m_activityLogService = null;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link CloudService} is deregistering
+	 */
+	public synchronized void unbindCloudService(final CloudService cloudService) {
+		if (this.m_cloudService == cloudService) {
+			super.setCloudService(this.m_cloudService = null);
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link ConfigurationService} is deregistering
+	 */
+	public synchronized void unbindConfigurationService(final ConfigurationService configurationService) {
+		if (this.m_configurationService == configurationService) {
+			this.m_configurationService = null;
+		}
 	}
 
 	/**
