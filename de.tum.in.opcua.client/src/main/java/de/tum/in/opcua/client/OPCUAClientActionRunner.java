@@ -332,7 +332,6 @@ public final class OpcUaClientActionRunner {
 			}
 
 			Stack.releaseSharedResources();
-			System.exit(0);
 		});
 
 		try {
@@ -346,6 +345,7 @@ public final class OpcUaClientActionRunner {
 				this.m_future.complete(client);
 			}
 		} catch (final Throwable t) {
+			LOGGER.error("Error running client example: " + Throwables.getStackTraceAsString(t));
 			this.m_future.completeExceptionally(t);
 		}
 	}
