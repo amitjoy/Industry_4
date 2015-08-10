@@ -196,7 +196,6 @@ public class OpcUaClient implements ConfigurableComponent {
 			this.m_opcuaSecurityPolicy = SecurityPolicy.Basic256Sha256;
 			break;
 		}
-
 	}
 
 	/**
@@ -233,7 +232,7 @@ public class OpcUaClient implements ConfigurableComponent {
 	}
 
 	/**
-	 * Used to be called when configurations will get updated
+	 * Used to be called when configurations get updated
 	 */
 	public void updated(final Map<String, Object> properties) {
 		LOGGER.info("Updated OPC-UA Component...");
