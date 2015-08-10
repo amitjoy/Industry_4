@@ -58,6 +58,11 @@ public class OpcUaClient implements ConfigurableComponent {
 	private static final String KEYSTORE_SERVER_ALIAS = "keystore.server.alias";
 
 	/**
+	 * Configurable Property to set keystore type
+	 */
+	private static final String KEYSTORE_TYPE = "keystore.type";
+
+	/**
 	 * Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpcUaClient.class);
@@ -101,6 +106,11 @@ public class OpcUaClient implements ConfigurableComponent {
 	 * Placeholder for keystore server alias
 	 */
 	private String m_keystoreServerAlias;
+
+	/**
+	 * Placeholder for keystore type
+	 */
+	private String m_keystoreType;
 
 	/**
 	 * Placeholder for opc-ua certificate location
@@ -218,6 +228,7 @@ public class OpcUaClient implements ConfigurableComponent {
 		this.m_opcuaApplicationCert = (String) this.m_properties.get(OPCUA_APPLICATION_CERTIFICATE);
 		this.m_securityPolicy = (int) this.m_properties.get(OPCUA_SECURITY_POLICY);
 		this.m_requestTimeout = (int) this.m_properties.get(OPCUA_REQUEST_TIMEOUT);
+		this.m_keystoreType = (String) this.m_properties.get(KEYSTORE_TYPE);
 	}
 
 	/**
@@ -233,7 +244,7 @@ public class OpcUaClient implements ConfigurableComponent {
 					.setApplicationName(this.m_opcuaApplicationName).setApplicationUri(this.m_opcuaApplicationUri)
 					.setApplicationCertificate(this.m_opcuaApplicationCert).setRequestTimeout(this.m_requestTimeout)
 					.setKeyStoreClientAlias(this.m_keystoreClientAlias).setKeyStorePassword(this.m_keystorePassword)
-					.setKeyStoreServerAlias(this.m_keystoreServerAlias)
+					.setKeyStoreServerAlias(this.m_keystoreServerAlias).setKeystoreType(this.m_keystoreType)
 					.setEndpointUrl(opcuaClientAction.getEndpointUrl()).setSecurityPolicy(this.m_opcuaSecurityPolicy)
 					.build();
 			clientActionRunner.run();

@@ -87,6 +87,11 @@ public final class OpcUaClientActionRunner {
 		private String m_keyStoreServerAlias;
 
 		/**
+		 * Keystore Type
+		 */
+		private String m_keyStoreType;
+
+		/**
 		 * OPC-UA Request timeout
 		 */
 		private int m_requestTimeout;
@@ -101,8 +106,9 @@ public final class OpcUaClientActionRunner {
 		 */
 		public OpcUaClientActionRunner build() {
 			return new OpcUaClientActionRunner(this.m_endpointUrl, this.m_securityPolicy, this.m_clientAction,
-					this.m_keyStoreServerAlias, this.m_keyStoreClientAlias, this.m_keyStorePassword,
-					this.m_applicationName, this.m_applicationUri, this.m_applicationCertificate);
+					this.m_keyStoreType, this.m_keyStoreServerAlias, this.m_keyStoreClientAlias,
+					this.m_keyStorePassword, this.m_applicationName, this.m_applicationUri,
+					this.m_applicationCertificate, this.m_requestTimeout);
 		}
 
 		/**
@@ -166,6 +172,14 @@ public final class OpcUaClientActionRunner {
 		 */
 		public final Builder setKeyStoreServerAlias(final String keyStoreServerAlias) {
 			this.m_keyStoreServerAlias = keyStoreServerAlias;
+			return this;
+		}
+
+		/**
+		 * Setter for Keystore Type
+		 */
+		public final Builder setKeystoreType(final String keystoreType) {
+			this.m_keyStoreType = keystoreType;
 			return this;
 		}
 
@@ -238,6 +252,11 @@ public final class OpcUaClientActionRunner {
 	private final String m_keyStoreServerAlias;
 
 	/**
+	 * Keystore Type
+	 */
+	private final String m_keyStoreType;
+
+	/**
 	 * The keystore loader
 	 */
 	private final KeyStoreLoader m_loader;
@@ -245,7 +264,7 @@ public final class OpcUaClientActionRunner {
 	/**
 	 * OPC-UA Request timeout
 	 */
-	private int m_requestTimeout;
+	private final int m_requestTimeout;
 
 	/**
 	 * Security Policy for the action to perform
@@ -256,19 +275,21 @@ public final class OpcUaClientActionRunner {
 	 * Constructor
 	 */
 	private OpcUaClientActionRunner(final String endpointUrl, final SecurityPolicy securityPolicy,
-			final OpcUaClientAction clientAction, final String keystoreServerAlias, final String keystoreClientAlias,
-			final String keystorePassword, final String applicationName, final String applicationUri,
-			final String applicationCert) {
+			final OpcUaClientAction clientAction, final String keystoreType, final String keystoreServerAlias,
+			final String keystoreClientAlias, final String keystorePassword, final String applicationName,
+			final String applicationUri, final String applicationCert, final int requestTimeout) {
 		this.m_endpointUrl = endpointUrl;
 		this.m_securityPolicy = securityPolicy;
 		this.m_clientAction = clientAction;
 		this.m_applicationName = applicationName;
 		this.m_applicationUri = applicationUri;
+		this.m_keyStoreType = keystoreType;
 		this.m_keyStoreClientAlias = keystoreClientAlias;
 		this.m_keyStoreServerAlias = keystoreServerAlias;
 		this.m_keyStorePassword = keystorePassword;
 		this.m_applicationCertificate = applicationCert;
-		this.m_loader = new KeyStoreLoader(this.m_keyStoreClientAlias, this.m_keyStoreServerAlias,
+		this.m_requestTimeout = requestTimeout;
+		this.m_loader = new KeyStoreLoader(this.m_keyStoreType, this.m_keyStoreClientAlias, this.m_keyStoreServerAlias,
 				this.m_keyStorePassword, this.m_applicationCertificate);
 	}
 

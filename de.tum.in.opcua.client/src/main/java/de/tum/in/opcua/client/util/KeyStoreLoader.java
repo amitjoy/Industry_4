@@ -53,6 +53,11 @@ public final class KeyStoreLoader {
 	private KeyPair m_clientKeyPair;
 
 	/**
+	 * Keystore Type
+	 */
+	private final String m_keystoreType;
+
+	/**
 	 * Keystore Password
 	 */
 	private final char[] m_password;
@@ -65,8 +70,9 @@ public final class KeyStoreLoader {
 	/**
 	 * Constructor
 	 */
-	public KeyStoreLoader(final String clientAlias, final String serverAlias, final String password,
-			final String certificate) {
+	public KeyStoreLoader(final String keystoreType, final String clientAlias, final String serverAlias,
+			final String password, final String certificate) {
+		this.m_keystoreType = keystoreType;
 		this.m_clientAlias = clientAlias;
 		this.m_serverAlias = serverAlias;
 		this.m_password = password.toCharArray();
@@ -88,14 +94,13 @@ public final class KeyStoreLoader {
 	}
 
 	/**
-	 * loads the certificate
+	 * Loads the certificate
 	 */
 	public KeyStoreLoader load() throws Exception {
-		final KeyStore keyStore = KeyStore.getInstance("PKCS12");
-
+		final KeyStore keyStore = KeyStore.getInstance(this.m_keystoreType);
 		keyStore.load(Files.newInputStream(Paths.get(this.m_certificate)), this.m_password);
-
 		final Key clientPrivateKey = keyStore.getKey(this.m_clientAlias, this.m_password);
+
 		if (clientPrivateKey instanceof PrivateKey) {
 			this.m_clientCertificate = (X509Certificate) keyStore.getCertificate(this.m_clientAlias);
 			final PublicKey clientPublicKey = this.m_clientCertificate.getPublicKey();
