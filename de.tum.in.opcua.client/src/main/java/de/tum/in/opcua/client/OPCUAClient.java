@@ -240,6 +240,8 @@ public class OpcUaClient implements ConfigurableComponent {
 
 		this.m_properties = properties;
 		this.extractConfiguration();
+		this.configureSecurityPolicy();
+
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
 		LOGGER.info("Updated OPC-UA Component... Done.");

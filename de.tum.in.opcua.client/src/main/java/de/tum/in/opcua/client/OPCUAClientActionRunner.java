@@ -243,8 +243,8 @@ public final class OpcUaClientActionRunner {
 		this.m_keyStoreServerAlias = keystoreServerAlias;
 		this.m_keyStorePassword = keystorePassword;
 		this.m_applicationCertificate = applicationCert;
-		this.m_loader = new KeyStoreLoader(keystoreClientAlias, keystoreServerAlias, keystorePassword,
-				this.m_applicationCertificate);
+		this.m_loader = new KeyStoreLoader(this.m_keyStoreClientAlias, this.m_keyStoreServerAlias,
+				this.m_keyStorePassword, this.m_applicationCertificate);
 	}
 
 	/**
