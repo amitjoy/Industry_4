@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Mon Aug 10 09:01:34 CEST 2015
+#Mon Aug 10 11:31:44 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.opcua_build.xml
 build.dp.file=<.>/de.tum.in.dp.opcua.dp
 build.location=
@@ -17,7 +17,14 @@ bundles.1.missing=false
 bundles.1.name=de.tum.in.opcua-sdk-1.0-SNAPSHOT.jar
 bundles.1.symbolic_name=de.tum.in.opcua-sdk
 bundles.1.version=1.0.0.SNAPSHOT
-bundles.count=2
+bundles.2.bundle_path=/Users/AMIT/Industry_4.0/de.tum.in.opcua.client.read/target/de.tum.in.opcua.client.read-1.0-SNAPSHOT.jar
+bundles.2.customizer=false
+bundles.2.headers.count=0
+bundles.2.missing=false
+bundles.2.name=de.tum.in.opcua.client.read-1.0-SNAPSHOT.jar
+bundles.2.symbolic_name=de.tum.in.opcua.client.read
+bundles.2.version=1.0.0.SNAPSHOT
+bundles.count=3
 certificates.count=0
 general.signbundles=true
 headers.contact.address=admin@amitinside.com

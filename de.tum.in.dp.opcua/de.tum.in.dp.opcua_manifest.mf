@@ -12,3 +12,7 @@ Bundle-Version: 1.0.0.SNAPSHOT
 Name: de.tum.in.opcua-sdk-1.0-SNAPSHOT.jar
 Bundle-SymbolicName: de.tum.in.opcua-sdk
 Bundle-Version: 1.0.0.SNAPSHOT
+
+Name: de.tum.in.opcua.client.read-1.0-SNAPSHOT.jar
+Bundle-SymbolicName: de.tum.in.opcua.client.read
+Bundle-Version: 1.0.0.SNAPSHOT

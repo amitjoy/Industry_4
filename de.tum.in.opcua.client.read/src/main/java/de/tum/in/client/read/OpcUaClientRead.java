@@ -37,7 +37,7 @@ import com.google.common.collect.Lists;
 import de.tum.in.opcua.client.OpcUaClientAction;
 
 /**
- * This bundle is responsible for communicating with the OPC-UA Server
+ * This bundle is responsible for reading OPC-UA Server (Example Read)
  *
  * @author AMIT KUMAR MONDAL
  *
