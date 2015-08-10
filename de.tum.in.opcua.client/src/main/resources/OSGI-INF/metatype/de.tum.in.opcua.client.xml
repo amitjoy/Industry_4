@@ -32,9 +32,13 @@
 			cardinality="0" required="true" default="urn:kura:opcua:client"
 			description="Configurable property to set opc-ua application uri" />
 			
-		<AD id="opcua.application.certificate" name="opcua.application.certificate" type="String"
+		<AD id="opcua.certificate.location" name="opcua.certificate.location" type="String"
 			cardinality="0" required="true" default="/home/example-certs.pfx"
 			description="Configurable property to set opc-ua application certificate (Absolute Location)" />
+			
+		<AD id="opcua.request.timeout" name="opcua.request.timeout" type="Integer"
+			cardinality="0" required="true" default="5"
+			description="Configurable property to set opc-ua request timeout (in seconds)" />
 			
 		<AD id="opcua.security.policy" name="opcua.security.policy"
 			type="Integer" cardinality="0" required="true" default="0"

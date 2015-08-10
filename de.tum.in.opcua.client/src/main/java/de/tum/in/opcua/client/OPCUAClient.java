@@ -65,7 +65,7 @@ public class OpcUaClient implements ConfigurableComponent {
 	/**
 	 * Configurable Property to set opc-ua application certificate
 	 */
-	private static final String OPCUA_APPLICATION_CERTIFICATE = "opcua.application.certificate";
+	private static final String OPCUA_APPLICATION_CERTIFICATE = "opcua.certificate.location";
 
 	/**
 	 * Configurable Property to set opc-ua application name
@@ -76,6 +76,11 @@ public class OpcUaClient implements ConfigurableComponent {
 	 * Configurable Property to set opc-ua application uri
 	 */
 	private static final String OPCUA_APPLICATION_URI = "opcua.application.uri";
+
+	/**
+	 * Configurable property specifying the request timeout
+	 */
+	private static final String OPCUA_REQUEST_TIMEOUT = "opcua.request.timeout";
 
 	/**
 	 * Configurable property specifying the Security Policy
@@ -134,6 +139,11 @@ public class OpcUaClient implements ConfigurableComponent {
 	private Map<String, Object> m_properties;
 
 	/**
+	 * Placeholder for request timeout
+	 */
+	private int m_requestTimeout;
+
+	/**
 	 * Placeholder for security policy
 	 */
 	private int m_securityPolicy;
@@ -150,20 +160,7 @@ public class OpcUaClient implements ConfigurableComponent {
 			final Map<String, Object> properties) {
 		LOGGER.info("Activating OPC-UA Component...");
 
-		this.m_properties = properties;
-		this.extractConfiguration();
-		this.configureSecurityPolicy();
-
-		this.m_opcuaClientActions.forEach(opcuaClientAction -> {
-			final OpcUaClientActionRunner clientActionRunner = new OpcUaClientActionRunner.Builder()
-					.setApplicationName(this.m_opcuaApplicationName).setApplicationUri(this.m_opcuaApplicationUri)
-					.setApplicationCertificate(this.m_opcuaApplicationCert)
-					.setKeyStoreClientAlias(this.m_keystoreClientAlias).setKeyStorePassword(this.m_keystorePassword)
-					.setKeyStoreServerAlias(this.m_keystoreServerAlias)
-					.setEndpointUrl(opcuaClientAction.getEndpointUrl()).setSecurityPolicy(this.m_opcuaSecurityPolicy)
-					.build();
-			clientActionRunner.run();
-		});
+		this.reinitializeConfiguration(properties);
 
 		LOGGER.info("Activating OPC-UA Component... Done.");
 
@@ -220,6 +217,27 @@ public class OpcUaClient implements ConfigurableComponent {
 		this.m_opcuaApplicationUri = (String) this.m_properties.get(OPCUA_APPLICATION_URI);
 		this.m_opcuaApplicationCert = (String) this.m_properties.get(OPCUA_APPLICATION_CERTIFICATE);
 		this.m_securityPolicy = (int) this.m_properties.get(OPCUA_SECURITY_POLICY);
+		this.m_requestTimeout = (int) this.m_properties.get(OPCUA_REQUEST_TIMEOUT);
+	}
+
+	/**
+	 * Reinitialize Configurations as it gets updated
+	 */
+	private void reinitializeConfiguration(final Map<String, Object> properties) {
+		this.m_properties = properties;
+		this.extractConfiguration();
+		this.configureSecurityPolicy();
+
+		this.m_opcuaClientActions.forEach(opcuaClientAction -> {
+			final OpcUaClientActionRunner clientActionRunner = new OpcUaClientActionRunner.Builder()
+					.setApplicationName(this.m_opcuaApplicationName).setApplicationUri(this.m_opcuaApplicationUri)
+					.setApplicationCertificate(this.m_opcuaApplicationCert).setRequestTimeout(this.m_requestTimeout)
+					.setKeyStoreClientAlias(this.m_keystoreClientAlias).setKeyStorePassword(this.m_keystorePassword)
+					.setKeyStoreServerAlias(this.m_keystoreServerAlias)
+					.setEndpointUrl(opcuaClientAction.getEndpointUrl()).setSecurityPolicy(this.m_opcuaSecurityPolicy)
+					.build();
+			clientActionRunner.run();
+		});
 	}
 
 	/**
@@ -237,9 +255,7 @@ public class OpcUaClient implements ConfigurableComponent {
 	public void updated(final Map<String, Object> properties) {
 		LOGGER.info("Updated OPC-UA Component...");
 
-		this.m_properties = properties;
-		this.extractConfiguration();
-		this.configureSecurityPolicy();
+		this.reinitializeConfiguration(properties);
 
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 

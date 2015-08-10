@@ -47,6 +47,11 @@ import de.tum.in.opcua.client.OpcUaClientAction;
 public class OpcUaClientRead implements OpcUaClientAction {
 
 	/**
+	 * The OPC-UA Endpoint URL
+	 */
+	private static final String ENDPOINT_URL = "opc.tcp://localhost:12685/kura";
+
+	/**
 	 * Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpcUaClientRead.class);
@@ -79,7 +84,7 @@ public class OpcUaClientRead implements OpcUaClientAction {
 	/** {@inheritDoc}} */
 	@Override
 	public String getEndpointUrl() {
-		return "opc.tcp://localhost:12685/kura";
+		return ENDPOINT_URL;
 	}
 
 	/**

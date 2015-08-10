@@ -45,30 +45,37 @@ import de.tum.in.opcua.client.util.KeyStoreLoader;
  */
 public final class OpcUaClientActionRunner {
 	public static class Builder {
+
 		/**
 		 * Application Certificate
 		 */
 		private String m_applicationCertificate;
+
 		/**
 		 * Application Name
 		 */
 		private String m_applicationName;
+
 		/**
 		 * Application Uri
 		 */
 		private String m_applicationUri;
+
 		/**
 		 * The provided client action to work
 		 */
 		private OpcUaClientAction m_clientAction;
+
 		/**
 		 * OPC-UA Endpoint URL
 		 */
 		private String m_endpointUrl;
+
 		/**
 		 * Keystore Client Alias
 		 */
 		private String m_keyStoreClientAlias;
+
 		/**
 		 * Keystore Password
 		 */
@@ -78,6 +85,11 @@ public final class OpcUaClientActionRunner {
 		 * Keystore Server Alias
 		 */
 		private String m_keyStoreServerAlias;
+
+		/**
+		 * OPC-UA Request timeout
+		 */
+		private int m_requestTimeout;
 
 		/**
 		 * Security Policy for the action to perform
@@ -158,6 +170,14 @@ public final class OpcUaClientActionRunner {
 		}
 
 		/**
+		 * Setter for Request Timeout
+		 */
+		public final Builder setRequestTimeout(final int requestTimeout) {
+			this.m_requestTimeout = requestTimeout;
+			return this;
+		}
+
+		/**
 		 * Setter for Security Policy
 		 */
 		public final Builder setSecurityPolicy(final SecurityPolicy securityPolicy) {
@@ -223,6 +243,11 @@ public final class OpcUaClientActionRunner {
 	private final KeyStoreLoader m_loader;
 
 	/**
+	 * OPC-UA Request timeout
+	 */
+	private int m_requestTimeout;
+
+	/**
 	 * Security Policy for the action to perform
 	 */
 	private final SecurityPolicy m_securityPolicy;
@@ -264,8 +289,8 @@ public final class OpcUaClientActionRunner {
 		final OpcUaClientConfig config = OpcUaClientConfig.builder()
 				.setApplicationName(LocalizedText.english(this.m_applicationName))
 				.setApplicationUri(this.m_applicationUri).setCertificate(this.m_loader.getClientCertificate())
-				.setKeyPair(this.m_loader.getClientKeyPair()).setEndpoint(endpoint).setRequestTimeout(uint(5000))
-				.build();
+				.setKeyPair(this.m_loader.getClientKeyPair()).setEndpoint(endpoint)
+				.setRequestTimeout(uint(this.m_requestTimeout * 1000)).build();
 
 		return new OpcUaClient(config);
 	}
