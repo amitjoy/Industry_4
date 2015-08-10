@@ -18,7 +18,7 @@
 # Declaring all the Deployment Package Project Names to facilitate easy finding of 
 # its directory (as the directory name is as same as the project name)
 
-declare -a arr=("de.tum.in.dp.bluetooth" "de.tum.in.dp.bluetooth.machine" "de.tum.in.dp.cache" "de.tum.in.dp.commons" "de.tum.in.dp.dependencies")
+declare -a arr=("de.tum.in.dp.bluetooth" "de.tum.in.dp.bluetooth.machine" "de.tum.in.dp.opcua" "de.tum.in.dp.cache" "de.tum.in.dp.commons" "de.tum.in.dp.dependencies")
 
 # The build file filename extension
 b="_build.xml"

@@ -245,6 +245,7 @@
 		<module>../de.tum.in.heartbeat</module>
 		<module>../de.tum.in.splunk</module>
 		<module>../de.tum.in.ifttt</module>
+		<module>../de.tum.in.opcua-sdk</module>
 		<module>../de.tum.in.opcua.client</module>
 		<module>../de.tum.in.dp.parent</module>
 	</modules>
