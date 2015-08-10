@@ -44,64 +44,228 @@ import de.tum.in.opcua.client.util.KeyStoreLoader;
  *
  */
 public final class OPCUAClientActionRunner {
+	public static class Builder {
+		/**
+		 * Application Certificate
+		 */
+		private String m_applicationCertificate;
+		/**
+		 * Application Name
+		 */
+		private String m_applicationName;
+		/**
+		 * Application Uri
+		 */
+		private String m_applicationUri;
+		/**
+		 * The provided client action to work
+		 */
+		private OPCUAClientAction m_clientAction;
+		/**
+		 * OPC-UA Endpoint URL
+		 */
+		private String m_endpointUrl;
+		/**
+		 * Keystore Client Alias
+		 */
+		private String m_keyStoreClientAlias;
+		/**
+		 * Keystore Password
+		 */
+		private String m_keyStorePassword;
+
+		/**
+		 * Keystore Server Alias
+		 */
+		private String m_keyStoreServerAlias;
+
+		/**
+		 * Security Policy for the action to perform
+		 */
+		private SecurityPolicy m_securityPolicy;
+
+		/**
+		 * Returns the main Runner
+		 */
+		public OPCUAClientActionRunner build() {
+			return new OPCUAClientActionRunner(this.m_endpointUrl, this.m_securityPolicy, this.m_clientAction,
+					this.m_keyStoreServerAlias, this.m_keyStoreClientAlias, this.m_keyStorePassword,
+					this.m_applicationName, this.m_applicationUri, this.m_applicationCertificate);
+		}
+
+		/**
+		 * Setter for Application Certificate
+		 */
+		public final Builder setApplicationCertificate(final String applicationCertificate) {
+			this.m_applicationCertificate = applicationCertificate;
+			return this;
+		}
+
+		/**
+		 * Setter for Application Name
+		 */
+		public final Builder setApplicationName(final String applicationName) {
+			this.m_applicationName = applicationName;
+			return this;
+		}
+
+		/**
+		 * Setter for Application URI
+		 */
+		public final Builder setApplicationUri(final String applicationUri) {
+			this.m_applicationUri = applicationUri;
+			return this;
+		}
+
+		/**
+		 * Setter for Client Action
+		 */
+		public final Builder setClientAction(final OPCUAClientAction opcuaClientAction) {
+			this.m_clientAction = opcuaClientAction;
+			return this;
+		}
+
+		/**
+		 * Setter for Endpoint URL
+		 */
+		public final Builder setEndpointUrl(final String endpointUrl) {
+			this.m_endpointUrl = endpointUrl;
+			return this;
+		}
+
+		/**
+		 * Setter for Keystore Client Alias
+		 */
+		public final Builder setKeyStoreClientAlias(final String keyStoreClientAlias) {
+			this.m_keyStoreClientAlias = keyStoreClientAlias;
+			return this;
+		}
+
+		/**
+		 * Setter for Keystore Password
+		 */
+		public final Builder setKeyStorePassword(final String keyStorePassword) {
+			this.m_keyStorePassword = keyStorePassword;
+			return this;
+		}
+
+		/**
+		 * Setter for Keystore Server Alias
+		 */
+		public final Builder setKeyStoreServerAlias(final String keyStoreServerAlias) {
+			this.m_keyStoreServerAlias = keyStoreServerAlias;
+			return this;
+		}
+
+		/**
+		 * Setter for Security Policy
+		 */
+		public final Builder setSecurityPolicy(final SecurityPolicy securityPolicy) {
+			this.m_securityPolicy = securityPolicy;
+			return this;
+		}
+
+	}
+
 	/**
 	 * Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(OPCUAClientActionRunner.class);
 
 	/**
+	 * Application Certificate
+	 */
+	private final String m_applicationCertificate;
+
+	/**
+	 * Application Name
+	 */
+	private final String m_applicationName;
+
+	/**
+	 * Application Uri
+	 */
+	private final String m_applicationUri;
+
+	/**
 	 * The provided client action to work
 	 */
-	private final OPCUAClientAction clientAction;
+	private final OPCUAClientAction m_clientAction;
 
 	/**
 	 * OPC-UA Endpoint URL
 	 */
-	private final String endpointUrl;
+	private final String m_endpointUrl;
 
 	/**
 	 * The worker thread for the action to perform
 	 */
-	private final CompletableFuture<OpcUaClient> future = new CompletableFuture<>();
+	private final CompletableFuture<OpcUaClient> m_future = new CompletableFuture<>();
+
+	/**
+	 * Keystore Client Alias
+	 */
+	private final String m_keyStoreClientAlias;
+
+	/**
+	 * Keystore Password
+	 */
+	private final String m_keyStorePassword;
+
+	/**
+	 * Keystore Server Alias
+	 */
+	private final String m_keyStoreServerAlias;
 
 	/**
 	 * The keystore loader
 	 */
-	private final KeyStoreLoader loader = new KeyStoreLoader();
+	private final KeyStoreLoader m_loader;
 
 	/**
 	 * Security Policy for the action to perform
 	 */
-	private final SecurityPolicy securityPolicy;
+	private final SecurityPolicy m_securityPolicy;
 
 	/**
 	 * Constructor
 	 */
-	public OPCUAClientActionRunner(final String endpointUrl, final SecurityPolicy securityPolicy,
-			final OPCUAClientAction clientExample) {
-		this.endpointUrl = endpointUrl;
-		this.securityPolicy = securityPolicy;
-		this.clientAction = clientExample;
+	private OPCUAClientActionRunner(final String endpointUrl, final SecurityPolicy securityPolicy,
+			final OPCUAClientAction clientAction, final String keystoreServerAlias, final String keystoreClientAlias,
+			final String keystorePassword, final String applicationName, final String applicationUri,
+			final String applicationCert) {
+		this.m_endpointUrl = endpointUrl;
+		this.m_securityPolicy = securityPolicy;
+		this.m_clientAction = clientAction;
+		this.m_applicationName = applicationName;
+		this.m_applicationUri = applicationUri;
+		this.m_keyStoreClientAlias = keystoreClientAlias;
+		this.m_keyStoreServerAlias = keystoreServerAlias;
+		this.m_keyStorePassword = keystorePassword;
+		this.m_applicationCertificate = applicationCert;
+		this.m_loader = new KeyStoreLoader(keystoreClientAlias, keystoreServerAlias, keystorePassword,
+				this.m_applicationCertificate);
 	}
 
 	/**
 	 * Creates the OPC-UA Client reference for the action needed to perform
 	 */
 	private OpcUaClient createClient() throws Exception {
-		final EndpointDescription[] endpoints = UaTcpStackClient.getEndpoints(this.endpointUrl).get();
+		final EndpointDescription[] endpoints = UaTcpStackClient.getEndpoints(this.m_endpointUrl).get();
 
 		final EndpointDescription endpoint = Arrays.stream(endpoints)
-				.filter(e -> e.getSecurityPolicyUri().equals(this.securityPolicy.getSecurityPolicyUri())).findFirst()
+				.filter(e -> e.getSecurityPolicyUri().equals(this.m_securityPolicy.getSecurityPolicyUri())).findFirst()
 				.orElseThrow(() -> new Exception("no desired endpoints returned"));
 
-		LOGGER.info("Using endpoint: " + endpoint.getEndpointUrl() + " with " + this.securityPolicy);
+		LOGGER.info("Using endpoint: " + endpoint.getEndpointUrl() + " with " + this.m_securityPolicy);
 
-		this.loader.load();
+		this.m_loader.load();
 
 		final OpcUaClientConfig config = OpcUaClientConfig.builder()
-				.setApplicationName(LocalizedText.english("digitalpetri opc-ua client"))
-				.setApplicationUri("urn:digitalpetri:opcua:client").setCertificate(this.loader.getClientCertificate())
-				.setKeyPair(this.loader.getClientKeyPair()).setEndpoint(endpoint).setRequestTimeout(uint(5000)).build();
+				.setApplicationName(LocalizedText.english(this.m_applicationName))
+				.setApplicationUri(this.m_applicationUri).setCertificate(this.m_loader.getClientCertificate())
+				.setKeyPair(this.m_loader.getClientKeyPair()).setEndpoint(endpoint).setRequestTimeout(uint(5000))
+				.build();
 
 		return new OpcUaClient(config);
 	}
@@ -110,7 +274,7 @@ public final class OPCUAClientActionRunner {
 	 * Finalize the required action
 	 */
 	public void run() {
-		this.future.whenComplete((c, ex) -> {
+		this.m_future.whenComplete((c, ex) -> {
 			if (c != null) {
 				try {
 					c.disconnect().get(1, TimeUnit.SECONDS);
@@ -129,14 +293,14 @@ public final class OPCUAClientActionRunner {
 			final OpcUaClient client = this.createClient();
 
 			try {
-				this.clientAction.run(client, this.future);
-				this.future.get(5, TimeUnit.SECONDS);
+				this.m_clientAction.run(client, this.m_future);
+				this.m_future.get(5, TimeUnit.SECONDS);
 			} catch (final Throwable t) {
 				LOGGER.error("Error running client example: " + Throwables.getStackTraceAsString(t));
-				this.future.complete(client);
+				this.m_future.complete(client);
 			}
 		} catch (final Throwable t) {
-			this.future.completeExceptionally(t);
+			this.m_future.completeExceptionally(t);
 		}
 	}
 }

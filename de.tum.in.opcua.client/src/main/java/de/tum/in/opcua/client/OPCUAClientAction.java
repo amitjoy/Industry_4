@@ -29,8 +29,13 @@ import com.digitalpetri.opcua.sdk.client.OpcUaClient;
 public interface OPCUAClientAction {
 
 	/**
+	 * Returns Endpoint URL
+	 */
+	public String getEndpointUrl();
+
+	/**
 	 * The main action to perform
 	 */
-	void run(OpcUaClient client, CompletableFuture<OpcUaClient> future) throws Exception;
+	public void run(OpcUaClient client, CompletableFuture<OpcUaClient> future) throws Exception;
 
 }

@@ -23,12 +23,33 @@
 		<Icon
 			resource="http://icons.iconarchive.com/icons/elegantthemes/beautiful-flat/128/ship-wheel-icon.png"
 			size="32" />
+		
+		<AD id="opcua.application.name" name="opcua.application.name" type="String"
+			cardinality="0" required="true" default="opc-ua client"
+			description="Configurable property to set opc-ua application name" />
+			
+		<AD id="opcua.application.uri" name="opcua.application.uri" type="String"
+			cardinality="0" required="true" default="urn:kura:opcua:client"
+			description="Configurable property to set opc-ua application uri" />
+			
+		<AD id="opcua.application.certificate" name="opcua.application.certificate" type="String"
+			cardinality="0" required="true" default="/home/example-certs.pfx"
+			description="Configurable property to set opc-ua application certificate (Absolute Location)" />
+			
+		<AD id="opcua.security.policy" name="opcua.security.policy"
+			type="Integer" cardinality="0" required="true" default="0"
+			description="Configurable property specifying the Security Policy">
+			<Option label="None" value="0" />
+			<Option label="Basic128Rsa15" value="1" />
+			<Option label="Basic256" value="2" />
+			<Option label="Basic256Sha256" value="3" />
+		</AD>
 
 		<AD id="keystore.client.alias" name="keystore.client.alias" type="String"
 			cardinality="0" required="true" default="client-ai"
 			description="Configurable property to set client alias for the keystore" />
 
-		<AD id="keystore.client.alias" name="keystore.client.alias"
+		<AD id="keystore.server.alias" name="keystore.server.alias"
 			type="String" cardinality="0" required="true" default="server-ai"
 			description="Configurable Property to set server alias for the keystore" />
 

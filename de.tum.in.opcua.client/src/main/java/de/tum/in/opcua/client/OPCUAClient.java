@@ -29,6 +29,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.digitalpetri.opcua.stack.core.security.SecurityPolicy;
 import com.google.common.collect.Lists;
 
 /**
@@ -62,6 +63,26 @@ public class OPCUAClient implements ConfigurableComponent {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OPCUAClient.class);
 
 	/**
+	 * Configurable Property to set opc-ua application certificate
+	 */
+	private static final String OPCUA_APPLICATION_CERTIFICATE = "opcua.application.certificate";
+
+	/**
+	 * Configurable Property to set opc-ua application name
+	 */
+	private static final String OPCUA_APPLICATION_NAME = "opcua.application.name";
+
+	/**
+	 * Configurable Property to set opc-ua application uri
+	 */
+	private static final String OPCUA_APPLICATION_URI = "opcua.application.uri";
+
+	/**
+	 * Configurable property specifying the Security Policy
+	 */
+	private static final String OPCUA_SECURITY_POLICY = "opcua.security.policy";
+
+	/**
 	 * Placeholder for keystore client alias
 	 */
 	private String m_keystoreClientAlias;
@@ -77,6 +98,21 @@ public class OPCUAClient implements ConfigurableComponent {
 	private String m_keystoreServerAlias;
 
 	/**
+	 * Placeholder for opc-ua certificate location
+	 */
+	private String m_opcuaApplicationCert;
+
+	/**
+	 * Placeholder for opc-ua application name
+	 */
+	private String m_opcuaApplicationName;
+
+	/**
+	 * Placeholder for opc-ua application uri
+	 */
+	private String m_opcuaApplicationUri;
+
+	/**
 	 * OPC-UA Client Service Injection
 	 */
 	@Reference(bind = "bindOpcUa", unbind = "unbindOpcUa", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
@@ -88,9 +124,19 @@ public class OPCUAClient implements ConfigurableComponent {
 	private final List<OPCUAClientAction> m_opcuaClientActions = Lists.newCopyOnWriteArrayList();
 
 	/**
+	 * Placeholder for security policy
+	 */
+	private SecurityPolicy m_opcuaSecurityPolicy;
+
+	/**
 	 * Map to store list of configurations
 	 */
 	private Map<String, Object> m_properties;
+
+	/**
+	 * Placeholder for security policy
+	 */
+	private int m_securityPolicy;
 
 	/* Constructor */
 	public OPCUAClient() {
@@ -106,6 +152,17 @@ public class OPCUAClient implements ConfigurableComponent {
 
 		this.m_properties = properties;
 		this.extractConfiguration();
+		this.configureSecurityPolicy();
+
+		for (final OPCUAClientAction opcuaClientAction : this.m_opcuaClientActions) {
+			new OPCUAClientActionRunner.Builder().setApplicationName(this.m_opcuaApplicationName)
+					.setApplicationUri(this.m_opcuaApplicationUri)
+					.setApplicationCertificate(this.m_opcuaApplicationCert)
+					.setKeyStoreClientAlias(this.m_keystoreClientAlias).setKeyStorePassword(this.m_keystorePassword)
+					.setKeyStoreServerAlias(this.m_keystoreServerAlias)
+					.setEndpointUrl(opcuaClientAction.getEndpointUrl()).setSecurityPolicy(this.m_opcuaSecurityPolicy)
+					.build();
+		}
 
 		LOGGER.info("Activating OPC-UA Component... Done.");
 
@@ -118,6 +175,27 @@ public class OPCUAClient implements ConfigurableComponent {
 		if (!this.m_opcuaClientActions.contains(opcuaClientAction)) {
 			this.m_opcuaClientActions.add(opcuaClientAction);
 		}
+	}
+
+	/**
+	 * Retrieves Proper Security Policy
+	 */
+	private void configureSecurityPolicy() {
+		switch (this.m_securityPolicy) {
+		case 0:
+			this.m_opcuaSecurityPolicy = SecurityPolicy.None;
+			break;
+		case 1:
+			this.m_opcuaSecurityPolicy = SecurityPolicy.Basic128Rsa15;
+			break;
+		case 2:
+			this.m_opcuaSecurityPolicy = SecurityPolicy.Basic256;
+			break;
+		case 3:
+			this.m_opcuaSecurityPolicy = SecurityPolicy.Basic256Sha256;
+			break;
+		}
+
 	}
 
 	/**
@@ -138,6 +216,10 @@ public class OPCUAClient implements ConfigurableComponent {
 		this.m_keystoreClientAlias = (String) this.m_properties.get(KEYSTORE_CLIENT_ALIAS);
 		this.m_keystoreServerAlias = (String) this.m_properties.get(KEYSTORE_SERVER_ALIAS);
 		this.m_keystorePassword = (String) this.m_properties.get(KEYSTORE_PASSWORD);
+		this.m_opcuaApplicationName = (String) this.m_properties.get(OPCUA_APPLICATION_NAME);
+		this.m_opcuaApplicationUri = (String) this.m_properties.get(OPCUA_APPLICATION_URI);
+		this.m_opcuaApplicationCert = (String) this.m_properties.get(OPCUA_APPLICATION_CERTIFICATE);
+		this.m_securityPolicy = (int) this.m_properties.get(OPCUA_SECURITY_POLICY);
 	}
 
 	/**
