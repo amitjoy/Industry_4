@@ -39,8 +39,8 @@ import com.google.common.collect.Lists;
  *
  */
 @Component(immediate = true, name = "de.tum.in.opcua.client")
-@Service(value = { OPCUAClient.class })
-public class OPCUAClient implements ConfigurableComponent {
+@Service(value = { OpcUaClient.class })
+public class OpcUaClient implements ConfigurableComponent {
 
 	/**
 	 * Configurable property to set client alias for the keystore
@@ -60,7 +60,7 @@ public class OPCUAClient implements ConfigurableComponent {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(OPCUAClient.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(OpcUaClient.class);
 
 	/**
 	 * Configurable Property to set opc-ua application certificate
@@ -116,12 +116,12 @@ public class OPCUAClient implements ConfigurableComponent {
 	 * OPC-UA Client Service Injection
 	 */
 	@Reference(bind = "bindOpcUa", unbind = "unbindOpcUa", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
-	private volatile OPCUAClientAction m_opcuaClientAction;
+	private volatile OpcUaClientAction m_opcuaClientAction;
 
 	/**
-	 * Holds List of {@link OPCUAClientAction}
+	 * Holds List of {@link OpcUaClientAction}
 	 */
-	private final List<OPCUAClientAction> m_opcuaClientActions = Lists.newCopyOnWriteArrayList();
+	private final List<OpcUaClientAction> m_opcuaClientActions = Lists.newCopyOnWriteArrayList();
 
 	/**
 	 * Placeholder for security policy
@@ -139,7 +139,7 @@ public class OPCUAClient implements ConfigurableComponent {
 	private int m_securityPolicy;
 
 	/* Constructor */
-	public OPCUAClient() {
+	public OpcUaClient() {
 	}
 
 	/**
@@ -154,24 +154,25 @@ public class OPCUAClient implements ConfigurableComponent {
 		this.extractConfiguration();
 		this.configureSecurityPolicy();
 
-		for (final OPCUAClientAction opcuaClientAction : this.m_opcuaClientActions) {
-			new OPCUAClientActionRunner.Builder().setApplicationName(this.m_opcuaApplicationName)
-					.setApplicationUri(this.m_opcuaApplicationUri)
+		this.m_opcuaClientActions.forEach(opcuaClientAction -> {
+			final OpcUaClientActionRunner clientActionRunner = new OpcUaClientActionRunner.Builder()
+					.setApplicationName(this.m_opcuaApplicationName).setApplicationUri(this.m_opcuaApplicationUri)
 					.setApplicationCertificate(this.m_opcuaApplicationCert)
 					.setKeyStoreClientAlias(this.m_keystoreClientAlias).setKeyStorePassword(this.m_keystorePassword)
 					.setKeyStoreServerAlias(this.m_keystoreServerAlias)
 					.setEndpointUrl(opcuaClientAction.getEndpointUrl()).setSecurityPolicy(this.m_opcuaSecurityPolicy)
 					.build();
-		}
+			clientActionRunner.run();
+		});
 
 		LOGGER.info("Activating OPC-UA Component... Done.");
 
 	}
 
 	/**
-	 * Callback to be used while {@link OPCUAClientAction} is registering
+	 * Callback to be used while {@link OpcUaClientAction} is registering
 	 */
-	public synchronized void bindOpcUa(final OPCUAClientAction opcuaClientAction) {
+	public synchronized void bindOpcUa(final OpcUaClientAction opcuaClientAction) {
 		if (!this.m_opcuaClientActions.contains(opcuaClientAction)) {
 			this.m_opcuaClientActions.add(opcuaClientAction);
 		}
@@ -223,9 +224,9 @@ public class OPCUAClient implements ConfigurableComponent {
 	}
 
 	/**
-	 * Callback to be used while {@link OPCUAClientAction} is deregistering
+	 * Callback to be used while {@link OpcUaClientAction} is deregistering
 	 */
-	public synchronized void unbindOpcUa(final OPCUAClientAction opcuaClientAction) {
+	public synchronized void unbindOpcUa(final OpcUaClientAction opcuaClientAction) {
 		if ((this.m_opcuaClientActions.size() > 0) && this.m_opcuaClientActions.contains(opcuaClientAction)) {
 			this.m_opcuaClientActions.remove(opcuaClientAction);
 		}

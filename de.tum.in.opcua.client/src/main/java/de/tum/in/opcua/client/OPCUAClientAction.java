@@ -26,7 +26,7 @@ import com.digitalpetri.opcua.sdk.client.OpcUaClient;
  * @author AMIT KUMAR MONDAL
  *
  */
-public interface OPCUAClientAction {
+public interface OpcUaClientAction {
 
 	/**
 	 * Returns Endpoint URL

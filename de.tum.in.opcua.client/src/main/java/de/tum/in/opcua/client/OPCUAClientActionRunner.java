@@ -38,12 +38,12 @@ import com.google.common.base.Throwables;
 import de.tum.in.opcua.client.util.KeyStoreLoader;
 
 /**
- * Consumes {@link OPCUAClientAction} OSGi Services
+ * Consumes {@link OpcUaClientAction} OSGi Services
  *
  * @author AMIT KUMAR MONDAL
  *
  */
-public final class OPCUAClientActionRunner {
+public final class OpcUaClientActionRunner {
 	public static class Builder {
 		/**
 		 * Application Certificate
@@ -60,7 +60,7 @@ public final class OPCUAClientActionRunner {
 		/**
 		 * The provided client action to work
 		 */
-		private OPCUAClientAction m_clientAction;
+		private OpcUaClientAction m_clientAction;
 		/**
 		 * OPC-UA Endpoint URL
 		 */
@@ -87,8 +87,8 @@ public final class OPCUAClientActionRunner {
 		/**
 		 * Returns the main Runner
 		 */
-		public OPCUAClientActionRunner build() {
-			return new OPCUAClientActionRunner(this.m_endpointUrl, this.m_securityPolicy, this.m_clientAction,
+		public OpcUaClientActionRunner build() {
+			return new OpcUaClientActionRunner(this.m_endpointUrl, this.m_securityPolicy, this.m_clientAction,
 					this.m_keyStoreServerAlias, this.m_keyStoreClientAlias, this.m_keyStorePassword,
 					this.m_applicationName, this.m_applicationUri, this.m_applicationCertificate);
 		}
@@ -120,7 +120,7 @@ public final class OPCUAClientActionRunner {
 		/**
 		 * Setter for Client Action
 		 */
-		public final Builder setClientAction(final OPCUAClientAction opcuaClientAction) {
+		public final Builder setClientAction(final OpcUaClientAction opcuaClientAction) {
 			this.m_clientAction = opcuaClientAction;
 			return this;
 		}
@@ -170,7 +170,7 @@ public final class OPCUAClientActionRunner {
 	/**
 	 * Logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(OPCUAClientActionRunner.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(OpcUaClientActionRunner.class);
 
 	/**
 	 * Application Certificate
@@ -190,7 +190,7 @@ public final class OPCUAClientActionRunner {
 	/**
 	 * The provided client action to work
 	 */
-	private final OPCUAClientAction m_clientAction;
+	private final OpcUaClientAction m_clientAction;
 
 	/**
 	 * OPC-UA Endpoint URL
@@ -230,8 +230,8 @@ public final class OPCUAClientActionRunner {
 	/**
 	 * Constructor
 	 */
-	private OPCUAClientActionRunner(final String endpointUrl, final SecurityPolicy securityPolicy,
-			final OPCUAClientAction clientAction, final String keystoreServerAlias, final String keystoreClientAlias,
+	private OpcUaClientActionRunner(final String endpointUrl, final SecurityPolicy securityPolicy,
+			final OpcUaClientAction clientAction, final String keystoreServerAlias, final String keystoreClientAlias,
 			final String keystorePassword, final String applicationName, final String applicationUri,
 			final String applicationCert) {
 		this.m_endpointUrl = endpointUrl;
