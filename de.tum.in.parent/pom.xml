@@ -33,6 +33,9 @@
 		<osgi-core.version>5.0.0</osgi-core.version>
 		<osgi.version>4.3.1</osgi.version>
 		<slf4j.version>1.6.4</slf4j.version>
+		<ua-client.version>1.0.0-SNAPSHOT</ua-client.version>
+		<ua-server.version>0.4.0-SNAPSHOT</ua-server.version>
+		<ctt-namespace.version>0.4.0-SNAPSHOT</ctt-namespace.version>
 		<kura.version>1.0.5-SNAPSHOT</kura.version>
 		<guava.version>18.0</guava.version>
 		<mongo.version>3.0.1</mongo.version>
@@ -131,7 +134,7 @@
 				<artifactId>commons-io</artifactId>
 				<version>${apache.commons.io.version}</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-email</artifactId>
@@ -152,6 +155,25 @@
 				<version>${findbugs.version}</version>
 			</dependency>
 
+			<!-- OPC-UA -->
+			<dependency>
+				<groupId>com.digitalpetri.opcua</groupId>
+				<artifactId>ua-client</artifactId>
+				<version>${ua-client.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>com.digitalpetri.opcua</groupId>
+				<artifactId>ua-server</artifactId>
+				<version>${ua-server.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>com.digitalpetri.opcua</groupId>
+				<artifactId>ctt-namespace</artifactId>
+				<version>${ctt-namespace.version}</version>
+			</dependency>
+			
 		</dependencies>
 	</dependencyManagement>
 
@@ -223,6 +245,7 @@
 		<module>../de.tum.in.heartbeat</module>
 		<module>../de.tum.in.splunk</module>
 		<module>../de.tum.in.ifttt</module>
+		<module>../de.tum.in.opcua.client</module>
 		<module>../de.tum.in.dp.parent</module>
 	</modules>
 
@@ -230,6 +253,6 @@
 		<url>http://www.tum.de</url>
 		<name>Technical University of Munich</name>
 	</organization>
-	
+
 </project>
 

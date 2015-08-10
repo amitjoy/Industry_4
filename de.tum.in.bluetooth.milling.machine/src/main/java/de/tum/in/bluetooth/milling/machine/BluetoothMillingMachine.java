@@ -183,7 +183,7 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	/**
 	 * Holds List of Service Record for all the paired devices
 	 */
-	private final List<ServiceRecord> m_serviceRecords = Lists.newCopyOnWriteArrayList();;
+	private final List<ServiceRecord> m_serviceRecords = Lists.newCopyOnWriteArrayList();
 
 	/**
 	 * Eclipse Kura System Service Dependency
