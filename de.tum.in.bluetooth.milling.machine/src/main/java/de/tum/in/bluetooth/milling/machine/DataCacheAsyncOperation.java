@@ -64,7 +64,7 @@ public final class DataCacheAsyncOperation implements AsyncFunction<String, Stri
 			properties.put("timestamp", String.valueOf(System.currentTimeMillis()));
 			properties.put("data", this.input);
 
-			// TODO Wrap data in BluetoothData
+			// TODO Wrap received data in BluetoothData
 
 			final Event cacheEvent = new Event(Events.DATA_CACHE, properties);
 			DataCacheAsyncOperation.this.m_eventAdmin.postEvent(cacheEvent);
@@ -79,7 +79,7 @@ public final class DataCacheAsyncOperation implements AsyncFunction<String, Stri
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataCacheAsyncOperation.class);
 
 	/**
-	 * OSGi
+	 * Device Address
 	 */
 	private final String m_deviceAddress;
 
@@ -95,9 +95,6 @@ public final class DataCacheAsyncOperation implements AsyncFunction<String, Stri
 
 	/**
 	 * Constructor
-	 *
-	 * @param eventAdmin
-	 * @param remoteDeviceAddress
 	 */
 	public DataCacheAsyncOperation(final ListeningExecutorService poolToRunFunctionIn, final EventAdmin eventAdmin,
 			final String remoteDeviceAddress) {
