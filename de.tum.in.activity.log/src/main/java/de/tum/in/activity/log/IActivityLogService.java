@@ -39,7 +39,7 @@ public interface IActivityLogService {
 	/**
 	 * The location of the kura specific log file
 	 */
-	public static String LOCATION_TUM_LOG = "/home/pi/tum/tum.log";
+	public static String LOCATION_TUM_LOG = "/home/pi/TUM/tum.log";
 
 	/**
 	 * Used to retrieve saved activity logs
