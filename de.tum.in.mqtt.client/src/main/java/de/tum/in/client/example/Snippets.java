@@ -29,8 +29,9 @@ public final class Snippets {
 
 	public static void main(final String... args) {
 		// Create the connection object
-		client = new KuraMQTTClient.Builder().setHost("m20.cloudmqtt.com").setPort("11143")
-				.setUsername("user@email.com").setPassword("iotiwbiot").setClientId(clientId).build();
+		client = new KuraMQTTClient.Builder().setHost("broker-sandbox.everyware-cloud.com").setPort("1883")
+				.setClientId("CLIENT_176992").setUsername("akm").setPassword("ChangeMeS00n!").build();
+		;
 
 		// Connect to the Message Broker
 		status = client.connect();

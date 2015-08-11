@@ -65,6 +65,16 @@
             <groupId>com.digitalpetri.opcua</groupId>
             <artifactId>ctt-namespace</artifactId>
         </dependency>
+        
+        <dependency>
+				<groupId>com.digitalpetri.opcua</groupId>
+				<artifactId>stack-core</artifactId>
+		</dependency>
+		
+		 <dependency>
+				<groupId>com.digitalpetri.opcua</groupId>
+				<artifactId>stack-client</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -117,7 +127,7 @@
 						<Bundle-Vendor>TU Munich</Bundle-Vendor>
 						<Bundle-Developer>Amit Kumar Mondal</Bundle-Developer>
 						<Embed-Dependency>
-							ua-client, ua-server, ctt-namespace
+							ua-client, ua-server, ctt-namespace, stack-core, stack-client
 						</Embed-Dependency>
 						<_exportcontents>
 							com.digitalpetri.opcua.*

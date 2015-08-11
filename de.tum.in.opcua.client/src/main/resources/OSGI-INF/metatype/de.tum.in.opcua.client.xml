@@ -58,7 +58,7 @@
 			description="Configurable Property to set server alias for the keystore" />
 		
 		<AD id="keystore.type" name="keystore.type"
-			type="String" cardinality="0" required="true" default="0"
+			type="String" cardinality="0" required="true" default="PKCS12"
 			description="Configurable property specifying keystore type">
 			<Option label="PKCS12" value="PKCS12" />
 			<Option label="JKS" value="JKS" />
