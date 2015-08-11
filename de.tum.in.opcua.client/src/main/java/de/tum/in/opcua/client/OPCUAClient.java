@@ -44,6 +44,7 @@ import com.digitalpetri.opcua.stack.core.security.SecurityPolicy;
 import com.google.common.collect.Lists;
 
 import de.tum.in.activity.log.ActivityLogService;
+import de.tum.in.activity.log.IActivityLogService;
 
 /**
  * This bundle is responsible for communicating with the OPC-UA Server
@@ -114,7 +115,7 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	 * Activity Log Service Dependency
 	 */
 	@Reference(bind = "bindActivityLogService", unbind = "unbindActivityLogService")
-	private volatile ActivityLogService m_activityLogService;
+	private volatile IActivityLogService m_activityLogService;
 
 	/**
 	 * Eclipse Kura Cloud Service Dependency
@@ -218,7 +219,7 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	/**
 	 * Callback to be used while {@link ActivityLogService} is registering
 	 */
-	public synchronized void bindActivityLogService(final ActivityLogService activityLogService) {
+	public synchronized void bindActivityLogService(final IActivityLogService activityLogService) {
 		if (this.m_activityLogService == null) {
 			this.m_activityLogService = activityLogService;
 		}
@@ -376,7 +377,7 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	/**
 	 * Callback to be used while {@link ActivityLogService} is deregistering
 	 */
-	public synchronized void unbindActivityLogService(final ActivityLogService activityLogService) {
+	public synchronized void unbindActivityLogService(final IActivityLogService activityLogService) {
 		if (this.m_activityLogService == activityLogService) {
 			this.m_activityLogService = null;
 		}

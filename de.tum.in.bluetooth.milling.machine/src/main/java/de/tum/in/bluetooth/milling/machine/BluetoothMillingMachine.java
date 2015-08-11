@@ -62,6 +62,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import de.tum.in.activity.log.ActivityLogService;
+import de.tum.in.activity.log.IActivityLogService;
 
 /**
  * Used to consume all the service record provided by all the paired Bluetooth
@@ -104,7 +105,7 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	 * Activity Log Service Dependency
 	 */
 	@Reference(bind = "bindActivityLogService", unbind = "unbindActivityLogService")
-	private volatile ActivityLogService m_activityLogService;
+	private volatile IActivityLogService m_activityLogService;
 
 	/**
 	 * Eclipse Kura Cloud Service Dependency
@@ -216,7 +217,7 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	/**
 	 * Callback to be used while {@link ActivityLogService} is registering
 	 */
-	public synchronized void bindActivityLogService(final ActivityLogService activityLogService) {
+	public synchronized void bindActivityLogService(final IActivityLogService activityLogService) {
 		if (this.m_activityLogService == null) {
 			this.m_activityLogService = activityLogService;
 		}
@@ -471,7 +472,7 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	/**
 	 * Callback to be used while {@link ActivityLogService} is deregistering
 	 */
-	public synchronized void unbindActivityLogService(final ActivityLogService activityLogService) {
+	public synchronized void unbindActivityLogService(final IActivityLogService activityLogService) {
 		if (this.m_activityLogService == activityLogService) {
 			this.m_activityLogService = null;
 		}
