@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Tue Aug 04 19:38:38 CEST 2015
+#Tue Aug 11 08:18:27 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.bluetooth_build.xml
 build.dp.file=<.>/de.tum.in.dp.bluetooth.dp
 build.location=
@@ -24,7 +24,14 @@ bundles.2.missing=false
 bundles.2.name=de.tum.in.bluetooth-0.0.1-SNAPSHOT.jar
 bundles.2.symbolic_name=de.tum.in.bluetooth
 bundles.2.version=0.0.1.SNAPSHOT
-bundles.count=3
+bundles.3.bundle_path=/Users/AMIT/Industry_4.0/de.tum.in.bluetooth.milling.machine/target/de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar
+bundles.3.customizer=false
+bundles.3.headers.count=0
+bundles.3.missing=false
+bundles.3.name=de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar
+bundles.3.symbolic_name=de.tum.in.bluetooth.milling.machine
+bundles.3.version=1.0.0.SNAPSHOT
+bundles.count=4
 certificates.count=0
 general.signbundles=true
 headers.contact.address=admin@amitinside.com
