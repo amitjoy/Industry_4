@@ -247,8 +247,11 @@ public class BluetoothServiceDiscovery {
 	 * @param remote
 	 *            The Bluetooth Device found
 	 * @param serviceRecord
+	 *            the selected ServiceRecord to be registered
 	 * @param device
+	 *            the Device POJO
 	 * @param url
+	 *            the service record url
 	 */
 	@SuppressWarnings("rawtypes")
 	private synchronized void register(final RemoteDevice remote, final ServiceRecord serviceRecord,
@@ -267,6 +270,9 @@ public class BluetoothServiceDiscovery {
 			final Map<Integer, DataElement> attrs = new HashMap<Integer, DataElement>();
 			for (final int attrID : attributeIDs) {
 				attrs.put(attrID, serviceRecord.getAttributeValue(attrID));
+				if (attrID == 0x100) {
+					props.put("service.name", serviceRecord.getAttributeValue(attrID));
+				}
 			}
 			props.put("service.attributes", attrs);
 		}
@@ -345,7 +351,7 @@ public class BluetoothServiceDiscovery {
 	}
 
 	/**
-	 * Deregisters the provided Service Record
+	 * Deregister the provided Service Record
 	 */
 	@SuppressWarnings("rawtypes")
 	private synchronized void unregister(final RemoteDevice remote) {
@@ -361,7 +367,7 @@ public class BluetoothServiceDiscovery {
 	}
 
 	/**
-	 * Deregisters all Service Records
+	 * Deregister all Service Records
 	 */
 	private synchronized void unregisterAll() {
 		for (final RemoteDevice remoteDevice : this.m_servicesRecord.keySet()) {
