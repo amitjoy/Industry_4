@@ -20,24 +20,34 @@ import de.tum.in.client.KuraMQTTClient;
 import de.tum.in.client.adapter.MessageListener;
 import de.tum.in.client.message.KuraPayload;
 
+/**
+ * Example Codes for MQTT Communication
+ *
+ * @author AMIT KUMAR MONDAL
+ *
+ */
 public final class Snippets {
 
+	private static String BLUETOOTH_V1_CONF_PUBLISH = "$EDC/tum/B8:27:EB:A6:A9:8A/BLUETOOTH-V1/GET/configurations";
+	private static String BLUETOOTH_V1_CONF_SUBSCRIBE = "$EDC/tum/ANKUR/BLUETOOTH-V1/REPLY/4234216342143261";
+	private static String BLUETOOTH_V1_ON_PUBLISH = "$EDC/tum/B8:27:EB:A6:A9:8A/BLUETOOTH-V1/EXEC/start";
+	private static String BLUETOOTH_V1_ON_SUBSCRIBE = "$EDC/tum/ANKUR/BLUETOOTH-V1/REPLY/4234216342143261";
 	private static IKuraMQTTClient client;
 	private static String clientId = "AMIT";
-	private static String HEARTBEAT = "$EDC/tum/B8:27:EB:A6:A9:8A/HEARTBEAT-V1/mqtt/heartbeat";
+	private static String HEARTBEAT = "$EDC/tum/B8:27:EB:A6:A9:8A/BLUETOOTH-V1/mqtt/heartbeat";
 	private static boolean status;
 
 	public static void main(final String... args) {
 		// Create the connection object
-		client = new KuraMQTTClient.Builder().setHost("broker-sandbox.everyware-cloud.com").setPort("1883")
-				.setClientId("CLIENT_176992").setUsername("akm").setPassword("ChangeMeS00n!").build();
-		;
+		client = new KuraMQTTClient.Builder().setHost("m20.cloudmqtt.com").setPort("11143")
+				.setUsername("user@email.com").setPassword("iotiwbiot").setClientId(clientId).build();
 
 		// Connect to the Message Broker
 		status = client.connect();
 
+		// Subscription
 		if (status) {
-			client.subscribe(HEARTBEAT, new MessageListener() {
+			client.subscribe(BLUETOOTH_V1_ON_SUBSCRIBE, new MessageListener() {
 
 				@Override
 				public void processMessage(final KuraPayload payload) {
@@ -51,20 +61,19 @@ public final class Snippets {
 
 		}
 
+		// Payload Generation for Publishing
 		final KuraPayload payload = new KuraPayload();
-		payload.addMetric("request.id", "454545454545456");
+		payload.addMetric("request.id", "4234216342143261");
 		payload.addMetric("requester.client.id", clientId);
-		payload.addMetric("nodeId", "8");
-		payload.addMetric("encVal",
-				"821b5d53fcba7680aecafbfd9a29658923e6d0a27315daa4345ffa865c4fd7a964bfe51a252cd8e891a8503ae09b82836ffb5e15b1e61233b7f3938b5869900a93da74ceb1ba272d26f3cf0f7ba073b1");
 		System.out.println(status);
 
+		// Publishing
 		if (status) {
-			// client.publish("", payload);
+			client.publish(BLUETOOTH_V1_ON_PUBLISH, payload);
 
 			System.out.println("--------------------------------------------------------------------");
 			System.out.println("Request Published");
-			System.out.println("Request ID : " + "454545454545456");
+			System.out.println("Request ID : " + "4234216342143261");
 			System.out.println("Request Client ID : " + clientId);
 			System.out.println("--------------------------------------------------------------------");
 		}

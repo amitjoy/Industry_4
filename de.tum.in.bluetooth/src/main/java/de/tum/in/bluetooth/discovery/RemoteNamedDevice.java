@@ -28,10 +28,17 @@ import javax.microedition.io.Connection;
  */
 public final class RemoteNamedDevice extends RemoteDevice {
 
+	/**
+	 * The remote device object to be wrapped
+	 */
 	public final RemoteDevice device;
 
+	/**
+	 * The user-friendly name
+	 */
 	public final String friendlyName;
 
+	/** Constructor */
 	protected RemoteNamedDevice(final RemoteDevice device, final String name) {
 		super(device.getBluetoothAddress());
 		this.device = device;

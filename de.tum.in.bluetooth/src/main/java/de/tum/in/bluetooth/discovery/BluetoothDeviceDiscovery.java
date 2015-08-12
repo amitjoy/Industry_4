@@ -873,7 +873,9 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 				LOGGER.info("Paring pattern match for " + address + " / " + name + " with " + regex);
 				try {
 					LOGGER.info("Device " + address + " pairing started..");
-					return RemoteDeviceHelper.authenticate(device, pin);
+					final boolean authStatus = RemoteDeviceHelper.authenticate(device, pin);
+					LOGGER.info("Device (" + address + ") Pairing Authentication Status: " + authStatus);
+					return true;
 				} catch (final IOException e) {
 					LOGGER.error("Cannot authenticate device despite it matches the regex " + regex, e);
 				}
@@ -968,10 +970,6 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 		BluetoothThreadManager.stopScheduler();
 		this.unregisterAll();
 		LOGGER.info("Disabling Bluetooth...Done");
-		LOGGER.info("Releasing all subscription...");
-		this.getCloudApplicationClient().release();
-		LOGGER.info("Releasing all subscription...done");
-
 	}
 
 	/**

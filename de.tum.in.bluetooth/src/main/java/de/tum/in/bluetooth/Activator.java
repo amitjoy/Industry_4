@@ -23,6 +23,8 @@ import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.intel.bluetooth.BluetoothConsts;
+
 import de.tum.in.bluetooth.connection.ConnectionFactoryImpl;
 
 /**
@@ -42,7 +44,7 @@ public class Activator implements BundleActivator {
 	/**
 	 * Schema provided for connections
 	 */
-	private static final String SCHEMA = "btspp";
+	private static final String SCHEMA = BluetoothConsts.PROTOCOL_SCHEME_RFCOMM;
 
 	/**
 	 * The ConnectionFactory Service implementation
