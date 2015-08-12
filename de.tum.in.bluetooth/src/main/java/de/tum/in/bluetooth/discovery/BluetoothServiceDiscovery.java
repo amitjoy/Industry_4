@@ -85,6 +85,12 @@ public class BluetoothServiceDiscovery {
 	private volatile DeviceList m_fleet;
 
 	/**
+	 * Remote Device Injection
+	 */
+	@Reference(bind = "bindRemoteDevice", unbind = "unbindRemoteDevice", cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+	private volatile RemoteDevice m_remoteDevice;
+
+	/**
 	 * Map storing the currently registered ServiceRecord(with their
 	 * ServiceRegistration) by RemoteDevice
 	 */
@@ -95,18 +101,6 @@ public class BluetoothServiceDiscovery {
 	 * Default Constructor Required for DS.
 	 */
 	public BluetoothServiceDiscovery() {
-	}
-
-	/**
-	 * Creates a {@link BluetoothServiceDiscovery}. Mainly used for testing
-	 * environment.
-	 *
-	 * @param context
-	 *            the Bundle context
-	 */
-	public BluetoothServiceDiscovery(final BundleContext context) {
-		this.m_context = context;
-		LOGGER.info("Bluetooth Tracker Started");
 	}
 
 	/**
@@ -140,15 +134,20 @@ public class BluetoothServiceDiscovery {
 	 */
 	public synchronized void bindRemoteDevice(final RemoteDevice device) {
 		LOGGER.info("Binding Remote Device...." + device);
+
+		if (this.m_remoteDevice == null) {
+			this.m_remoteDevice = device;
+		}
+
 		try {
 			// We can't run searches concurrently.
-			final ServiceDiscoveryAgent agent = new ServiceDiscoveryAgent(this, device);
+			final ServiceDiscoveryAgent agent = new ServiceDiscoveryAgent(this, this.m_remoteDevice);
 			BluetoothThreadManager.submit(agent);
 		} catch (final Exception e) {
-			LOGGER.error("Cannot discover services from " + device.getBluetoothAddress(),
+			LOGGER.error("Cannot discover services from " + this.m_remoteDevice.getBluetoothAddress(),
 					Throwables.getStackTraceAsString(e));
 		}
-		LOGGER.info("Binding Remote Device....Done" + device);
+		LOGGER.info("Binding Remote Device....Done" + this.m_remoteDevice.getBluetoothAddress());
 	}
 
 	/**

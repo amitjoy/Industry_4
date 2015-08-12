@@ -68,8 +68,7 @@ public class DeviceDiscoveryAgent implements Runnable {
 		public void deviceDiscovered(final RemoteDevice remote, final DeviceClass clazz) {
 			synchronized (this) {
 				try {
-					LOGGER.info("Device discovered : " + remote.getBluetoothAddress() + " "
-							+ remote.getFriendlyName(false));
+					LOGGER.info("Device discovered : " + remote.getBluetoothAddress());
 					if (DeviceDiscoveryAgent.this.m_onlineCheckOnDiscovery) {
 						// On windows, even lost device may be re-discovered
 						// once they are paired.
@@ -86,9 +85,11 @@ public class DeviceDiscoveryAgent implements Runnable {
 						// We add the device.
 						LOGGER.info("Device discovery completed successfully, injecting device (no online check)");
 						this.m_discoveredDevices.add(remote);
+						LOGGER.info("Devices discovered...Done");
 					}
 				} catch (final Throwable e) {
-					LOGGER.error("Something really bad happened during the device discovery", e);
+					LOGGER.error("Something really bad happened during the device discovery",
+							Throwables.getStackTraceAsString(e));
 				}
 			}
 		}
