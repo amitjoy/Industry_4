@@ -37,7 +37,7 @@ import de.tum.in.bluetooth.connection.ConnectionFactoryImpl;
 public class Activator implements BundleActivator {
 
 	/**
-	 * slf4j Logger
+	 * Logger
 	 */
 	private final static Logger LOGGER = LoggerFactory.getLogger(Activator.class);
 
