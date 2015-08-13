@@ -54,6 +54,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 	public Connection createConnection(String name, int mode, final boolean timeouts) throws IOException {
 		name = checkNotNull(name, "Connection URI must not be null");
 		mode = checkNotNull(mode, "Connection Mode must not be null");
+		checkNotNull(Connector.open(name, mode, timeouts), "Connection Stream must not be null");
 
 		return new WrappedConnection((StreamConnection) Connector.open(name, mode, timeouts));
 
