@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.IOException;
 
 import javax.microedition.io.Connection;
-import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
 import org.osgi.service.io.ConnectionFactory;
@@ -28,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+import com.intel.bluetooth.MicroeditionConnector;
 
 /**
  * Bluetooth Serial Port Profile Connection Factory Implementation
@@ -61,16 +61,14 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 	 */
 	@Override
 	public Connection createConnection(String name, int mode, final boolean timeouts) throws IOException {
-		Connection connection = null;
 		try {
 			name = checkNotNull(name, "Connection URI must not be null");
 			mode = checkNotNull(mode, "Connection Mode must not be null");
-			connection = checkNotNull(Connector.open(name, mode, timeouts));
 		} catch (final Exception e) {
 			LOGGER.error("Reference null " + Throwables.getStackTraceAsString(e));
 		}
 
-		return new WrappedConnection((StreamConnection) connection);
+		return new WrappedConnection((StreamConnection) MicroeditionConnector.open(name, mode, timeouts));
 
 	}
 

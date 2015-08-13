@@ -30,8 +30,6 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
-import com.intel.bluetooth.RemoteDeviceHelper;
-
 /**
  * Creates a bluetooth server instance
  *
@@ -71,11 +69,7 @@ public final class SPPServer {
 
 		// Authenticate the Remote Device with dummy PIN
 		final RemoteDevice device = RemoteDevice.getRemoteDevice(connection);
-		if (!RemoteDeviceHelper.isAuthenticated(device)) {
-			if (!RemoteDeviceHelper.authenticate(device, "1111")) {
-				return;
-			}
-		}
+
 		System.out.println("Remote device address: " + device.getBluetoothAddress());
 		System.out.println("Remote device name: " + device.getFriendlyName(true));
 

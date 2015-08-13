@@ -44,7 +44,7 @@ public class Activator implements BundleActivator {
 	/**
 	 * Schema provided for connections
 	 */
-	private static final String SCHEMA = BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX;
+	private static final String SCHEMA = BluetoothConsts.PROTOCOL_SCHEME_RFCOMM;
 
 	/**
 	 * The ConnectionFactory Service implementation
@@ -58,14 +58,14 @@ public class Activator implements BundleActivator {
 		properties.put(ConnectionFactory.IO_SCHEME, new String[] { SCHEMA });
 		this.m_connectionFactory = new ConnectionFactoryImpl();
 		context.registerService(ConnectionFactory.class.getName(), this.m_connectionFactory, properties);
-		LOGGER.debug("Started Bundle");
+		LOGGER.debug("Started Bluetooth Bundle");
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void stop(final BundleContext context) throws Exception {
 		this.m_connectionFactory = null;
-		LOGGER.debug("Stopped Bundle");
+		LOGGER.debug("Stopped Bluetooth Bundle");
 	}
 
 }

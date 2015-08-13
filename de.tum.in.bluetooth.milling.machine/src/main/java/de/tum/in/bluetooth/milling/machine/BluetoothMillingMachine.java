@@ -153,7 +153,7 @@ public class BluetoothMillingMachine extends Cloudlet {
 	/**
 	 * Bluetooth Service Record Dependency for paired bluetooth devices
 	 */
-	@Reference(bind = "bindServiceRecord", unbind = "unbindServiceRecord", policy = ReferencePolicy.DYNAMIC, target = "(service.name=OBEX Object Push)", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+	@Reference(bind = "bindServiceRecord", unbind = "unbindServiceRecord", policy = ReferencePolicy.DYNAMIC, target = "(service.name=Bluetooth Milling Machine Simulation)", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 	private volatile ServiceRecord m_serviceRecord;
 
 	/**
