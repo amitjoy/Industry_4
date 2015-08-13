@@ -110,11 +110,12 @@ public final class BluetoothConnector {
 		try {
 			LOGGER.info("Connecting to..." + s_serviceRecord.getHostDevice().getBluetoothAddress()
 					+ " with connection url " + connectionURL);
-			this.m_streamConnection = (StreamConnection) s_connectorService.open(connectionURL, ConnectorService.READ);
+			this.m_streamConnection = (StreamConnection) s_connectorService.open(connectionURL,
+					ConnectorService.READ_WRITE, false);
 			LOGGER.info("Successfully Connected to " + s_serviceRecord.getHostDevice().getBluetoothAddress()
 					+ " with stream " + this.m_streamConnection);
 		} catch (final IOException e) {
-			LOGGER.error("Not able to connect to the remote device", Throwables.getStackTraceAsString(e));
+			LOGGER.error("Not able to connect to the remote device. " + Throwables.getStackTraceAsString(e));
 		}
 
 		LOGGER.info("Connection Established with " + s_serviceRecord.getHostDevice().getBluetoothAddress());

@@ -20,11 +20,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.IOException;
 
 import javax.microedition.io.Connection;
+import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
 import org.osgi.service.io.ConnectionFactory;
-
-import com.intel.bluetooth.MicroeditionConnector;
 
 /**
  * Bluetooth Serial Port Profile Connection Factory Implementation
@@ -56,7 +55,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 		name = checkNotNull(name, "Connection URI must not be null");
 		mode = checkNotNull(mode, "Connection Mode must not be null");
 
-		return new WrappedConnection((StreamConnection) MicroeditionConnector.open(name, mode, timeouts));
+		return new WrappedConnection((StreamConnection) Connector.open(name, mode, timeouts));
 
 	}
 

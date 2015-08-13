@@ -88,7 +88,7 @@ public class WrappedConnection implements StreamConnection {
 				this.m_inputStream.close();
 			}
 		} catch (final IOException e) {
-			LOGGER.error("Failed to close connection", Throwables.getStackTraceAsString(e));
+			LOGGER.error("Failed to close connection" + Throwables.getStackTraceAsString(e));
 			throw e;
 		}
 
@@ -102,7 +102,7 @@ public class WrappedConnection implements StreamConnection {
 			this.m_dataInputStream = this.m_connection.openDataInputStream();
 			return this.m_dataInputStream;
 		} catch (final IOException e) {
-			LOGGER.error("Failed to open connection", Throwables.getStackTraceAsString(e));
+			LOGGER.error("Failed to open DataInputStream" + Throwables.getStackTraceAsString(e));
 			throw e;
 		}
 	}
@@ -115,7 +115,7 @@ public class WrappedConnection implements StreamConnection {
 			this.m_dataOutputStream = this.m_connection.openDataOutputStream();
 			return this.m_dataOutputStream;
 		} catch (final IOException e) {
-			LOGGER.error("Failed to open connection", Throwables.getStackTraceAsString(e));
+			LOGGER.error("Failed to open DataOutputStream" + Throwables.getStackTraceAsString(e));
 			throw e;
 
 		}
@@ -129,7 +129,7 @@ public class WrappedConnection implements StreamConnection {
 			this.m_inputStream = this.m_connection.openInputStream();
 			return this.m_inputStream;
 		} catch (final IOException e) {
-			LOGGER.error("Failed to open connection", Throwables.getStackTraceAsString(e));
+			LOGGER.error("Failed to open InputStream" + Throwables.getStackTraceAsString(e));
 			throw e;
 
 		}
@@ -143,7 +143,7 @@ public class WrappedConnection implements StreamConnection {
 			this.m_outputStream = this.m_connection.openOutputStream();
 			return this.m_outputStream;
 		} catch (final IOException e) {
-			LOGGER.error("Failed to open connection", Throwables.getStackTraceAsString(e));
+			LOGGER.error("Failed to open OutputStream", Throwables.getStackTraceAsString(e));
 			throw e;
 
 		}
