@@ -343,7 +343,8 @@ public class BluetoothMillingMachine extends Cloudlet {
 		// thread
 		this.m_resultFromWorker = this.m_pool.submit(new DataRetrieverWorker(bluetoothConnector));
 
-		// next do the async operation to save the result to cache retrieved by
+		// next do the asynchronous operation to save the result to cache
+		// retrieved by
 		// the data retriever thread
 		this.m_finalResult = Futures.transform(this.m_resultFromWorker,
 				new DataCacheAsyncOperation(this.m_poolForAsyncFunction, this.m_eventAdmin, remoteDeviceAddress));

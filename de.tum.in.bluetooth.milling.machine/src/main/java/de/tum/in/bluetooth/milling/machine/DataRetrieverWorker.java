@@ -15,10 +15,11 @@
  *******************************************************************************/
 package de.tum.in.bluetooth.milling.machine;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,22 +57,13 @@ public final class DataRetrieverWorker implements Callable<String> {
 	@Override
 	public String call() throws Exception {
 		LOGGER.debug("Data Retrieving from Milling Machines....");
-
-		final byte buffer[] = new byte[8];
 		try {
 			final InputStream inputStream = this.m_bluetoothConnector.getInputStream();
-			int bytes_read = inputStream.available();
+			final BufferedReader bReader = new BufferedReader(new InputStreamReader(inputStream));
+			final String lineRead = bReader.readLine();
 
-			if (bytes_read > 0) {
-				bytes_read = inputStream.read(buffer, 0, 8);
-			} else {
-				TimeUnit.SECONDS.sleep(1);
-			}
-
-			final String received = new String(buffer, 0, bytes_read);
-
-			LOGGER.debug("Bluetooth Data Received: " + received);
-			return Strings.isNullOrEmpty(received) ? "" : received;
+			LOGGER.debug("Bluetooth Data Received: " + lineRead);
+			return Strings.isNullOrEmpty(lineRead) ? "" : lineRead;
 		} catch (final IOException e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}

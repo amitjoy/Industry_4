@@ -34,7 +34,7 @@ public final class Snippets {
 	private static String BLUETOOTH_V1_ON_SUBSCRIBE = "$EDC/tum/ANKUR/BLUETOOTH-V1/REPLY/4234216342143261";
 	private static IKuraMQTTClient client;
 	private static String clientId = "AMIT";
-	private static String HEARTBEAT = "$EDC/tum/B8:27:EB:A6:A9:8A/BLUETOOTH-V1/mqtt/heartbeat";
+	private static String HEARTBEAT = "$EDC/tum/B8:27:EB:A6:A9:8A/HEARTBEAT-V1/mqtt/heartbeat";
 	private static String MILLING_V1_ON_PUBLISH = "$EDC/tum/B8:27:EB:A6:A9:8A/MILLING-V1/EXEC/start";
 	private static boolean status;
 
@@ -48,7 +48,7 @@ public final class Snippets {
 
 		// Subscription
 		if (status) {
-			client.subscribe(BLUETOOTH_V1_ON_SUBSCRIBE, new MessageListener() {
+			client.subscribe(HEARTBEAT, new MessageListener() {
 
 				@Override
 				public void processMessage(final KuraPayload payload) {

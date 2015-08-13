@@ -121,8 +121,9 @@ public final class BluetoothConnector {
 		LOGGER.info("Connection Established with " + s_serviceRecord.getHostDevice().getBluetoothAddress());
 		try {
 			LOGGER.info("Getting IO Streams for " + s_serviceRecord.getHostDevice().getBluetoothAddress());
-			this.m_inputStream = this.m_streamConnection.openDataInputStream();
-			this.m_outputStream = this.m_streamConnection.openDataOutputStream();
+
+			this.m_inputStream = this.m_streamConnection.openInputStream();
+			this.m_outputStream = this.m_streamConnection.openOutputStream();
 			LOGGER.debug(
 					"Streams Returned-> InputStream: " + this.m_inputStream + " OutputStream: " + this.m_outputStream);
 		} catch (final IOException e) {

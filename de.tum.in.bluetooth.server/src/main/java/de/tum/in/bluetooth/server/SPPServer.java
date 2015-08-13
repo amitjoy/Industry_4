@@ -15,13 +15,11 @@
  *******************************************************************************/
 package de.tum.in.bluetooth.server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.concurrent.TimeUnit;
 
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
@@ -38,7 +36,43 @@ import javax.microedition.io.StreamConnectionNotifier;
  */
 public final class SPPServer {
 
+	private static StreamConnection connection = null;
+
 	private static final String RESPONSE = "Greetings from serverland";
+
+	private static StreamConnectionNotifier streamConnNotifier = null;
+
+	private static PrintWriter writer = null;
+
+	private static void closeConn() throws IOException {
+		writer.flush();
+		writer.close();
+		streamConnNotifier.close();
+	}
+
+	private static void init() throws IOException {
+		// Create a UUID for SPP
+		final UUID uuid = new UUID("0000110100001000800000805F9B34FB", false);
+		// Create the service URL
+		final String connectionString = "btspp://localhost:" + uuid + ";name=Bluetooth Milling Machine Simulation";
+
+		// open server URL
+		streamConnNotifier = (StreamConnectionNotifier) Connector.open(connectionString);
+
+		// Wait for client connection
+		System.out.println("\nServer Started. Waiting for clients to connect...");
+		connection = streamConnNotifier.acceptAndOpen();
+
+		// Authenticate the Remote Device with dummy PIN
+		final RemoteDevice device = RemoteDevice.getRemoteDevice(connection);
+
+		System.out.println("Remote device address: " + device.getBluetoothAddress());
+		System.out.println("Remote device name: " + device.getFriendlyName(true));
+
+		// send response to SPP client
+		final OutputStream outStream = connection.openOutputStream();
+		writer = new PrintWriter(new OutputStreamWriter(outStream));
+	}
 
 	public static void main(final String[] args) throws IOException {
 		// display local device address and name
@@ -47,48 +81,22 @@ public final class SPPServer {
 		System.out.println("Name: " + localDevice.getFriendlyName());
 
 		final SPPServer sampleSPPServer = new SPPServer();
+		init();
 		while (true) {
-			sampleSPPServer.startServer();
+			sampleSPPServer.sendResponse();
+			try {
+				TimeUnit.SECONDS.sleep(2);
+			} catch (final InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 
 	}
 
 	// start SPP server
-	private void startServer() throws IOException {
-		// Create a UUID for SPP
-		final UUID uuid = new UUID("0000110100001000800000805F9B34FB", false);
-		// Create the service URL
-		final String connectionString = "btspp://localhost:" + uuid + ";name=Bluetooth Milling Machine Simulation";
-
-		// open server URL
-		final StreamConnectionNotifier streamConnNotifier = (StreamConnectionNotifier) Connector.open(connectionString);
-
-		// Wait for client connection
-		System.out.println("\nServer Started. Waiting for clients to connect...");
-		final StreamConnection connection = streamConnNotifier.acceptAndOpen();
-
-		// Authenticate the Remote Device with dummy PIN
-		final RemoteDevice device = RemoteDevice.getRemoteDevice(connection);
-
-		System.out.println("Remote device address: " + device.getBluetoothAddress());
-		System.out.println("Remote device name: " + device.getFriendlyName(true));
-
-		// read string from SPP client
-		final InputStream inStream = connection.openInputStream();
-		final BufferedReader bReader = new BufferedReader(new InputStreamReader(inStream));
-		final String lineRead = bReader.readLine();
-		System.out.println("Message from remote device: " + lineRead);
-
-		// send response to SPP client
-		final OutputStream outStream = connection.openOutputStream();
-		final PrintWriter pWriter = new PrintWriter(new OutputStreamWriter(outStream));
+	private void sendResponse() throws IOException {
 		System.out.println("Sending response to remote device (" + RESPONSE + ")");
-		pWriter.write(RESPONSE + "\r\n");
-		pWriter.flush();
-
-		pWriter.close();
-
-		streamConnNotifier.close();
+		writer.write(RESPONSE + "\r\n");
 	}
 
 }
