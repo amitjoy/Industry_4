@@ -33,6 +33,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -81,13 +82,13 @@ public class BluetoothServiceDiscovery {
 	 * Set of devices loaded from the <tt>configuration</tt>. This contains the
 	 * authentication information for the device.
 	 */
-	@Reference(bind = "bindDeviceListService", unbind = "unbindDeviceListService", cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+	@Reference(bind = "bindDeviceListService", policy = ReferencePolicy.DYNAMIC, unbind = "unbindDeviceListService", cardinality = ReferenceCardinality.OPTIONAL_UNARY)
 	private volatile DeviceList m_fleet;
 
 	/**
 	 * Remote Device Service Injection
 	 */
-	@Reference(bind = "bindRemoteDevice", unbind = "unbindRemoteDevice", cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+	@Reference(bind = "bindRemoteDevice", unbind = "unbindRemoteDevice", policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
 	private volatile RemoteDevice m_remoteDevice;
 
 	/**
@@ -279,7 +280,7 @@ public class BluetoothServiceDiscovery {
 		if ((attributeIDs != null) && (attributeIDs.length > 0)) {
 			for (final int attrID : attributeIDs) {
 				if (attrID == SERVICE_NAME_ATTRIBUTE) {
-					props.put("service.name", serviceRecord.getAttributeValue(attrID));
+					props.put("service.name", serviceRecord.getAttributeValue(attrID).getValue());
 				}
 			}
 		}

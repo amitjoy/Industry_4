@@ -108,9 +108,11 @@ public final class BluetoothConnector {
 
 		final String connectionURL = s_serviceRecord.getConnectionURL(0, false);
 		try {
-			LOGGER.info("Connecting to..." + s_serviceRecord.getHostDevice().getBluetoothAddress());
-			this.m_streamConnection = (StreamConnection) s_connectorService.open(connectionURL, ConnectorService.READ,
-					true);
+			LOGGER.info("Connecting to..." + s_serviceRecord.getHostDevice().getBluetoothAddress()
+					+ " with connection url " + connectionURL);
+			this.m_streamConnection = (StreamConnection) s_connectorService.open(connectionURL, ConnectorService.READ);
+			LOGGER.info("Successfully Connected to " + s_serviceRecord.getHostDevice().getBluetoothAddress()
+					+ " with stream " + this.m_streamConnection);
 		} catch (final IOException e) {
 			LOGGER.error("Not able to connect to the remote device", Throwables.getStackTraceAsString(e));
 		}
@@ -120,6 +122,8 @@ public final class BluetoothConnector {
 			LOGGER.info("Getting IO Streams for " + s_serviceRecord.getHostDevice().getBluetoothAddress());
 			this.m_inputStream = this.m_streamConnection.openInputStream();
 			this.m_outputStream = this.m_streamConnection.openOutputStream();
+			LOGGER.debug(
+					"Streams Returned-> InputStream: " + this.m_inputStream + " OutputStream: " + this.m_outputStream);
 		} catch (final IOException e) {
 			LOGGER.error("Unable to retrieve stream connection for remote device", Throwables.getStackTraceAsString(e));
 		}

@@ -35,6 +35,7 @@ public final class Snippets {
 	private static IKuraMQTTClient client;
 	private static String clientId = "AMIT";
 	private static String HEARTBEAT = "$EDC/tum/B8:27:EB:A6:A9:8A/BLUETOOTH-V1/mqtt/heartbeat";
+	private static String MILLING_V1_ON_PUBLISH = "$EDC/tum/B8:27:EB:A6:A9:8A/MILLING-V1/EXEC/start";
 	private static boolean status;
 
 	public static void main(final String... args) {
@@ -69,7 +70,7 @@ public final class Snippets {
 
 		// Publishing
 		if (status) {
-			client.publish(BLUETOOTH_V1_ON_PUBLISH, payload);
+			client.publish(MILLING_V1_ON_PUBLISH, payload);
 
 			System.out.println("--------------------------------------------------------------------");
 			System.out.println("Request Published");

@@ -44,7 +44,7 @@ public class Activator implements BundleActivator {
 	/**
 	 * Schema provided for connections
 	 */
-	private static final String SCHEMA = BluetoothConsts.PROTOCOL_SCHEME_RFCOMM;
+	private static final String SCHEMA = BluetoothConsts.PROTOCOL_SCHEME_BT_OBEX;
 
 	/**
 	 * The ConnectionFactory Service implementation

@@ -37,14 +37,33 @@ import com.google.common.base.Throwables;
 public class WrappedConnection implements StreamConnection {
 
 	/**
-	 * slf4j Logger
+	 * Logger
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(WrappedConnection.class);
 
+	/**
+	 * Streaming connection for bluetooth communication
+	 */
 	private final StreamConnection m_connection;
+
+	/**
+	 * Data Object Input Stream for Bluetooth Communication
+	 */
 	private DataInputStream m_dataInputStream;
+
+	/**
+	 * Data Object Input Stream for Bluetooth Communication
+	 */
 	private DataOutputStream m_dataOutputStream;
+
+	/**
+	 * Communication Input Stream
+	 */
 	private InputStream m_inputStream;
+
+	/**
+	 * Communication Output Stream
+	 */
 	private OutputStream m_outputStream;
 
 	/** Constructor */

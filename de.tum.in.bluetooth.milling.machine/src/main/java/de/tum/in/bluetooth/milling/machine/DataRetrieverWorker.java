@@ -70,6 +70,7 @@ public final class DataRetrieverWorker implements Callable<String> {
 
 			final String received = new String(buffer, 0, bytes_read);
 
+			LOGGER.debug("Bluetooth Data Received: " + received);
 			return Strings.isNullOrEmpty(received) ? "" : received;
 		} catch (final IOException e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
