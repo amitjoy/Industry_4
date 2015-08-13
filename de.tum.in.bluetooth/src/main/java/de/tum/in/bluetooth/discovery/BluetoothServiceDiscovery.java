@@ -54,7 +54,7 @@ import de.tum.in.bluetooth.devices.DeviceList;
  *
  * @author AMIT KUMAR MONDAL
  */
-@Component(immediate = true, name = "de.tum.in.bluetooth.service.discovery")
+@Component(name = "de.tum.in.bluetooth.service.discovery")
 public class BluetoothServiceDiscovery {
 
 	/**
@@ -85,7 +85,7 @@ public class BluetoothServiceDiscovery {
 	private volatile DeviceList m_fleet;
 
 	/**
-	 * Remote Device Injection
+	 * Remote Device Service Injection
 	 */
 	@Reference(bind = "bindRemoteDevice", unbind = "unbindRemoteDevice", cardinality = ReferenceCardinality.OPTIONAL_UNARY)
 	private volatile RemoteDevice m_remoteDevice;

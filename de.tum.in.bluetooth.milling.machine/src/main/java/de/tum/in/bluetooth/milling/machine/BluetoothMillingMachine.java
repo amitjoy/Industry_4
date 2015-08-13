@@ -178,7 +178,7 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	/**
 	 * Bluetooth Service Record Dependency for paired bluetooth devices
 	 */
-	@Reference(bind = "bindServiceRecord", unbind = "unbindServiceRecord", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+	@Reference(bind = "bindServiceRecord", unbind = "unbindServiceRecord", target = "(name=Obex FTP Transfer)", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 	private volatile ServiceRecord m_serviceRecord;
 
 	/**
