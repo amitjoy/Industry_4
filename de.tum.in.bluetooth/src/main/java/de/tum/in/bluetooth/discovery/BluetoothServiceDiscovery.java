@@ -207,7 +207,13 @@ public class BluetoothServiceDiscovery {
 
 	}
 
-	Device findDeviceFromFleet(final RemoteDevice remote) {
+	/**
+	 * Find the specified Remote Device from cache
+	 *
+	 * @param remote
+	 *            the RemoteDevice
+	 */
+	private Device findDeviceFromFleet(final RemoteDevice remote) {
 		if (this.m_fleet != null) {
 			final String address = remote.getBluetoothAddress();
 			String sn = null;
@@ -229,6 +235,9 @@ public class BluetoothServiceDiscovery {
 		return null;
 	}
 
+	/**
+	 * Increments the counter for every attempt
+	 */
 	private void incrementAttempt(final RemoteDevice remote) {
 		LOGGER.info("Attempting to retry..Retry On " + remote.getBluetoothAddress());
 		Integer attempt = this.m_attempts.get(remote);
@@ -256,25 +265,23 @@ public class BluetoothServiceDiscovery {
 	@SuppressWarnings("rawtypes")
 	private synchronized void register(final RemoteDevice remote, final ServiceRecord serviceRecord,
 			final Device device, final String url) {
-		LOGGER.info("Registering Service Records....");
+		LOGGER.info("Registering Service Records for " + remote.getBluetoothAddress() + " .....");
 
 		if (!this.m_servicesRecord.containsKey(remote)) {
 			this.m_servicesRecord.put(remote, new HashMap<ServiceRecord, ServiceRegistration>());
 		}
 
 		final Dictionary<String, Object> props = new Hashtable<String, Object>();
-		props.put("device.id", remote.getBluetoothAddress());
-		final int[] attributeIDs = serviceRecord.getAttributeIDs();
 
+		props.put("device.id", remote.getBluetoothAddress());
+
+		final int[] attributeIDs = serviceRecord.getAttributeIDs();
 		if ((attributeIDs != null) && (attributeIDs.length > 0)) {
-			final Map<Integer, DataElement> attrs = new HashMap<Integer, DataElement>();
 			for (final int attrID : attributeIDs) {
-				attrs.put(attrID, serviceRecord.getAttributeValue(attrID));
-				if (attrID == 0x100) {
+				if (attrID == ServiceConstants.SERVICE_NAME) {
 					props.put("service.name", serviceRecord.getAttributeValue(attrID));
 				}
 			}
-			props.put("service.attributes", attrs);
 		}
 
 		props.put("service.url", url);
@@ -287,7 +294,7 @@ public class BluetoothServiceDiscovery {
 				props);
 		this.m_servicesRecord.get(remote).put(serviceRecord, sr);
 
-		LOGGER.info("Registering Service Records....Done");
+		LOGGER.info("Registering Service Records for " + remote.getBluetoothAddress() + " ......Done");
 	}
 
 	/**
