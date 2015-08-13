@@ -63,7 +63,7 @@ public class BluetoothServiceDiscovery {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BluetoothServiceDiscovery.class);
 
 	/**
-	 * RFCOMM Communication Service Constant
+	 * Service Name Attribute ID in Bluetooth Service Record
 	 */
 	private static final int SERVICE_NAME_ATTRIBUTE = ServiceConstants.SERVICE_NAME;
 
@@ -278,7 +278,7 @@ public class BluetoothServiceDiscovery {
 		final int[] attributeIDs = serviceRecord.getAttributeIDs();
 		if ((attributeIDs != null) && (attributeIDs.length > 0)) {
 			for (final int attrID : attributeIDs) {
-				if (attrID == ServiceConstants.SERVICE_NAME) {
+				if (attrID == SERVICE_NAME_ATTRIBUTE) {
 					props.put("service.name", serviceRecord.getAttributeValue(attrID));
 				}
 			}
