@@ -15,14 +15,14 @@
  *******************************************************************************/
 package de.tum.in.bluetooth.milling.machine;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javax.bluetooth.ServiceRecord;
 import javax.microedition.io.Connector;
@@ -152,15 +152,20 @@ public final class BluetoothConnector implements Runnable {
 	 */
 	private void doPublish() throws KuraException {
 		this.m_response = String.valueOf(LocalDateTime.now());
+
 		LOGGER.debug("Publishing Bluetooth Data.....");
+
 		final KuraPayload payload = new KuraPayload();
 		payload.addMetric("result", this.m_response);
+
 		// publishing for mobile client
 		LOGGER.debug("Publishing Bluetooth Data.....to Mobile Clients");
 		s_cloudClient.controlPublish("data", payload, 0, false, 5);
+
 		// publishing for Splunk
 		LOGGER.debug("Publishing Bluetooth Data.....to Splunk");
 		s_cloudClient.publish(s_topic, this.m_response.getBytes(), 0, false, 5);
+
 		LOGGER.debug("Publishing Bluetooth Data.....Done");
 	}
 
@@ -170,41 +175,30 @@ public final class BluetoothConnector implements Runnable {
 	private void doRead() {
 		try {
 			if (this.m_streamConnection != null) {
-				this.m_inputStream = this.m_streamConnection.openInputStream();
+				final InputStream inputStream = checkNotNull(this.m_streamConnection).openInputStream();
+				this.m_inputStream = new NonBlockingInputStream(checkNotNull(inputStream), true);
 			}
-			LOGGER.debug("Input Stream: " + this.m_inputStream);
-			if (this.m_inputStream != null) {
-				this.m_bufferedReader = new BufferedReader(new InputStreamReader(this.m_inputStream));
-			}
-			LOGGER.info("Buffered Reader: " + this.m_bufferedReader);
+			LOGGER.debug("Input Stream (Non-Blocking): " + this.m_inputStream);
+			// this.m_bufferedReader = new BufferedReader(new
+			// InputStreamReader(checkNotNull(this.m_inputStream)));
+			// LOGGER.info("Buffered Reader: " + this.m_bufferedReader);
 
-			// TODO Remove this part: Junk
-			int i = 0;
-			while (i < 155) {
-				i++;
-				this.doPublish();
-				TimeUnit.SECONDS.sleep(3);
-			}
-			//////////////////////////////
+			this.junkMethod();
 
-			/**
-			 * if (!this.m_bufferedReader.ready()) { throw new RuntimeException(
-			 * "Bluetooth Communication Problem (Buffer not ready)"); }
-			 **/
-			if (this.m_bufferedReader != null) {
-				LOGGER.info(
-						"Buffered Reader Lines List: " + this.m_bufferedReader.lines().collect(Collectors.toList()));
-				this.m_response = this.m_bufferedReader.readLine();
-			}
+			this.m_response = this.readDataFromStream(checkNotNull(this.m_inputStream));
+
+			// LOGGER.info("Buffered Reader Lines List: "
+			// +
+			// checkNotNull(this.m_bufferedReader).lines().collect(Collectors.toList()));
+
+			// this.m_response = this.m_bufferedReader.readLine();
 			LOGGER.debug("Bluetooth Data Received: " + this.m_response);
 		} catch (final Exception e) {
 			LOGGER.warn(Throwables.getStackTraceAsString(e));
 		} finally {
 			try {
-				if ((this.m_inputStream != null) && (this.m_bufferedReader != null)) {
-					this.m_inputStream.close();
-					this.m_bufferedReader.close();
-				}
+				this.m_inputStream.close();
+				this.m_bufferedReader.close();
 			} catch (final Exception e) {
 				LOGGER.warn("Error closing input stream");
 			}
@@ -223,6 +217,32 @@ public final class BluetoothConnector implements Runnable {
 	 */
 	public OutputStream getOutputStream() {
 		return this.m_outputStream;
+	}
+
+	/**
+	 * TODO Remove this Junk Method
+	 */
+	private void junkMethod() throws KuraException, InterruptedException {
+		int i = 0;
+		while (i < 155) {
+			i++;
+			this.doPublish();
+			TimeUnit.SECONDS.sleep(3);
+		}
+	}
+
+	/**
+	 * Reads data from the input stream
+	 */
+	private String readDataFromStream(final InputStream is) throws IOException {
+		final StringBuilder builder = new StringBuilder();
+		int i = 0;
+		char c = 0;
+		while ((i = ((NonBlockingInputStream) is).read(TimeUnit.SECONDS.toMillis(2))) != -1) {
+			c = (char) i;
+			builder.append(c);
+		}
+		return builder.toString();
 	}
 
 	/**
@@ -247,7 +267,6 @@ public final class BluetoothConnector implements Runnable {
 		try {
 			LOGGER.info("Getting IO Streams for " + s_serviceRecord.getHostDevice().getBluetoothAddress());
 			this.doRead();
-
 			if (this.m_response != null) {
 				this.doPublish();
 			}
