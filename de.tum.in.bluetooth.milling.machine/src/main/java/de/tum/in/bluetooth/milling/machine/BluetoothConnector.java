@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.bluetooth.ServiceRecord;
@@ -33,7 +35,6 @@ import org.osgi.service.io.ConnectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.intel.bluetooth.MicroeditionConnector;
 
@@ -150,7 +151,7 @@ public final class BluetoothConnector implements Runnable {
 	 * Publish the data to message broker
 	 */
 	private void doPublish() throws KuraException {
-		this.m_response = (Strings.isNullOrEmpty(this.m_response) ? "Bluetooth-Data" : this.m_response);
+		this.m_response = String.valueOf(LocalDateTime.now());
 		LOGGER.debug("Publishing Bluetooth Data.....");
 		final KuraPayload payload = new KuraPayload();
 		payload.addMetric("result", this.m_response);
@@ -176,6 +177,15 @@ public final class BluetoothConnector implements Runnable {
 				this.m_bufferedReader = new BufferedReader(new InputStreamReader(this.m_inputStream));
 			}
 			LOGGER.info("Buffered Reader: " + this.m_bufferedReader);
+
+			// TODO Remove this part: Junk
+			int i = 0;
+			while (i < 155) {
+				i++;
+				this.doPublish();
+				TimeUnit.SECONDS.sleep(3);
+			}
+			//////////////////////////////
 
 			/**
 			 * if (!this.m_bufferedReader.ready()) { throw new RuntimeException(
@@ -237,6 +247,7 @@ public final class BluetoothConnector implements Runnable {
 		try {
 			LOGGER.info("Getting IO Streams for " + s_serviceRecord.getHostDevice().getBluetoothAddress());
 			this.doRead();
+
 			if (this.m_response != null) {
 				this.doPublish();
 			}
