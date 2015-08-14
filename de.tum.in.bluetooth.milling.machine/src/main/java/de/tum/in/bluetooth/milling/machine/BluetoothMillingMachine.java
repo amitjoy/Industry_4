@@ -17,6 +17,9 @@ package de.tum.in.bluetooth.milling.machine;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.bluetooth.ServiceRecord;
 
@@ -111,6 +114,11 @@ public class BluetoothMillingMachine extends Cloudlet {
 	private volatile EventAdmin m_eventAdmin;
 
 	/**
+	 * Future Event Handle for Executor
+	 */
+	private Future<?> m_handle;
+
+	/**
 	 * Bluetooth Service Record Dependency for paired bluetooth devices
 	 */
 	@Reference(bind = "bindServiceRecord", unbind = "unbindServiceRecord", policy = ReferencePolicy.DYNAMIC, target = "(service.name=Bluetooth-Milling-Machine-Simulation)", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
@@ -127,9 +135,15 @@ public class BluetoothMillingMachine extends Cloudlet {
 	@Reference(bind = "bindSystemService", unbind = "unbindSystemService")
 	private volatile SystemService m_systemService;
 
+	/**
+	 * Bluetooth Connector Worker Thread
+	 */
+	private final ExecutorService m_worker;
+
 	/* Constructor */
 	public BluetoothMillingMachine() {
 		super(APP_ID);
+		this.m_worker = Executors.newSingleThreadExecutor();
 	}
 
 	/**
@@ -219,6 +233,7 @@ public class BluetoothMillingMachine extends Cloudlet {
 
 		super.deactivate(context);
 		this.m_serviceRecords.clear();
+		this.m_worker.shutdown();
 
 		LOGGER.debug("Deactivating Bluetooth Milling Machine Component... Done.");
 	}
@@ -231,6 +246,13 @@ public class BluetoothMillingMachine extends Cloudlet {
 			LOGGER.info("Bluetooth Milling Machine Communication Started...");
 			this.m_serviceRecords.stream().forEach(serviceRecord -> this.doPublish(serviceRecord));
 			this.m_activityLogService.saveLog("Bluetooth Milling Machine Communication Started");
+			LOGGER.info("Bluetooth Milling Machine Communication Done");
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		}
+
+		if ("stop".equals(reqTopic.getResources()[0])) {
+			LOGGER.info("Bluetooth Milling Machine Communication Stopped...");
+			this.m_worker.shutdown();
 			LOGGER.info("Bluetooth Milling Machine Communication Done");
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 		}
@@ -272,6 +294,11 @@ public class BluetoothMillingMachine extends Cloudlet {
 	 */
 	private void doPublish(final ServiceRecord serviceRecord) {
 
+		// cancel a current worker handle if one if active
+		if (this.m_handle != null) {
+			this.m_handle.cancel(true);
+		}
+
 		LOGGER.debug("Publishing Real-time Data Started.....");
 
 		final String remoteDeviceAddress = serviceRecord.getHostDevice().getBluetoothAddress();
@@ -284,7 +311,8 @@ public class BluetoothMillingMachine extends Cloudlet {
 		final BluetoothConnector bluetoothConnector = new BluetoothConnector.Builder()
 				.setConnectorService(this.m_connectorService).setTopic(bluetoothRealtimeTopic)
 				.setServiceRecord(serviceRecord).setCloudClient(this.getCloudApplicationClient()).build();
-		bluetoothConnector.connect();
+
+		this.m_handle = this.m_worker.submit(bluetoothConnector);
 	}
 
 	/** {@inheritDoc} */

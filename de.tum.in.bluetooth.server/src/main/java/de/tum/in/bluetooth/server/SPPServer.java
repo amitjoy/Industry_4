@@ -28,7 +28,7 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
-import org.apache.commons.lang.RandomStringUtils;
+import com.intel.bluetooth.MicroeditionConnector;
 
 /**
  * Creates a bluetooth server instance
@@ -40,6 +40,8 @@ public final class SPPServer {
 
 	private static StreamConnection connection = null;
 
+	private static OutputStream outputStream = null;
+
 	private static StreamConnectionNotifier streamConnNotifier = null;
 
 	private static PrintWriter writer = null;
@@ -48,7 +50,8 @@ public final class SPPServer {
 		final UUID uuid = new UUID("0000110100001000800000805F9B34FB", false);
 		final String connectionString = "btspp://localhost:" + uuid + ";name=Bluetooth-Milling-Machine-Simulation";
 
-		streamConnNotifier = (StreamConnectionNotifier) Connector.open(connectionString);
+		streamConnNotifier = (StreamConnectionNotifier) MicroeditionConnector.open(connectionString, Connector.WRITE,
+				false);
 
 		System.out.println("Milling Machine Started. Waiting for clients to connect...");
 		connection = streamConnNotifier.acceptAndOpen();
@@ -58,8 +61,8 @@ public final class SPPServer {
 		System.out.println("Remote device address: " + device.getBluetoothAddress());
 		System.out.println("Remote device name: " + device.getFriendlyName(true));
 
-		final OutputStream outStream = connection.openOutputStream();
-		writer = new PrintWriter(new OutputStreamWriter(outStream));
+		outputStream = connection.openOutputStream();
+		writer = new PrintWriter(new OutputStreamWriter(outputStream));
 	}
 
 	public static void main(final String[] args) throws IOException {
@@ -68,20 +71,23 @@ public final class SPPServer {
 		System.out.println("Name: " + localDevice.getFriendlyName());
 
 		init();
+
 		while (!Thread.currentThread().isInterrupted()) {
 			sendResponse();
 			try {
+				writer.close();
+				writer = null;
 				TimeUnit.SECONDS.sleep(3);
+				writer = new PrintWriter(new OutputStreamWriter(outputStream));
 			} catch (final InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-	}
+	};
 
 	private static void sendResponse() throws IOException {
-		final String data = RandomStringUtils.randomAlphanumeric(5);
+		final String data = "A";
 		System.out.println("Broadcasting data (" + data + ")");
 		writer.write(data + "\r\n");
 	}
-
 }

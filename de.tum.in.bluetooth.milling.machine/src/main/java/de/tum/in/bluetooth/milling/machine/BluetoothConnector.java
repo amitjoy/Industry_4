@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.stream.Collectors;
 
 import javax.bluetooth.ServiceRecord;
+import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
 import org.eclipse.kura.KuraException;
@@ -31,6 +33,7 @@ import org.osgi.service.io.ConnectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.intel.bluetooth.MicroeditionConnector;
 
@@ -40,7 +43,7 @@ import com.intel.bluetooth.MicroeditionConnector;
  * @author AMIT KUMAR MONDAL
  *
  */
-public final class BluetoothConnector {
+public final class BluetoothConnector implements Runnable {
 
 	/**
 	 * Builder class to set Service Records and Connector Service
@@ -130,62 +133,33 @@ public final class BluetoothConnector {
 	private OutputStream m_outputStream;
 
 	/**
+	 * The response from the input stream
+	 */
+	private String m_response;
+
+	/**
 	 * Stream connection between paired bluetooth device and RPi
 	 */
 	private StreamConnection m_streamConnection;
 
-	/**
-	 * The response from the input stream
-	 */
-	private String response;
-
-	/* Constructor */
+	/** Constructor */
 	private BluetoothConnector() {
-	}
-
-	/**
-	 * Used to establish connection between the paired bluetooth device and RPi
-	 */
-	public void connect() {
-		LOGGER.info("Bluetooth Connection initiating for ... " + s_serviceRecord.getHostDevice().getBluetoothAddress());
-
-		final String connectionURL = s_serviceRecord.getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
-		try {
-			LOGGER.info("Connecting to..." + s_serviceRecord.getHostDevice().getBluetoothAddress()
-					+ " with connection url " + connectionURL);
-			this.m_streamConnection = (StreamConnection) MicroeditionConnector.open(connectionURL,
-					ConnectorService.READ_WRITE, false);
-			LOGGER.info("Successfully Connected to " + s_serviceRecord.getHostDevice().getBluetoothAddress()
-					+ " with stream " + this.m_streamConnection);
-		} catch (final IOException e) {
-			LOGGER.error("Not able to connect to the remote device. " + Throwables.getStackTraceAsString(e));
-		}
-		LOGGER.info("Connection Established with " + s_serviceRecord.getHostDevice().getBluetoothAddress());
-		try {
-			LOGGER.info("Getting IO Streams for " + s_serviceRecord.getHostDevice().getBluetoothAddress());
-			this.doRead();
-			this.doPublish();
-			LOGGER.debug(
-					"Streams Returned-> InputStream: " + this.m_inputStream + " OutputStream: " + this.m_outputStream);
-		} catch (final Exception e) {
-			LOGGER.error(
-					"Unable to retrieve stream connection for remote device" + Throwables.getStackTraceAsString(e));
-		}
 	}
 
 	/**
 	 * Publish the data to message broker
 	 */
 	private void doPublish() throws KuraException {
+		this.m_response = (Strings.isNullOrEmpty(this.m_response) ? "Bluetooth-Data" : this.m_response);
 		LOGGER.debug("Publishing Bluetooth Data.....");
 		final KuraPayload payload = new KuraPayload();
-		payload.addMetric("result", this.response);
+		payload.addMetric("result", this.m_response);
 		// publishing for mobile client
 		LOGGER.debug("Publishing Bluetooth Data.....to Mobile Clients");
-		s_cloudClient.controlPublish("milling_machine", payload, 0, false, 5);
+		s_cloudClient.controlPublish("data", payload, 0, false, 5);
 		// publishing for Splunk
 		LOGGER.debug("Publishing Bluetooth Data.....to Splunk");
-		s_cloudClient.publish(s_topic, this.response.getBytes(), 0, false, 5);
+		s_cloudClient.publish(s_topic, this.m_response.getBytes(), 0, false, 5);
 		LOGGER.debug("Publishing Bluetooth Data.....Done");
 	}
 
@@ -194,23 +168,35 @@ public final class BluetoothConnector {
 	 */
 	private void doRead() {
 		try {
-			this.m_inputStream = this.m_streamConnection.openInputStream();
+			if (this.m_streamConnection != null) {
+				this.m_inputStream = this.m_streamConnection.openInputStream();
+			}
 			LOGGER.debug("Input Stream: " + this.m_inputStream);
-			this.m_bufferedReader = new BufferedReader(new InputStreamReader(this.m_inputStream));
+			if (this.m_inputStream != null) {
+				this.m_bufferedReader = new BufferedReader(new InputStreamReader(this.m_inputStream));
+			}
 			LOGGER.info("Buffered Reader: " + this.m_bufferedReader);
-			this.response = this.m_bufferedReader.readLine();
-			LOGGER.debug("Bluetooth Data Received: " + this.response);
+
+			/**
+			 * if (!this.m_bufferedReader.ready()) { throw new RuntimeException(
+			 * "Bluetooth Communication Problem (Buffer not ready)"); }
+			 **/
+			if (this.m_bufferedReader != null) {
+				LOGGER.info(
+						"Buffered Reader Lines List: " + this.m_bufferedReader.lines().collect(Collectors.toList()));
+				this.m_response = this.m_bufferedReader.readLine();
+			}
+			LOGGER.debug("Bluetooth Data Received: " + this.m_response);
 		} catch (final Exception e) {
-			LOGGER.error(Throwables.getStackTraceAsString(e));
+			LOGGER.warn(Throwables.getStackTraceAsString(e));
 		} finally {
 			try {
 				if ((this.m_inputStream != null) && (this.m_bufferedReader != null)) {
 					this.m_inputStream.close();
 					this.m_bufferedReader.close();
-					this.m_streamConnection.close();
 				}
 			} catch (final Exception e) {
-				LOGGER.error("Error closing input stream");
+				LOGGER.warn("Error closing input stream");
 			}
 		}
 	}
@@ -227,6 +213,38 @@ public final class BluetoothConnector {
 	 */
 	public OutputStream getOutputStream() {
 		return this.m_outputStream;
+	}
+
+	/**
+	 * Used to establish connection between the paired bluetooth device and RPi
+	 */
+	@Override
+	public void run() {
+		LOGGER.info("Bluetooth Connection initiating for ... " + s_serviceRecord.getHostDevice().getBluetoothAddress());
+
+		final String connectionURL = s_serviceRecord.getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
+		try {
+			LOGGER.info("Connecting to..." + s_serviceRecord.getHostDevice().getBluetoothAddress()
+					+ " with connection url " + connectionURL);
+			this.m_streamConnection = (StreamConnection) MicroeditionConnector.open(connectionURL, Connector.READ,
+					false);
+			LOGGER.info("Successfully Connected to " + s_serviceRecord.getHostDevice().getBluetoothAddress()
+					+ " with stream " + this.m_streamConnection);
+		} catch (final IOException e) {
+			LOGGER.warn("Not able to connect to the remote device. " + Throwables.getStackTraceAsString(e));
+		}
+		LOGGER.info("Connection Established with " + s_serviceRecord.getHostDevice().getBluetoothAddress());
+		try {
+			LOGGER.info("Getting IO Streams for " + s_serviceRecord.getHostDevice().getBluetoothAddress());
+			this.doRead();
+			if (this.m_response != null) {
+				this.doPublish();
+			}
+			LOGGER.debug(
+					"Streams Returned-> InputStream: " + this.m_inputStream + " OutputStream: " + this.m_outputStream);
+		} catch (final Exception e) {
+			LOGGER.warn("Unable to retrieve stream connection for remote device" + Throwables.getStackTraceAsString(e));
+		}
 	}
 
 }
