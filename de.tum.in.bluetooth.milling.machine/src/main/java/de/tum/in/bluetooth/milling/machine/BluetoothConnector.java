@@ -258,9 +258,8 @@ public final class BluetoothConnector implements Runnable {
 		try {
 			LOGGER.info("Getting IO Streams for " + s_serviceRecord.getHostDevice().getBluetoothAddress());
 			this.doRead();
-			if (this.m_response != null) {
-				this.doPublish();
-			}
+			checkNotNull(this.m_response);
+			this.doPublish();
 			LOGGER.debug(
 					"Streams Returned-> InputStream: " + this.m_inputStream + " OutputStream: " + this.m_outputStream);
 		} catch (final Exception e) {
