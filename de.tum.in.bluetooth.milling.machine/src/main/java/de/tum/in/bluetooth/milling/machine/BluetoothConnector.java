@@ -207,6 +207,7 @@ public final class BluetoothConnector {
 				if ((this.m_inputStream != null) && (this.m_bufferedReader != null)) {
 					this.m_inputStream.close();
 					this.m_bufferedReader.close();
+					this.m_streamConnection.close();
 				}
 			} catch (final Exception e) {
 				LOGGER.error("Error closing input stream");
