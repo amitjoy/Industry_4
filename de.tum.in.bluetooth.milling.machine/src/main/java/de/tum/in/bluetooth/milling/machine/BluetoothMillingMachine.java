@@ -17,8 +17,6 @@ package de.tum.in.bluetooth.milling.machine;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.bluetooth.ServiceRecord;
 
@@ -47,10 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 
 import de.tum.in.activity.log.ActivityLogService;
 import de.tum.in.activity.log.IActivityLogService;
@@ -111,49 +105,15 @@ public class BluetoothMillingMachine extends Cloudlet {
 	private volatile ConnectorService m_connectorService;
 
 	/**
-	 * Used to control thread while maintaining connections between devices and
-	 * RPi
-	 */
-	private final ExecutorService m_deletegate = Executors.newFixedThreadPool(5);
-
-	/**
-	 * Used to control threads while for asynchronous operation of getting data
-	 * from paired bluetooth milling machines
-	 */
-	private final ExecutorService m_deletegateForAsyncFunction = Executors.newFixedThreadPool(5);
-
-	/**
 	 * OSGi Event Admin Service Dependency
 	 */
 	@Reference(bind = "bindEventAdmin", unbind = "unbindEventAdmin")
 	private volatile EventAdmin m_eventAdmin;
 
 	/**
-	 * The final result computed after the async operation
-	 */
-	private ListenableFuture<String> m_finalResult;
-
-	/**
-	 * Represents the thread pool for initiating data retrieval from bluetooth
-	 * devices
-	 */
-	private final ListeningExecutorService m_pool = MoreExecutors.listeningDecorator(this.m_deletegate);
-
-	/**
-	 * Represents the thread pool to operate async operation
-	 */
-	private final ListeningExecutorService m_poolForAsyncFunction = MoreExecutors
-			.listeningDecorator(this.m_deletegateForAsyncFunction);
-
-	/**
-	 * The intermediary result retrieved before the async operation
-	 */
-	private ListenableFuture<String> m_resultFromWorker;
-
-	/**
 	 * Bluetooth Service Record Dependency for paired bluetooth devices
 	 */
-	@Reference(bind = "bindServiceRecord", unbind = "unbindServiceRecord", policy = ReferencePolicy.DYNAMIC, target = "(service.name=Bluetooth Milling Machine Simulation)", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+	@Reference(bind = "bindServiceRecord", unbind = "unbindServiceRecord", policy = ReferencePolicy.DYNAMIC, target = "(service.name=Bluetooth-Milling-Machine-Simulation)", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 	private volatile ServiceRecord m_serviceRecord;
 
 	/**
@@ -258,8 +218,6 @@ public class BluetoothMillingMachine extends Cloudlet {
 		LOGGER.debug("Deactivating Bluetooth Milling Machine Component...");
 
 		super.deactivate(context);
-		this.m_pool.shutdown();
-		this.m_poolForAsyncFunction.shutdown();
 		this.m_serviceRecords.clear();
 
 		LOGGER.debug("Deactivating Bluetooth Milling Machine Component... Done.");
@@ -269,27 +227,13 @@ public class BluetoothMillingMachine extends Cloudlet {
 	@Override
 	protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
-		// Terminate bluetooth communication
-		if ("terminate".equals(reqTopic.getResources()[0])) {
-			LOGGER.info("Bluetooth Milling Machine Communication Termination Started...");
-			if (!this.m_pool.isShutdown()) {
-				this.m_pool.shutdown();
-				this.m_poolForAsyncFunction.shutdown();
-			}
-			this.m_activityLogService.saveLog("Bluetooth Milling Machine Communication Terminated");
-			LOGGER.info("Bluetooth Milling Machine Communication Termination Done");
-		}
-
-		// Terminate bluetooth communication
 		if ("start".equals(reqTopic.getResources()[0])) {
 			LOGGER.info("Bluetooth Milling Machine Communication Started...");
 			this.m_serviceRecords.stream().forEach(serviceRecord -> this.doPublish(serviceRecord));
 			this.m_activityLogService.saveLog("Bluetooth Milling Machine Communication Started");
 			LOGGER.info("Bluetooth Milling Machine Communication Done");
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 		}
-
-		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
-
 	}
 
 	/** {@inheritDoc} */
@@ -334,28 +278,13 @@ public class BluetoothMillingMachine extends Cloudlet {
 
 		LOGGER.info("Active Bluetooth Data Transfer for " + remoteDeviceAddress);
 
+		final String bluetoothRealtimeTopic = this.m_systemService.getProperties()
+				.getProperty(BLUETOOTH_REALTIME_TOPIC);
+
 		final BluetoothConnector bluetoothConnector = new BluetoothConnector.Builder()
-				.setConnectorService(this.m_connectorService).setServiceRecord(serviceRecord).build();
-
+				.setConnectorService(this.m_connectorService).setTopic(bluetoothRealtimeTopic)
+				.setServiceRecord(serviceRecord).setCloudClient(this.getCloudApplicationClient()).build();
 		bluetoothConnector.connect();
-
-		// first retrieve the bluetooth real-time data from the data retriever
-		// thread
-		this.m_resultFromWorker = this.m_pool.submit(new DataRetrieverWorker(bluetoothConnector));
-
-		// next do the asynchronous operation to save the result to cache
-		// retrieved by
-		// the data retriever thread
-		this.m_finalResult = Futures.transform(this.m_resultFromWorker,
-				new DataCacheAsyncOperation(this.m_poolForAsyncFunction, this.m_eventAdmin, remoteDeviceAddress));
-
-		final String topic = this.m_systemService.getProperties().getProperty(BLUETOOTH_REALTIME_TOPIC);
-
-		// finally publish the final transformed result to our listenable thread
-		// callback
-		Futures.addCallback(this.m_finalResult,
-				new FuturePublishDataCallback(this.getCloudApplicationClient(), topic, 1, false, DFLT_PRIORITY));
-
 	}
 
 	/** {@inheritDoc} */

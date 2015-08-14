@@ -48,8 +48,9 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDiscoveryAgent.class);
 
-	// TODO Validation of SDP
-	// private static UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP };
+	/**
+	 * RFCOMM UUID to discover
+	 */
 	private static UUID[] searchUuidSet = { UUIDs.RFCOMM };
 
 	/**

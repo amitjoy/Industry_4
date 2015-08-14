@@ -31,7 +31,7 @@
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>Bluetooth Server</name>
+	<name>Bluetooth Milling Machine Simulation Server</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
