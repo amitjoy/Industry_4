@@ -1,0 +1,15 @@
+#Deployment Plugin Project File
+#Sat Aug 15 01:36:48 CEST 2015
+build.ant.name=<.>/de.tum.in.dp.socket_build.xml
+build.dp.file=<.>/de.tum.in.dp.socket.dp
+build.location=
+bundles.count=0
+certificates.count=0
+general.signbundles=true
+headers.contact.address=admin@amitinside.com
+headers.copyright=Amit Kumar Mondal
+headers.other.headers=DeploymentPackage-Name\:Socket Communication
+headers.symbolic.name=de.tum.in.dp.socket
+headers.version=1.0.0
+resources.count=0
+

@@ -260,6 +260,7 @@
 		<module>../de.tum.in.opcua-sdk</module>
 		<module>../de.tum.in.opcua.client</module>
 		<module>../de.tum.in.opcua.client.read</module>
+		<module>../de.tum.in.socket.client</module>
 		<module>../de.tum.in.dp.parent</module>
 	</modules>
 
