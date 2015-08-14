@@ -174,31 +174,22 @@ public final class BluetoothConnector implements Runnable {
 	 */
 	private void doRead() {
 		try {
-			if (this.m_streamConnection != null) {
-				final InputStream inputStream = checkNotNull(this.m_streamConnection).openInputStream();
-				this.m_inputStream = new NonBlockingInputStream(checkNotNull(inputStream), true);
-			}
+			final InputStream inputStream = checkNotNull(this.m_streamConnection).openInputStream();
+			this.m_inputStream = new NonBlockingInputStream(checkNotNull(inputStream), true);
 			LOGGER.debug("Input Stream (Non-Blocking): " + this.m_inputStream);
-			// this.m_bufferedReader = new BufferedReader(new
-			// InputStreamReader(checkNotNull(this.m_inputStream)));
-			// LOGGER.info("Buffered Reader: " + this.m_bufferedReader);
 
 			this.junkMethod();
 
 			this.m_response = this.readDataFromStream(checkNotNull(this.m_inputStream));
 
-			// LOGGER.info("Buffered Reader Lines List: "
-			// +
-			// checkNotNull(this.m_bufferedReader).lines().collect(Collectors.toList()));
-
-			// this.m_response = this.m_bufferedReader.readLine();
 			LOGGER.debug("Bluetooth Data Received: " + this.m_response);
 		} catch (final Exception e) {
 			LOGGER.warn(Throwables.getStackTraceAsString(e));
 		} finally {
 			try {
-				this.m_inputStream.close();
-				this.m_bufferedReader.close();
+				checkNotNull(this.m_inputStream).close();
+				checkNotNull(this.m_bufferedReader).close();
+				checkNotNull(((NonBlockingInputStream) this.m_inputStream)).shutdown();
 			} catch (final Exception e) {
 				LOGGER.warn("Error closing input stream");
 			}
