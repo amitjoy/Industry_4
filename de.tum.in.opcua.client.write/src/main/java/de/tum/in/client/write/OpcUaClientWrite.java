@@ -88,6 +88,12 @@ public class OpcUaClientWrite implements OpcUaClientAction {
 
 	/** {@inheritDoc}} */
 	@Override
+	public String getName() {
+		return "OPC-UA-CLIENT-WRITE";
+	}
+
+	/** {@inheritDoc}} */
+	@Override
 	public void run(final OpcUaClient client, final CompletableFuture<OpcUaClient> future) throws Exception {
 		client.connect().get();
 

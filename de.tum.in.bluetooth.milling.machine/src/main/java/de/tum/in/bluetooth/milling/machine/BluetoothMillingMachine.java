@@ -90,13 +90,13 @@ public class BluetoothMillingMachine extends Cloudlet {
 	private volatile IActivityLogService m_activityLogService;
 
 	/**
-	 * Eclipse Kura Cloud Service Dependency
+	 * Cloud Service Dependency
 	 */
 	@Reference(bind = "bindCloudService", unbind = "unbindCloudService")
 	private volatile CloudService m_cloudService;
 
 	/**
-	 * Eclipse Kura Configuration Service Dependency
+	 * Configuration Service Dependency
 	 */
 	@Reference(bind = "bindConfigurationService", unbind = "unbindConfigurationService")
 	private volatile ConfigurationService m_configurationService;

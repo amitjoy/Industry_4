@@ -26,6 +26,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
@@ -34,6 +35,7 @@ import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.component.ComponentContext;
@@ -41,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.digitalpetri.opcua.stack.core.security.SecurityPolicy;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import de.tum.in.activity.log.ActivityLogService;
@@ -167,7 +170,7 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	/**
 	 * OPC-UA Client Service Injection
 	 */
-	@Reference(bind = "bindOpcUa", unbind = "unbindOpcUa", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+	@Reference(bind = "bindOpcUa", unbind = "unbindOpcUa", policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 	private volatile OpcUaClientAction m_opcuaClientAction;
 
 	/**
@@ -287,23 +290,29 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	@Override
 	protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
-		LOGGER.info("OPC-UA Client Actions Started...");
+		LOGGER.info("OPC-UA Client Action Started...");
+		final String clientName = (String) reqPayload.getMetric("opcClientName");
+		Preconditions.checkNotNull(clientName);
 
-		this.m_opcuaClientActions.forEach(opcuaClientAction -> {
-			final OpcUaClientActionRunner clientActionRunner = new OpcUaClientActionRunner.Builder()
-					.setApplicationName(this.m_opcuaApplicationName).setApplicationUri(this.m_opcuaApplicationUri)
-					.setApplicationCertificate(this.m_opcuaApplicationCert).setRequestTimeout(this.m_requestTimeout)
-					.setKeyStoreClientAlias(this.m_keystoreClientAlias).setKeyStorePassword(this.m_keystorePassword)
-					.setKeyStoreServerAlias(this.m_keystoreServerAlias).setKeystoreType(this.m_keystoreType)
-					.setEndpointUrl(opcuaClientAction.getEndpointUrl()).setSecurityPolicy(this.m_opcuaSecurityPolicy)
-					.build();
-			clientActionRunner.run();
-		});
-		this.m_activityLogService.saveLog("OPC-UA Client Actions Executed");
+		this.m_opcuaClientActions.stream().filter(opcClientName -> clientName.equals(opcClientName))
+				.forEach(opcuaClientAction -> {
+					final OpcUaClientActionRunner clientActionRunner = new OpcUaClientActionRunner.Builder()
+							.setApplicationName(this.m_opcuaApplicationName)
+							.setApplicationUri(this.m_opcuaApplicationUri)
+							.setApplicationCertificate(this.m_opcuaApplicationCert)
+							.setRequestTimeout(this.m_requestTimeout).setKeyStoreClientAlias(this.m_keystoreClientAlias)
+							.setKeyStorePassword(this.m_keystorePassword)
+							.setKeyStoreServerAlias(this.m_keystoreServerAlias).setKeystoreType(this.m_keystoreType)
+							.setEndpointUrl(opcuaClientAction.getEndpointUrl())
+							.setSecurityPolicy(this.m_opcuaSecurityPolicy).build();
+					clientActionRunner.run();
+				});
+
+		this.m_activityLogService.saveLog("OPC-UA Client Action Executed");
 
 		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 
-		LOGGER.info("OPC-UA Client Actions Communication Done");
+		LOGGER.info("OPC-UA Client Action Communication Done");
 	}
 
 	/** {@inheritDoc}} */
@@ -327,6 +336,12 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 			this.m_activityLogService.saveLog("OPC-UA Configuration Retrieved");
 
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		}
+
+		if ("list".equals(reqTopic.getResources()[0])) {
+			final KuraPayload payload = new KuraPayload();
+			this.m_opcuaClientActions.stream().map(opcClientAction -> opcClientAction.getName())
+					.forEach(opcClientActionName -> payload.addMetric("action", opcClientActionName));
 		}
 
 		LOGGER.info("OPC-UA Configuration Retrieved");

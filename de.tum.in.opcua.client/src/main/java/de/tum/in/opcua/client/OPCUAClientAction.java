@@ -34,6 +34,11 @@ public interface OpcUaClientAction {
 	public String getEndpointUrl();
 
 	/**
+	 * Returns the name of the client action
+	 */
+	public String getName();
+
+	/**
 	 * The main action to perform
 	 */
 	public void run(OpcUaClient client, CompletableFuture<OpcUaClient> future) throws Exception;

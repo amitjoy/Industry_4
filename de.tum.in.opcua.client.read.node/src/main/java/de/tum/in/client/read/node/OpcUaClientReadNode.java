@@ -20,15 +20,18 @@ import java.util.concurrent.CompletableFuture;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.message.KuraPayload;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.digitalpetri.opcua.sdk.client.OpcUaClient;
 import com.digitalpetri.opcua.sdk.client.api.nodes.attached.UaVariableNode;
-import com.digitalpetri.opcua.stack.core.Identifiers;
-import com.digitalpetri.opcua.stack.core.types.builtin.DataValue;
+import com.digitalpetri.opcua.stack.core.types.builtin.NodeId;
+import com.google.common.base.Throwables;
 
 import de.tum.in.opcua.client.OpcUaClientAction;
 
@@ -53,6 +56,12 @@ public class OpcUaClientReadNode implements OpcUaClientAction {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpcUaClientReadNode.class);
 
+	/**
+	 * Cloud Service Dependency
+	 */
+	@Reference(bind = "bindCloudService", unbind = "unbindCloudService")
+	private volatile CloudService m_cloudService;
+
 	/* Constructor */
 	public OpcUaClientReadNode() {
 	}
@@ -66,6 +75,15 @@ public class OpcUaClientReadNode implements OpcUaClientAction {
 
 		LOGGER.info("Activating OPC-UA Read Node Component... Done.");
 
+	}
+
+	/**
+	 * Callback to be used while {@link CloudService} is registering
+	 */
+	public synchronized void bindCloudService(final CloudService cloudService) {
+		if (this.m_cloudService == null) {
+			this.m_cloudService = cloudService;
+		}
 	}
 
 	/**
@@ -86,19 +104,44 @@ public class OpcUaClientReadNode implements OpcUaClientAction {
 
 	/** {@inheritDoc}} */
 	@Override
+	public String getName() {
+		return "OPC-UA-CLIENT-READ-NODE";
+	}
+
+	/** {@inheritDoc}} */
+	@Override
 	public void run(final OpcUaClient client, final CompletableFuture<OpcUaClient> future) throws Exception {
 		// synchronous connect
 		client.connect().get();
 
+		final NodeId nodeId = new NodeId(2, "/Static/AllProfiles/Scalar/Int32");
+
 		// read the value of the current time node
-		final UaVariableNode currentTimeNode = client.getAddressSpace()
-				.getVariableNode(Identifiers.Server_ServerStatus_CurrentTime);
+		final UaVariableNode variableNode = client.getAddressSpace().getVariableNode(nodeId);
 
-		final DataValue value = currentTimeNode.readValue().get();
+		final Object value = variableNode.readValueAttribute().get();
 
-		LOGGER.info("currentTime value " + value);
+		LOGGER.info("value" + value);
+
+		final KuraPayload payload = new KuraPayload();
+		payload.addMetric("value", value);
+		try {
+			this.m_cloudService.newCloudClient("OPC-READ-NODE-V1").controlPublish("opc-read-node-v1", payload, 0, false,
+					5);
+		} catch (final Exception e) {
+			LOGGER.warn(Throwables.getStackTraceAsString(e));
+		}
 
 		future.complete(client);
+	}
+
+	/**
+	 * Callback to be used while {@link CloudService} is deregistering
+	 */
+	public synchronized void unbindCloudService(final CloudService cloudService) {
+		if (this.m_cloudService == cloudService) {
+			this.m_cloudService = null;
+		}
 	}
 
 }
