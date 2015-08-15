@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Tue Aug 11 08:18:27 CEST 2015
+#Sat Aug 15 18:46:52 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.bluetooth_build.xml
 build.dp.file=<.>/de.tum.in.dp.bluetooth.dp
 build.location=

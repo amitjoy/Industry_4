@@ -16,8 +16,8 @@
 package de.tum.in.socket.client;
 
 /**
- * WiFi Message Format
- * 
+ * Message Format
+ *
  * @author AMIT KUMAR MONDAL
  *
  */

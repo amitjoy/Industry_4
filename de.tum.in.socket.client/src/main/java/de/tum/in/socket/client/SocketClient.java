@@ -236,7 +236,7 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	@Override
 	protected void doGet(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
-		LOGGER.info("OPC-UA Configuration Retrieving...");
+		LOGGER.info("Socket Client Configuration Retrieving...");
 		// Retrieve the configurations
 		if ("configurations".equals(reqTopic.getResources()[0])) {
 			final ComponentConfiguration configuration = this.m_configurationService.getComponentConfiguration(APP_ID);
