@@ -18,8 +18,15 @@ package de.tum.in.socket.client;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.collections.IterableMap;
 import org.apache.commons.collections.MapIterator;
@@ -48,7 +55,6 @@ import com.google.common.base.Throwables;
 
 import de.tum.in.activity.log.ActivityLogService;
 import de.tum.in.activity.log.IActivityLogService;
-import jsock.net.ObjectSocket;
 
 /**
  * This bundle is responsible for communicating with the Socket Server
@@ -104,6 +110,11 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	private volatile ConfigurationService m_configurationService;
 
 	/**
+	 * Future Event Handle for Executor
+	 */
+	private Future<?> m_handle;
+
+	/**
 	 * Map to store list of configurations
 	 */
 	private Map<String, Object> m_properties;
@@ -121,7 +132,7 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	/**
 	 * Placeholder for socket Port
 	 */
-	private Integer m_socketPort;
+	private int m_socketPort;
 
 	/**
 	 * Eclipse Kura System Service Dependency
@@ -129,9 +140,15 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	@Reference(bind = "bindSystemService", unbind = "unbindSystemService")
 	private volatile SystemService m_systemService;
 
+	/**
+	 * Data Receiver Worker Thread
+	 */
+	private final ExecutorService m_worker;
+
 	/* Constructor */
 	public SocketClient() {
 		super(APP_ID);
+		this.m_worker = Executors.newSingleThreadExecutor();
 	}
 
 	/**
@@ -144,7 +161,7 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 
 		super.setCloudService(this.m_cloudService);
 		super.activate(componentContext);
-		this.reinitializeConfiguration(properties);
+		this.initializeConfiguration(properties);
 
 		LOGGER.info("Activating Socket Client Component... Done.");
 
@@ -205,31 +222,30 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	@Override
 	protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
-		LOGGER.info("Socket Communication Started...");
-		Message message = null;
-		try {
-			this.m_socketConnection = new Socket(this.m_socketIPAddress, this.m_socketPort);
-			final ObjectSocket sock = new ObjectSocket(this.m_socketConnection);
-			message = (Message) sock.recv_object(Message.class);
-		} catch (final Exception e) {
-			LOGGER.error(Throwables.getStackTraceAsString(e));
+		if ("start".equals(reqTopic.getResources()[0])) {
+			LOGGER.info("Socket Communication Started...");
+			// cancel a current worker handle if one if active
+			if (this.m_handle != null) {
+				this.m_handle.cancel(true);
+			}
+			final Runnable task = () -> {
+				try {
+					this.doProcess(respPayload);
+				} catch (final Exception e) {
+					e.printStackTrace();
+				}
+			};
+			this.m_handle = this.m_worker.submit(task);
+
+			LOGGER.info("Socket Communication Done");
 		}
 
-		this.m_activityLogService.saveLog("Socket Communication Started");
-
-		final KuraPayload payload = new KuraPayload();
-		payload.addMetric("result", checkNotNull(message.getDescription()));
-
-		// Publish for Mobile Clients
-		LOGGER.debug("Publishing WiFi Data.....to Mobile Clients");
-		this.getCloudApplicationClient().controlPublish("data", payload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
-		// Publish for Splunk
-		LOGGER.debug("Publishing WiFi Data.....to Splunk");
-		final String topic = this.m_systemService.getProperties().getProperty(WIFI_REALTIME_TOPIC);
-		this.getCloudApplicationClient().publish(topic, message.getDescription().getBytes(), 0, false, 5);
-		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
-
-		LOGGER.info("Socket Communication Done");
+		if ("stop".equals(reqTopic.getResources()[0])) {
+			LOGGER.info("Socket Communication Stopped...");
+			this.m_worker.shutdown();
+			LOGGER.info("Socket Communication Done");
+			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+		}
 	}
 
 	/** {@inheritDoc}} */
@@ -258,6 +274,54 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 		LOGGER.info("Socket Client Configuration Retrieved");
 	}
 
+	/**
+	 * @param respPayload
+	 * @throws KuraException
+	 */
+	private void doProcess(final KuraResponsePayload respPayload) throws KuraException {
+		String message = null;
+		try {
+			final SocketChannel channel = SocketChannel.open();
+
+			// we open this channel in non blocking mode
+			channel.configureBlocking(false);
+			channel.connect(new InetSocketAddress(this.m_socketIPAddress, this.m_socketPort));
+
+			while (!channel.finishConnect()) {
+				// System.out.println("still connecting");
+			}
+			while (true) {
+				final ByteBuffer bufferA = ByteBuffer.allocate(20);
+				message = "";
+				while ((channel.read(bufferA)) > 0) {
+					bufferA.flip();
+					message += Charset.defaultCharset().decode(bufferA);
+				}
+
+				if (message.length() > 0) {
+					LOGGER.info("Message Received: " + message);
+				}
+
+			}
+		} catch (final Exception e) {
+			LOGGER.error(Throwables.getStackTraceAsString(e));
+		}
+
+		this.m_activityLogService.saveLog("Socket Communication Started");
+
+		final KuraPayload payload = new KuraPayload();
+		payload.addMetric("result", checkNotNull(message));
+
+		// Publish for Mobile Clients
+		LOGGER.debug("Publishing WiFi Data.....to Mobile Clients");
+		this.getCloudApplicationClient().controlPublish("data", payload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
+		// Publish for Splunk
+		LOGGER.debug("Publishing WiFi Data.....to Splunk");
+		final String topic = this.m_systemService.getProperties().getProperty(WIFI_REALTIME_TOPIC);
+		this.getCloudApplicationClient().publish(topic, message.getBytes(), DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
+		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
+	}
+
 	/** {@inheritDoc}} */
 	@Override
 	protected void doPut(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
@@ -281,13 +345,13 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	 */
 	private void extractConfiguration() {
 		this.m_socketIPAddress = (String) this.m_properties.get(SOCKET_IP);
-		this.m_socketPort = (Integer) this.m_properties.get(SOCKET_CONNECT_PORT);
+		this.m_socketPort = (int) this.m_properties.get(SOCKET_CONNECT_PORT);
 	}
 
 	/**
 	 * Reinitialize Configurations as it gets updated
 	 */
-	private void reinitializeConfiguration(final Map<String, Object> properties) {
+	private void initializeConfiguration(final Map<String, Object> properties) {
 		this.m_properties = properties;
 		this.extractConfiguration();
 	}
@@ -334,7 +398,7 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	public void updated(final Map<String, Object> properties) {
 		LOGGER.info("Updated Socket Client Component...");
 
-		this.reinitializeConfiguration(properties);
+		this.initializeConfiguration(properties);
 
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 

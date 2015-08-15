@@ -16,12 +16,20 @@
 package de.tum.in.socket.server;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-
-import com.google.common.base.Throwables;
-
-import jsock.net.ObjectSocket;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Socket Server Instance
@@ -31,23 +39,88 @@ import jsock.net.ObjectSocket;
  */
 public final class SocketServer {
 
-	private static ServerSocket server = null;
+	private static String channelType = "channelType";
+	private static String clientChannel = "clientChannel";
+	private static String serverChannel = "serverChannel";
 
+	/**
+	 * ServerSocketChannel represents a channel for sockets that listen to
+	 * incoming connections.
+	 *
+	 * @throws IOException
+	 */
 	public static void main(final String[] args) throws IOException {
-		try {
-			server = new ServerSocket(9999);
-			final Socket conn = server.accept();
-			final ObjectSocket sock = new ObjectSocket(conn);
+		final int port = 9999;
+		final String localhost = "localhost";
 
-			final Message message = new Message();
-			message.setDescription("Dummy WiFi Message");
+		final ServerSocketChannel channel = ServerSocketChannel.open();
 
-			sock.send_object(message, Message.class);
-		} catch (final Exception e) {
-			System.out.println(Throwables.getStackTraceAsString(e));
-		} finally {
-			server.close();
+		channel.bind(new InetSocketAddress(localhost, port));
+
+		channel.configureBlocking(false);
+
+		final Selector selector = Selector.open();
+
+		final SelectionKey socketServerSelectionKey = channel.register(selector, SelectionKey.OP_ACCEPT);
+		final Map<String, String> properties = new HashMap<String, String>();
+		properties.put(channelType, serverChannel);
+		socketServerSelectionKey.attach(properties);
+		for (;;) {
+
+			if (selector.select() == 0) {
+				continue;
+			}
+			final Set<SelectionKey> selectedKeys = selector.selectedKeys();
+			final Iterator<SelectionKey> iterator = selectedKeys.iterator();
+			while (iterator.hasNext()) {
+				final SelectionKey key = iterator.next();
+				if (((Map<?, ?>) key.attachment()).get(channelType).equals(serverChannel)) {
+					final ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
+					final SocketChannel clientSocketChannel = serverSocketChannel.accept();
+
+					if (clientSocketChannel != null) {
+						clientSocketChannel.configureBlocking(false);
+						final SelectionKey clientKey = clientSocketChannel.register(selector, SelectionKey.OP_READ,
+								SelectionKey.OP_WRITE);
+						final Map<String, String> clientproperties = new HashMap<String, String>();
+						clientproperties.put(channelType, clientChannel);
+						clientKey.attach(clientproperties);
+
+						while (!Thread.currentThread().isInterrupted()) {
+							try {
+								final CharBuffer buffer = CharBuffer.wrap(String.valueOf(new Random().nextInt(200)));
+								while (buffer.hasRemaining()) {
+									clientSocketChannel.write(Charset.defaultCharset().encode(buffer));
+								}
+								buffer.clear();
+								TimeUnit.SECONDS.sleep(3);
+							} catch (final InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+
+				} else {
+					final ByteBuffer buffer = ByteBuffer.allocate(20);
+					final SocketChannel clientChannel = (SocketChannel) key.channel();
+					int bytesRead = 0;
+					if (key.isReadable()) {
+						if ((bytesRead = clientChannel.read(buffer)) > 0) {
+							buffer.flip();
+							System.out.println(Charset.defaultCharset().decode(buffer));
+							buffer.clear();
+						}
+						if (bytesRead < 0) {
+							clientChannel.close();
+						}
+					}
+
+				}
+
+				iterator.remove();
+
+			}
 		}
-	}
 
+	}
 }
