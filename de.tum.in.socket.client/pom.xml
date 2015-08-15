@@ -42,6 +42,12 @@
 		</dependency>
 		
 		<dependency>
+			<groupId>com.czifrodevelopment.jsocket</groupId>
+   		    <artifactId>jsocket</artifactId>
+   		    <version>0.4.2</version>
+		</dependency>
+		
+		<dependency>
 			<groupId>de.tum.in</groupId>
 			<artifactId>de.tum.in.activity.log</artifactId>
 			<version>1.0-SNAPSHOT</version>
@@ -128,6 +134,9 @@
 					<instructions>
 						<Bundle-Vendor>TU Munich</Bundle-Vendor>
 						<Bundle-Developer>Amit Kumar Mondal</Bundle-Developer>
+						<Embed-Dependency>
+							jsocket
+						</Embed-Dependency>
 					</instructions>
 				</configuration>
 			</plugin>
