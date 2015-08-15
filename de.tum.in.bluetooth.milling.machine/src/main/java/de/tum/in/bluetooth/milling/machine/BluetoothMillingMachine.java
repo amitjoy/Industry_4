@@ -74,7 +74,7 @@ public class BluetoothMillingMachine extends Cloudlet {
 	private static final String APP_ID = "MILLING-V1";
 
 	/**
-	 * Configurable property to set Bluetooth Real-time Topic Namespace
+	 * Property for Bluetooth Real-time Topic Namespace
 	 */
 	private static final String BLUETOOTH_REALTIME_TOPIC = "bluetooth.realtime.topic";
 

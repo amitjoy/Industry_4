@@ -39,6 +39,7 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,11 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	private static final String SOCKET_IP = "socket.server.ip";
 
 	/**
+	 * Property for WiFi Real-time Topic Namespace
+	 */
+	private static final String WIFI_REALTIME_TOPIC = "wifi.realtime.topic";
+
+	/**
 	 * Activity Log Service Dependency
 	 */
 	@Reference(bind = "bindActivityLogService", unbind = "unbindActivityLogService")
@@ -103,7 +109,7 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	private Map<String, Object> m_properties;
 
 	/**
-	 * Socket Connection
+	 * Placeholder for Socket Connection
 	 */
 	private Socket m_socketConnection;
 
@@ -116,6 +122,12 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	 * Placeholder for socket Port
 	 */
 	private Integer m_socketPort;
+
+	/**
+	 * Eclipse Kura System Service Dependency
+	 */
+	@Reference(bind = "bindSystemService", unbind = "unbindSystemService")
+	private volatile SystemService m_systemService;
 
 	/* Constructor */
 	public SocketClient() {
@@ -166,18 +178,27 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	}
 
 	/**
+	 * Callback to be used while {@link SystemService} is registering
+	 */
+	public synchronized void bindSystemService(final SystemService systemService) {
+		if (this.m_systemService == null) {
+			this.m_systemService = systemService;
+		}
+	}
+
+	/**
 	 * Callback used when this service component is deactivating
 	 */
 	@Override
 	@Deactivate
 	protected void deactivate(final ComponentContext context) {
-		LOGGER.debug("Deactivating OPC-UA Component...");
+		LOGGER.debug("Deactivating Socket Client Component...");
 		try {
 			this.m_socketConnection.close();
 		} catch (final IOException e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
-		LOGGER.debug("Deactivating OPC-UA Component... Done.");
+		LOGGER.debug("Deactivating Socket Component... Done.");
 	}
 
 	/** {@inheritDoc}} */
@@ -197,8 +218,15 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 		this.m_activityLogService.saveLog("Socket Communication Started");
 
 		final KuraPayload payload = new KuraPayload();
-		payload.addMetric("result", checkNotNull(message));
+		payload.addMetric("result", checkNotNull(message.getDescription()));
+
+		// Publish for Mobile Clients
+		LOGGER.debug("Publishing WiFi Data.....to Mobile Clients");
 		this.getCloudApplicationClient().controlPublish("data", payload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
+		// Publish for Splunk
+		LOGGER.debug("Publishing WiFi Data.....to Splunk");
+		final String topic = this.m_systemService.getProperties().getProperty(WIFI_REALTIME_TOPIC);
+		this.getCloudApplicationClient().publish(topic, message.getDescription().getBytes(), 0, false, 5);
 		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 
 		LOGGER.info("Socket Communication Done");
@@ -288,6 +316,15 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	public synchronized void unbindConfigurationService(final ConfigurationService configurationService) {
 		if (this.m_configurationService == configurationService) {
 			this.m_configurationService = null;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link SystemService} is deregistering
+	 */
+	public synchronized void unbindSystemService(final SystemService systemService) {
+		if (this.m_systemService == systemService) {
+			this.m_systemService = null;
 		}
 	}
 
