@@ -275,10 +275,11 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	}
 
 	/**
-	 * @param respPayload
-	 * @throws KuraException
+	 * Process the receiving of data from server
 	 */
 	private void doProcess(final KuraResponsePayload respPayload) throws KuraException {
+		this.m_activityLogService.saveLog("Socket Communication Started");
+
 		String message = null;
 		try {
 			final SocketChannel channel = SocketChannel.open();
@@ -288,33 +289,37 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 			channel.connect(new InetSocketAddress(this.m_socketIPAddress, this.m_socketPort));
 
 			while (!channel.finishConnect()) {
-				// System.out.println("still connecting");
+				// No need to log. Still connecting to server.
 			}
-			while (true) {
+			while (!Thread.currentThread().isInterrupted()) {
 				final ByteBuffer bufferA = ByteBuffer.allocate(20);
 				message = "";
 				while ((channel.read(bufferA)) > 0) {
 					bufferA.flip();
 					message += Charset.defaultCharset().decode(bufferA);
 				}
-
 				if (message.length() > 0) {
 					LOGGER.info("Message Received: " + message);
 				}
-
+				checkNotNull(message);
+				this.doPublish(respPayload, message);
 			}
 		} catch (final Exception e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
+	}
 
-		this.m_activityLogService.saveLog("Socket Communication Started");
-
+	/**
+	 * Publishes the data to cloud
+	 */
+	private void doPublish(final KuraResponsePayload respPayload, final String message) throws KuraException {
 		final KuraPayload payload = new KuraPayload();
 		payload.addMetric("result", checkNotNull(message));
 
 		// Publish for Mobile Clients
 		LOGGER.debug("Publishing WiFi Data.....to Mobile Clients");
 		this.getCloudApplicationClient().controlPublish("data", payload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
+
 		// Publish for Splunk
 		LOGGER.debug("Publishing WiFi Data.....to Splunk");
 		final String topic = this.m_systemService.getProperties().getProperty(WIFI_REALTIME_TOPIC);
