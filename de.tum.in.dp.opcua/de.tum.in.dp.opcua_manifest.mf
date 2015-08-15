@@ -16,3 +16,15 @@ Bundle-Version: 1.0.0.SNAPSHOT
 Name: de.tum.in.opcua.client.read-1.0-SNAPSHOT.jar
 Bundle-SymbolicName: de.tum.in.opcua.client.read
 Bundle-Version: 1.0.0.SNAPSHOT
+
+Name: de.tum.in.opcua.client.write-1.0-SNAPSHOT.jar
+Bundle-SymbolicName: de.tum.in.opcua.client.write
+Bundle-Version: 1.0.0.SNAPSHOT
+
+Name: de.tum.in.opcua.client.read.node-1.0-SNAPSHOT.jar
+Bundle-SymbolicName: de.tum.in.opcua.client.read.node
+Bundle-Version: 1.0.0.SNAPSHOT
+
+Name: de.tum.in.opcua.client.write.node-1.0-SNAPSHOT.jar
+Bundle-SymbolicName: de.tum.in.opcua.client.write.node
+Bundle-Version: 1.0.0.SNAPSHOT

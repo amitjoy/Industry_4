@@ -25,11 +25,11 @@
 		<relativePath>../de.tum.in.parent/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>de.tum.in.opcua.client.write</artifactId>
+	<artifactId>de.tum.in.opcua.client.write.node</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
-	<name>OPC-UA Client Write Example</name>
+	<name>OPC-UA Client Write Node Example</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -165,5 +165,5 @@
 		<url>http://www.tum.de</url>
 	</organization>
 
-	<description>This bundle is responsible for writing to OPC-UA Server (Example Write)</description>
+	<description>This bundle is responsible for writing to a node of OPC-UA Server (Example Write Node)</description>
 </project>

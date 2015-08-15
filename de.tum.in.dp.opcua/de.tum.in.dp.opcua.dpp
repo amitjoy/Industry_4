@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Mon Aug 10 11:31:44 CEST 2015
+#Sat Aug 15 20:16:01 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.opcua_build.xml
 build.dp.file=<.>/de.tum.in.dp.opcua.dp
 build.location=
@@ -24,7 +24,28 @@ bundles.2.missing=false
 bundles.2.name=de.tum.in.opcua.client.read-1.0-SNAPSHOT.jar
 bundles.2.symbolic_name=de.tum.in.opcua.client.read
 bundles.2.version=1.0.0.SNAPSHOT
-bundles.count=3
+bundles.3.bundle_path=/Users/AMIT/Industry_4.0/de.tum.in.opcua.client.write/target/de.tum.in.opcua.client.write-1.0-SNAPSHOT.jar
+bundles.3.customizer=false
+bundles.3.headers.count=0
+bundles.3.missing=false
+bundles.3.name=de.tum.in.opcua.client.write-1.0-SNAPSHOT.jar
+bundles.3.symbolic_name=de.tum.in.opcua.client.write
+bundles.3.version=1.0.0.SNAPSHOT
+bundles.4.bundle_path=/Users/AMIT/Industry_4.0/de.tum.in.opcua.client.read.node/target/de.tum.in.opcua.client.read.node-1.0-SNAPSHOT.jar
+bundles.4.customizer=false
+bundles.4.headers.count=0
+bundles.4.missing=false
+bundles.4.name=de.tum.in.opcua.client.read.node-1.0-SNAPSHOT.jar
+bundles.4.symbolic_name=de.tum.in.opcua.client.read.node
+bundles.4.version=1.0.0.SNAPSHOT
+bundles.5.bundle_path=/Users/AMIT/Industry_4.0/de.tum.in.opcua.client.write.node/target/de.tum.in.opcua.client.write.node-1.0-SNAPSHOT.jar
+bundles.5.customizer=false
+bundles.5.headers.count=0
+bundles.5.missing=false
+bundles.5.name=de.tum.in.opcua.client.write.node-1.0-SNAPSHOT.jar
+bundles.5.symbolic_name=de.tum.in.opcua.client.write.node
+bundles.5.version=1.0.0.SNAPSHOT
+bundles.count=6
 certificates.count=0
 general.signbundles=true
 headers.contact.address=admin@amitinside.com
