@@ -15,6 +15,10 @@
  *******************************************************************************/
 package de.tum.in.socket.client;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.IOException;
+import java.net.Socket;
 import java.util.Map;
 
 import org.apache.commons.collections.IterableMap;
@@ -32,14 +36,18 @@ import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Throwables;
+
 import de.tum.in.activity.log.ActivityLogService;
 import de.tum.in.activity.log.IActivityLogService;
+import jsock.net.ObjectSocket;
 
 /**
  * This bundle is responsible for communicating with the Socket Server
@@ -93,6 +101,11 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	 * Map to store list of configurations
 	 */
 	private Map<String, Object> m_properties;
+
+	/**
+	 * Socket Connection
+	 */
+	private Socket m_socketConnection;
 
 	/**
 	 * Placeholder for socket IP Address
@@ -159,7 +172,11 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	@Deactivate
 	protected void deactivate(final ComponentContext context) {
 		LOGGER.debug("Deactivating OPC-UA Component...");
-
+		try {
+			this.m_socketConnection.close();
+		} catch (final IOException e) {
+			LOGGER.error(Throwables.getStackTraceAsString(e));
+		}
 		LOGGER.debug("Deactivating OPC-UA Component... Done.");
 	}
 
@@ -168,10 +185,20 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	protected void doExec(final CloudletTopic reqTopic, final KuraRequestPayload reqPayload,
 			final KuraResponsePayload respPayload) throws KuraException {
 		LOGGER.info("Socket Communication Started...");
+		Message message = null;
+		try {
+			this.m_socketConnection = new Socket(this.m_socketIPAddress, this.m_socketPort);
+			final ObjectSocket sock = new ObjectSocket(this.m_socketConnection);
+			message = (Message) sock.recv_object(Message.class);
+		} catch (final Exception e) {
+			LOGGER.error(Throwables.getStackTraceAsString(e));
+		}
 
-		// TODO Socket Client Logic
 		this.m_activityLogService.saveLog("Socket Communication Started");
 
+		final KuraPayload payload = new KuraPayload();
+		payload.addMetric("result", checkNotNull(message));
+		this.getCloudApplicationClient().controlPublish("data", payload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
 		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 
 		LOGGER.info("Socket Communication Done");

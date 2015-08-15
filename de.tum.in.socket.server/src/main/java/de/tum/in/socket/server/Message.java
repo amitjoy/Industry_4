@@ -15,39 +15,27 @@
  *******************************************************************************/
 package de.tum.in.socket.server;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-
-import com.google.common.base.Throwables;
-
-import jsock.net.ObjectSocket;
-
 /**
- * Socket Server Instance
- *
+ * WiFi Message Format
+ * 
  * @author AMIT KUMAR MONDAL
  *
  */
-public final class SocketServer {
+public class Message {
+	private String description;
 
-	private static ServerSocket server = null;
-
-	public static void main(final String[] args) throws IOException {
-		try {
-			server = new ServerSocket(9999);
-			final Socket conn = server.accept();
-			final ObjectSocket sock = new ObjectSocket(conn);
-
-			final Message message = new Message();
-			message.setDescription("Dummy WiFi Message");
-
-			sock.send_object(message, Message.class);
-		} catch (final Exception e) {
-			System.out.println(Throwables.getStackTraceAsString(e));
-		} finally {
-			server.close();
-		}
+	/**
+	 * @return the description
+	 */
+	public final String getDescription() {
+		return this.description;
 	}
 
+	/**
+	 * @param description
+	 *            the description to set
+	 */
+	public final void setDescription(final String description) {
+		this.description = description;
+	}
 }
