@@ -38,14 +38,29 @@ import com.intel.bluetooth.MicroeditionConnector;
  */
 public final class SPPServer {
 
+	/**
+	 * Stream connection between the Raspberry Pi and Bluetooth Server
+	 */
 	private static StreamConnection connection = null;
 
+	/**
+	 * The output stream to be used by the server
+	 */
 	private static OutputStream outputStream = null;
 
+	/**
+	 * Bluetooth Connector Acceptor
+	 */
 	private static StreamConnectionNotifier streamConnNotifier = null;
 
+	/**
+	 * Stream Writer
+	 */
 	private static PrintWriter writer = null;
 
+	/**
+	 * The main starter
+	 */
 	private static void init() throws IOException {
 		final UUID uuid = new UUID("0000110100001000800000805F9B34FB", false);
 		final String connectionString = "btspp://localhost:" + uuid + ";name=Bluetooth-Milling-Machine-Simulation";
@@ -75,16 +90,16 @@ public final class SPPServer {
 		while (!Thread.currentThread().isInterrupted()) {
 			sendResponse();
 			try {
-				writer.close();
-				writer = null;
 				TimeUnit.SECONDS.sleep(3);
-				writer = new PrintWriter(new OutputStreamWriter(outputStream));
 			} catch (final InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 	};
 
+	/**
+	 * Broadcasts response
+	 */
 	private static void sendResponse() throws IOException {
 		final String data = "A";
 		System.out.println("Broadcasting data (" + data + ")");
