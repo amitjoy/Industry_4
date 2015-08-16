@@ -29,7 +29,7 @@ import org.osgi.util.tracker.ServiceTracker;
  *
  * @author AMIT KUMAR MONDAL
  */
-public class SortingServiceTracker<T> extends ServiceTracker {
+public class SortingServiceTracker<T> extends ServiceTracker<Object, Object> {
 
 	private int lastCount = -1;
 

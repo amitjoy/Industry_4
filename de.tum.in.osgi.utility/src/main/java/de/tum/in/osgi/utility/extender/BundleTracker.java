@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Description: Tracks active bundles
  * </p>
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */

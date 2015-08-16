@@ -43,7 +43,7 @@ public class ServiceUtil {
 			final Long otherId;
 			Object otherRankObj;
 			if (reference instanceof ServiceReference) {
-				final ServiceReference other = (ServiceReference) reference;
+				final ServiceReference<?> other = (ServiceReference<?>) reference;
 				otherId = (Long) other.getProperty(Constants.SERVICE_ID);
 				otherRankObj = other.getProperty(Constants.SERVICE_RANKING);
 			} else if (reference instanceof Map) {
