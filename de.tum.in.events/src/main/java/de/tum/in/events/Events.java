@@ -19,14 +19,14 @@ package de.tum.in.events;
  * All the system event constants should be registered here. To get your data
  * cached, you have to add your event which must have a topic starting with
  * <code>de/tum/in/device/cache/<code>
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
 public interface Events {
 
 	/**
-	 * Used to cache data retrieved from the bluetooth enabled milling machine
+	 * Used to cache data retrieved from realtime device
 	 */
 	public static final String DATA_CACHE = "de/tum/in/device/data/cache";
 

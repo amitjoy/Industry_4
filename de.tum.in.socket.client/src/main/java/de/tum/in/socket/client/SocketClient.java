@@ -23,6 +23,9 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,6 +51,8 @@ import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +60,7 @@ import com.google.common.base.Throwables;
 
 import de.tum.in.activity.log.ActivityLogService;
 import de.tum.in.activity.log.IActivityLogService;
+import de.tum.in.events.Events;
 
 /**
  * This bundle is responsible for communicating with the Socket Server
@@ -108,6 +114,12 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	 */
 	@Reference(bind = "bindConfigurationService", unbind = "unbindConfigurationService")
 	private volatile ConfigurationService m_configurationService;
+
+	/**
+	 * OSGi Event Admin Service Dependency
+	 */
+	@Reference(bind = "bindEventAdmin", unbind = "unbindEventAdmin")
+	private volatile EventAdmin m_eventAdmin;
 
 	/**
 	 * Future Event Handle for Executor
@@ -195,6 +207,15 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	}
 
 	/**
+	 * Callback to be used while {@link EventAdmin} is registering
+	 */
+	public synchronized void bindEventAdmin(final EventAdmin eventAdmin) {
+		if (this.m_eventAdmin == null) {
+			this.m_eventAdmin = eventAdmin;
+		}
+	}
+
+	/**
 	 * Callback to be used while {@link SystemService} is registering
 	 */
 	public synchronized void bindSystemService(final SystemService systemService) {
@@ -216,6 +237,22 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
 		LOGGER.debug("Deactivating Socket Component... Done.");
+	}
+
+	/**
+	 * Publishes asynchronous events for caching
+	 */
+	private void doBroadcastEventsForCaching(final String message) {
+		LOGGER.debug("Publishing Event for caching wifi data...");
+
+		final Dictionary<String, Object> properties = new Hashtable<>();
+		properties.put("data", message);
+		properties.put("timestamp", LocalDateTime.now());
+		final Event event = new Event(Events.DATA_CACHE, properties);
+
+		this.m_eventAdmin.postEvent(event);
+
+		LOGGER.debug("Publishing Event for caching wifi data...Done");
 	}
 
 	/** {@inheritDoc}} */
@@ -316,6 +353,8 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 		final KuraPayload payload = new KuraPayload();
 		payload.addMetric("result", checkNotNull(message));
 
+		this.doBroadcastEventsForCaching(message);
+
 		// Publish for Mobile Clients
 		LOGGER.debug("Publishing WiFi Data.....to Mobile Clients");
 		this.getCloudApplicationClient().controlPublish("data", payload, DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
@@ -385,6 +424,15 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	public synchronized void unbindConfigurationService(final ConfigurationService configurationService) {
 		if (this.m_configurationService == configurationService) {
 			this.m_configurationService = null;
+		}
+	}
+
+	/**
+	 * Callback to be used while {@link EventAdmin} is deregistering
+	 */
+	public synchronized void unbindEventAdmin(final EventAdmin eventAdmin) {
+		if (this.m_cloudService == eventAdmin) {
+			this.m_eventAdmin = null;
 		}
 	}
 

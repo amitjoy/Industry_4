@@ -170,7 +170,7 @@ public final class BluetoothConnector implements Runnable {
 	 * Publishes asynchronous events for caching
 	 */
 	private void doBroadcastEventsForCaching(final String data) {
-		LOGGER.debug("Publishing Event for caching...");
+		LOGGER.debug("Publishing Event for caching bluetooth data...");
 
 		final Dictionary<String, Object> properties = new Hashtable<>();
 		properties.put("data", data);
@@ -179,7 +179,7 @@ public final class BluetoothConnector implements Runnable {
 
 		s_eventAdmin.postEvent(event);
 
-		LOGGER.debug("Publishing Event for caching...Done");
+		LOGGER.debug("Publishing Event for caching bluetooth data...Done");
 
 	}
 
