@@ -19,7 +19,7 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 
 /**
- * Listener used to dump data to MongoDB while removing the data from the cache
+ * Listener used to dump data locally in Controller (IoT Gateway)
  *
  * @author AMIT KUMAR MONDAL
  *
