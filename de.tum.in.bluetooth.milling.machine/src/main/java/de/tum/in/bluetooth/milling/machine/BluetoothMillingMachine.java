@@ -310,7 +310,8 @@ public class BluetoothMillingMachine extends Cloudlet {
 
 		final BluetoothConnector bluetoothConnector = new BluetoothConnector.Builder()
 				.setConnectorService(this.m_connectorService).setTopic(bluetoothRealtimeTopic)
-				.setServiceRecord(serviceRecord).setCloudClient(this.getCloudApplicationClient()).build();
+				.setServiceRecord(serviceRecord).setEventAdmin(this.m_eventAdmin)
+				.setCloudClient(this.getCloudApplicationClient()).build();
 
 		this.m_handle = this.m_worker.submit(bluetoothConnector);
 	}

@@ -24,7 +24,7 @@ import com.google.common.cache.RemovalNotification;
  * @author AMIT KUMAR MONDAL
  *
  */
-public class RemoveRealtimeDataListener implements RemovalListener<String, Object> {
+public final class RemoveRealtimeDataListener implements RemovalListener<String, Object> {
 
 	/** {@inheritDoc} */
 	@Override

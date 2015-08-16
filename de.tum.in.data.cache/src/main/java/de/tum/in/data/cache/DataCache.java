@@ -31,7 +31,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-import de.tum.in.data.format.RealtimeData;
 import de.tum.in.events.Events;
 
 /**
@@ -53,16 +52,6 @@ public class DataCache implements EventHandler {
 	 * The cache to store data
 	 */
 	private Cache<String, Object> m_cache;
-
-	/**
-	 * Placeholder to store the device address from the event properties
-	 */
-	private String m_deviceAddress;
-
-	/**
-	 * Placeholder to store the extra information from the event properties
-	 */
-	private Object m_extraInformation;
 
 	/**
 	 * Placeholder to store the data from the event properties
@@ -109,18 +98,11 @@ public class DataCache implements EventHandler {
 			LOGGER.debug("Cache Event Handler caching....");
 
 			// Extract all the event properties
-			this.m_deviceAddress = (String) event.getProperty("device.id");
 			this.m_timestamp = (String) event.getProperty("timestamp");
 			this.m_realtimeData = (String) event.getProperty("data");
-			this.m_extraInformation = event.getProperty("extra.info");
-
-			// Prepare the data and wrap it
-			final RealtimeData data = new RealtimeData.Builder().setDeviceAddress(this.m_deviceAddress)
-					.setTimestamp(this.m_timestamp).setValue(this.m_realtimeData).setExtraBody(this.m_extraInformation)
-					.build();
 
 			// Now put the data in the cache
-			this.m_cache.put(String.valueOf(System.currentTimeMillis()), data);
+			this.m_cache.put(this.m_timestamp, this.m_realtimeData);
 
 			LOGGER.debug("Cache Event Handler Caching...done");
 		}

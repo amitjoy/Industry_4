@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 
 import javax.bluetooth.ServiceRecord;
@@ -31,12 +33,16 @@ import javax.microedition.io.StreamConnection;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudClient;
 import org.eclipse.kura.message.KuraPayload;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.io.ConnectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
 import com.intel.bluetooth.MicroeditionConnector;
+
+import de.tum.in.events.Events;
 
 /**
  * Used to establish connection between the paired bluetooth device and RPi
@@ -75,6 +81,14 @@ public final class BluetoothConnector implements Runnable {
 		}
 
 		/**
+		 * Setter to set Event Admin Service
+		 */
+		public Builder setEventAdmin(final EventAdmin eventAdmin) {
+			s_eventAdmin = eventAdmin;
+			return this;
+		}
+
+		/**
 		 * Setter to set bluetooth Service record for paired device
 		 */
 		public Builder setServiceRecord(final ServiceRecord record) {
@@ -107,6 +121,11 @@ public final class BluetoothConnector implements Runnable {
 	 */
 	@SuppressWarnings("unused")
 	private static ConnectorService s_connectorService;
+
+	/**
+	 * Event Admin Service
+	 */
+	private static EventAdmin s_eventAdmin;
 
 	/**
 	 * Paired Bluetooth Device Serial Port Profile Service
@@ -148,10 +167,29 @@ public final class BluetoothConnector implements Runnable {
 	}
 
 	/**
+	 * Publishes asynchronous events for caching
+	 */
+	private void doBroadcastEventsForCaching(final String data) {
+		LOGGER.debug("Publishing Event for caching...");
+
+		final Dictionary<String, Object> properties = new Hashtable<>();
+		properties.put("data", data);
+		properties.put("timestamp", LocalDateTime.now());
+		final Event event = new Event(Events.DATA_CACHE, properties);
+
+		s_eventAdmin.postEvent(event);
+
+		LOGGER.debug("Publishing Event for caching...Done");
+
+	}
+
+	/**
 	 * Publish the data to message broker
 	 */
 	private void doPublish() throws KuraException {
 		this.m_response = String.valueOf(LocalDateTime.now());
+
+		this.doBroadcastEventsForCaching(this.m_response);
 
 		LOGGER.debug("Publishing Bluetooth Data.....");
 
@@ -229,7 +267,7 @@ public final class BluetoothConnector implements Runnable {
 		final StringBuilder builder = new StringBuilder();
 		int i = 0;
 		char c = 0;
-		while ((i = ((NonBlockingInputStream) is).read(TimeUnit.SECONDS.toMillis(2))) != -1) {
+		while ((i = ((NonBlockingInputStream) is).read(TimeUnit.SECONDS.toMillis(3))) != -1) {
 			c = (char) i;
 			builder.append(c);
 		}
