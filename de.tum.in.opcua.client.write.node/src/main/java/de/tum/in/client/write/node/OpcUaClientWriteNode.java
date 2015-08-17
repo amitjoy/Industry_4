@@ -42,7 +42,7 @@ import de.tum.in.opcua.client.OpcUaClientAction;
  * @author AMIT KUMAR MONDAL
  *
  */
-@Component(immediate = true, name = "de.tum.in.opcua.client.write")
+@Component(immediate = true, name = "de.tum.in.opcua.client.write.node")
 @Service(value = { OpcUaClientAction.class })
 public class OpcUaClientWriteNode implements OpcUaClientAction {
 

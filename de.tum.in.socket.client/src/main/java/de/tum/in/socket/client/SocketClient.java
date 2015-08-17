@@ -173,7 +173,7 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 
 		super.setCloudService(this.m_cloudService);
 		super.activate(componentContext);
-		this.initializeConfiguration(properties);
+		this.m_properties = properties;
 
 		LOGGER.info("Activating Socket Client Component... Done.");
 
@@ -261,6 +261,9 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 			final KuraResponsePayload respPayload) throws KuraException {
 		if ("start".equals(reqTopic.getResources()[0])) {
 			LOGGER.info("Socket Communication Started...");
+
+			this.extractConfiguration();
+
 			// cancel a current worker handle if one if active
 			if (this.m_handle != null) {
 				this.m_handle.cancel(true);
@@ -384,20 +387,13 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	}
 
 	/**
-	 * Used to extract configuration for populating placeholders with respective
-	 * values
+	 * Extracts configuration for populating placeholders with respective values
 	 */
 	private void extractConfiguration() {
+		LOGGER.debug("Extracting Socket Client Configuration....");
 		this.m_socketIPAddress = (String) this.m_properties.get(SOCKET_IP);
 		this.m_socketPort = (int) this.m_properties.get(SOCKET_CONNECT_PORT);
-	}
-
-	/**
-	 * Reinitialize Configurations as it gets updated
-	 */
-	private void initializeConfiguration(final Map<String, Object> properties) {
-		this.m_properties = properties;
-		this.extractConfiguration();
+		LOGGER.debug("Extracting Socket Client Configuration....Done");
 	}
 
 	/**
@@ -451,7 +447,8 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	public void updated(final Map<String, Object> properties) {
 		LOGGER.info("Updated Socket Client Component...");
 
-		this.initializeConfiguration(properties);
+		this.m_properties = properties;
+		this.extractConfiguration();
 
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
