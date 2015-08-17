@@ -1,5 +1,5 @@
 #Deployment Plugin Project File
-#Wed Aug 05 09:22:29 CEST 2015
+#Mon Aug 17 09:02:09 CEST 2015
 build.ant.name=<.>/de.tum.in.dp.commons_build.xml
 build.dp.file=<.>/de.tum.in.dp.commons.dp
 build.location=
@@ -52,7 +52,14 @@ bundles.6.missing=false
 bundles.6.name=de.tum.in.ifttt-1.0-SNAPSHOT.jar
 bundles.6.symbolic_name=de.tum.in.ifttt
 bundles.6.version=1.0.0.SNAPSHOT
-bundles.count=7
+bundles.7.bundle_path=/Users/AMIT/Industry_4.0/de.tum.in.osgi.utility/target/de.tum.in.osgi.utility-1.0-SNAPSHOT.jar
+bundles.7.customizer=false
+bundles.7.headers.count=0
+bundles.7.missing=false
+bundles.7.name=de.tum.in.osgi.utility-1.0-SNAPSHOT.jar
+bundles.7.symbolic_name=de.tum.in.osgi.utility
+bundles.7.version=1.0.0.SNAPSHOT
+bundles.count=8
 certificates.count=0
 general.signbundles=true
 headers.contact.address=admin@amitinside.com
