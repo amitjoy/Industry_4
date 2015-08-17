@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -44,6 +45,7 @@ public class ReadExcel {
 
 	private static Object getTypeValue(final Class<?> type, final Cell cell) {
 		Object typedValue = null;
+		final DataFormatter formatter = new DataFormatter();
 		if (type == int.class) {
 			typedValue = (int) cell.getNumericCellValue();
 		} else if (type == double.class) {
@@ -51,7 +53,7 @@ public class ReadExcel {
 		} else if (type == boolean.class) {
 			typedValue = cell.getBooleanCellValue();
 		} else if (type == String.class) {
-			typedValue = cell.getStringCellValue();
+			typedValue = formatter.formatCellValue(cell);
 		}
 		return typedValue;
 	}
@@ -73,7 +75,6 @@ public class ReadExcel {
 
 			final RealtimeData newRecord = bluetoothData.getClass().newInstance();
 
-			// Skip First row which is column names
 			if (rowOne > 0) {
 				int i = 0;
 				while (cellIterator.hasNext()) {
@@ -99,7 +100,7 @@ public class ReadExcel {
 
 		try {
 
-			final File file = new File("GS_d8n19000fz01ap06.xlsx");
+			final File file = new File("testdata.xlsx");
 
 			final FileInputStream fileStream = new FileInputStream(file);
 

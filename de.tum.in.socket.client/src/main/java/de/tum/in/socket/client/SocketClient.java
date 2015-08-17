@@ -17,9 +17,7 @@ package de.tum.in.socket.client;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
@@ -56,6 +54,7 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 
 import de.tum.in.activity.log.ActivityLogService;
@@ -130,11 +129,6 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	 * Map to store list of configurations
 	 */
 	private Map<String, Object> m_properties;
-
-	/**
-	 * Placeholder for Socket Connection
-	 */
-	private Socket m_socketConnection;
 
 	/**
 	 * Placeholder for socket IP Address
@@ -231,11 +225,6 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	@Deactivate
 	protected void deactivate(final ComponentContext context) {
 		LOGGER.debug("Deactivating Socket Client Component...");
-		try {
-			this.m_socketConnection.close();
-		} catch (final IOException e) {
-			LOGGER.error(Throwables.getStackTraceAsString(e));
-		}
 		LOGGER.debug("Deactivating Socket Component... Done.");
 	}
 
@@ -332,7 +321,7 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 				// No need to log. Still connecting to server.
 			}
 			while (!Thread.currentThread().isInterrupted()) {
-				final ByteBuffer bufferA = ByteBuffer.allocate(20);
+				final ByteBuffer bufferA = ByteBuffer.allocate(500);
 				message = "";
 				while ((channel.read(bufferA)) > 0) {
 					bufferA.flip();
@@ -341,8 +330,9 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 				if (message.length() > 0) {
 					LOGGER.info("Message Received: " + message);
 				}
-				checkNotNull(message);
-				this.doPublish(respPayload, message);
+				if (!Strings.isNullOrEmpty(message)) {
+					this.doPublish(respPayload, message);
+				}
 			}
 		} catch (final Exception e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));

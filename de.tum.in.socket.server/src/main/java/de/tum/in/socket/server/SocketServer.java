@@ -57,13 +57,13 @@ public final class SocketServer {
 	 */
 	public static void main(final String[] args) throws IOException {
 		final int port = 9999;
-		final String localhost = "localhost";
+		final String ipAddress = args[0];
 
 		data = ReadExcel.read();
 
 		final ServerSocketChannel channel = ServerSocketChannel.open();
 
-		channel.bind(new InetSocketAddress(localhost, port));
+		channel.bind(new InetSocketAddress(ipAddress, port));
 
 		channel.configureBlocking(false);
 
@@ -96,12 +96,12 @@ public final class SocketServer {
 
 						while (!Thread.currentThread().isInterrupted()) {
 							try {
-								final CharBuffer buffer = CharBuffer
-										.wrap(String.valueOf(data.get(new Random().nextInt(2000))));
-								while (buffer.hasRemaining()) {
-									clientSocketChannel.write(Charset.defaultCharset().encode(buffer));
-								}
-								buffer.clear();
+								final ByteBuffer buf = ByteBuffer.allocate(500);
+								final CharBuffer cbuf = buf.asCharBuffer();
+								cbuf.put(data.get(new Random().nextInt(300)).toString());
+								cbuf.flip();
+								clientSocketChannel.write(buf);
+								buf.clear();
 								TimeUnit.SECONDS.sleep(3);
 							} catch (final InterruptedException e) {
 								e.printStackTrace();
