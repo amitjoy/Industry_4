@@ -107,6 +107,8 @@
 					<instructions>
 						<Bundle-Vendor>TU Munich</Bundle-Vendor>
 						<Bundle-Developer>Amit Kumar Mondal</Bundle-Developer>
+						<Bundle-Activator>de.tum.in.osgi.utility.OsgiUtilsActivator</Bundle-Activator>
+						<Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
 					</instructions>
 				</configuration>
 			</plugin>

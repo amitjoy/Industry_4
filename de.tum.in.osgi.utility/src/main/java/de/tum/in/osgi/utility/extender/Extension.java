@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2015 - Amit Kumar Mondal <admin@amitinside.com>
+ * Copyright 2015 Amit Kumar Mondal <admin@amitinside.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package de.tum.in.osgi.utility;
-
-import java.io.IOException;
+package de.tum.in.osgi.utility.extender;
 
 /**
- * Loads resources from a bundle
- * 
- * @author AMIT KUMAR MONDAL
+ * A simple interface used by the extender to manage extensions.
  *
+ * @author AMIT KUMAR MONDAL
  */
-public interface IBundleResourceLoader {
-	public <T> T loadResource(Class<?> bundleClazz, Class<T> resourceTypeclazz, String pathToFile) throws IOException;
+public interface Extension {
+
+	/**
+	 * Destroy should be synchronous and only return when the extension has been
+	 * fully destroyed. In addition it must be synchronized with start, because
+	 * start() and destroy() can be called concurrently.
+	 */
+	void destroy() throws Exception;
+
+	/**
+	 * Start this extension. Starting and stopping of the extension should be
+	 * synchronized.
+	 */
+	void start() throws Exception;
+
 }

@@ -25,23 +25,26 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
+import com.google.common.base.Preconditions;
 
 /**
  * Utilities for OSGI
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
@@ -100,16 +103,39 @@ public final class OsgiUtils {
 	 *            the service type
 	 * @return a future that will eventually contain the service instance
 	 */
-	public static <T> ListenableFuture<T> asyncWaitForService(final Class<T> serviceType) {
-		final ListenableFutureTask<T> task = ListenableFutureTask.create(() -> waitForService(serviceType));
-		final Executor exe = Executors.newCachedThreadPool();
-		exe.execute(task);
+	public static <T> CompletableFuture<T> asyncWaitForService(final Class<T> serviceType) {
+		final CompletableFuture<T> task = CompletableFuture.supplyAsync(() -> waitForService(serviceType));
+		final ExecutorService exe = Executors.newCachedThreadPool();
+		exe.submit(() -> {
+			try {
+				task.get();
+			} catch (final CancellationException e) {
+				task.cancel(true);
+			} catch (final Exception e) {
+				task.completeExceptionally(e);
+			}
+		});
 		return task;
 	}
 
 	/**
+	 * Check whether a bundle is started or not
+	 */
+	private static void checkStarted(final Bundle bundle) {
+		Preconditions.checkNotNull(bundle);
+		final int bundleState = bundle.getState();
+		if ((bundleState != Bundle.STARTING) && (bundleState != Bundle.ACTIVE)) {
+			try {
+				bundle.start();
+			} catch (final BundleException ex) {
+				log.log(Level.SEVERE, "Error starting bundle", bundle.getSymbolicName());
+			}
+		}
+	}
+
+	/**
 	 * Returns all classes from a package
-	 * 
+	 *
 	 * @param one
 	 *            a well known class from the package that should be searched
 	 * @return the found classes (never returns null)
@@ -123,7 +149,7 @@ public final class OsgiUtils {
 	/**
 	 * Searches a package and returns all classes that extend or implement the
 	 * given class or interface.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the class or interface the returned classes should
 	 *            extend or implement
@@ -167,7 +193,7 @@ public final class OsgiUtils {
 
 	/**
 	 * Returns all classes from a package
-	 * 
+	 *
 	 * @param pkg
 	 *            the package to search for classes
 	 * @param bnd
@@ -183,7 +209,7 @@ public final class OsgiUtils {
 	/**
 	 * Searches a package and returns all classes that extend or implement the
 	 * given class or interface.
-	 * 
+	 *
 	 * @param <T>
 	 *            the type of the class or interface the returned classes should
 	 *            extend or implement
@@ -255,7 +281,7 @@ public final class OsgiUtils {
 	/**
 	 * Searches a package and returns all classes that extend or implement the
 	 * given class or interface.
-	 * 
+	 *
 	 * @param pkg
 	 *            the package to search for classes
 	 * @param jar
@@ -341,7 +367,7 @@ public final class OsgiUtils {
 
 	/**
 	 * Checks whether a bundle is a fragment
-	 * 
+	 *
 	 * @param bundle
 	 *            the bundle
 	 * @return true if bundle is a fragment
@@ -534,7 +560,7 @@ public final class OsgiUtils {
 	 *
 	 * @param condition
 	 *            the condition
-	 * 
+	 *
 	 * @return the condition value
 	 */
 	public static boolean waitUntil(final Condition condition) {
@@ -563,7 +589,7 @@ public final class OsgiUtils {
 	 * @param timeout
 	 *            the timeout in seconds after which to return even if the
 	 *            condition is <code>false</code>
-	 * 
+	 *
 	 * @return the condition value
 	 */
 	public static boolean waitUntil(final Condition condition, final int timeout) {
