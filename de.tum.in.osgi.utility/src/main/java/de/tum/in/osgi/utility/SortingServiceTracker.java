@@ -24,6 +24,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.google.common.collect.Lists;
+
 /**
  * Implementation providing a sorted list of services by service ranking.
  *
@@ -68,7 +70,7 @@ public class SortingServiceTracker<T> extends ServiceTracker<Object, Object> {
 				result = Collections.emptyList();
 			} else {
 				Arrays.sort(references);
-				result = new ArrayList<ServiceReference>();
+				result = Lists.newArrayList();
 				for (int i = 0; i < references.length; i++) {
 					result.add(references[references.length - 1 - i]);
 				}

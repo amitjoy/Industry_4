@@ -792,7 +792,7 @@ public class ServiceUtils {
 	 *            className
 	 * @param timeout
 	 *            time interval to wait. If zero, the method will wait
-	 *            indefinately.
+	 *            Indefinitely.
 	 * @param timeUnit
 	 *            time unit for the time interval
 	 * @return ServiceReference instance or <code>null</code>
@@ -826,7 +826,7 @@ public class ServiceUtils {
 	 *            ServiceTracker
 	 * @param timeoutInMillis
 	 *            time interval in milliseconds to wait. If zero, the method
-	 *            will wait indefinately.
+	 *            will wait indefinitely.
 	 * @param lock
 	 *            external lock that is used to handle new service adding to
 	 *            ServiceTracker

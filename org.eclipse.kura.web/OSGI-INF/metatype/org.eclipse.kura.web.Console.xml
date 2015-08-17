@@ -14,7 +14,7 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.web.Console" 
-         name="WebConsole" 
+         name="Web UI" 
          description="Web Console configuration">
          
         <Icon resource="DenaliService" size="32"/>
@@ -26,10 +26,9 @@
         	cardinality="0"
         	required="true"
         	default="admin"
-        	description="Device's web console password. A non empty value should be set.">
+        	description="Web Interface Password of the Gateway Device">
         </AD>
 
-                    
     </OCD>
     
     <Designate pid="org.eclipse.kura.web.Console">

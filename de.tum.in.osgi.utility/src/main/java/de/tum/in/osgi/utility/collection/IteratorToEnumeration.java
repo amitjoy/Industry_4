@@ -23,10 +23,10 @@ import java.util.Iterator;
  * @author AMIT KUMAR MONDAL
  *
  */
-public class IteratorToEnumeration implements Enumeration {
-	private final Iterator iter;
+public class IteratorToEnumeration implements Enumeration<Object> {
+	private final Iterator<?> iter;
 
-	public IteratorToEnumeration(final Iterator iter) {
+	public IteratorToEnumeration(final Iterator<?> iter) {
 		this.iter = iter;
 	}
 

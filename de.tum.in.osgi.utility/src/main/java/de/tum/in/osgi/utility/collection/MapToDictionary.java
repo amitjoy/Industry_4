@@ -25,18 +25,18 @@ import java.util.Map;
  *
  * @author AMIT KUMAR MONDAL
  **/
-public class MapToDictionary extends Dictionary {
+public class MapToDictionary extends Dictionary<Object, Object> {
 	/**
 	 * Map source.
 	 **/
-	private Map map = null;
+	private Map<?, ?> map = null;
 
-	public MapToDictionary(final Map map) {
+	public MapToDictionary(final Map<?, ?> map) {
 		this.map = map;
 	}
 
 	@Override
-	public Enumeration elements() {
+	public Enumeration<Object> elements() {
 		if (this.map == null) {
 			return null;
 		}
@@ -60,7 +60,7 @@ public class MapToDictionary extends Dictionary {
 	}
 
 	@Override
-	public Enumeration keys() {
+	public Enumeration<Object> keys() {
 		if (this.map == null) {
 			return null;
 		}
@@ -77,7 +77,7 @@ public class MapToDictionary extends Dictionary {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setSourceMap(final Map map) {
+	public void setSourceMap(final Map<?, ?> map) {
 		this.map = map;
 	}
 
