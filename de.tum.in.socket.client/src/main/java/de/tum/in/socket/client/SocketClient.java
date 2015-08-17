@@ -355,7 +355,8 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 		// Publish for Splunk
 		LOGGER.debug("Publishing WiFi Data.....to Splunk");
 		final String topic = this.m_systemService.getProperties().getProperty(WIFI_REALTIME_TOPIC);
-		this.getCloudApplicationClient().publish(topic, message.getBytes(), DFLT_PUB_QOS, DFLT_RETAIN, DFLT_PRIORITY);
+		this.getCloudApplicationClient().controlPublish("splunk", topic, message.getBytes(), DFLT_PUB_QOS, DFLT_RETAIN,
+				DFLT_PRIORITY);
 		respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 	}
 

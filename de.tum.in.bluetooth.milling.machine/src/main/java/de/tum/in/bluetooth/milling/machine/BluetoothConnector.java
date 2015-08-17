@@ -202,7 +202,7 @@ public final class BluetoothConnector implements Runnable {
 
 		// publishing for Splunk
 		LOGGER.debug("Publishing Bluetooth Data.....to Splunk");
-		s_cloudClient.publish(s_topic, this.m_response.getBytes(), 0, false, 5);
+		s_cloudClient.controlPublish("splunk", s_topic, this.m_response.getBytes(), 0, false, 5);
 
 		LOGGER.debug("Publishing Bluetooth Data.....Done");
 	}
