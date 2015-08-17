@@ -26,6 +26,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -41,6 +42,11 @@ public final class SocketServer {
 
 	private static String channelType = "channelType";
 	private static String clientChannel = "clientChannel";
+	/**
+	 * List of data to send
+	 */
+	private static List<RealtimeData> data;
+
 	private static String serverChannel = "serverChannel";
 
 	/**
@@ -52,6 +58,8 @@ public final class SocketServer {
 	public static void main(final String[] args) throws IOException {
 		final int port = 9999;
 		final String localhost = "localhost";
+
+		data = ReadExcel.read();
 
 		final ServerSocketChannel channel = ServerSocketChannel.open();
 
@@ -88,7 +96,8 @@ public final class SocketServer {
 
 						while (!Thread.currentThread().isInterrupted()) {
 							try {
-								final CharBuffer buffer = CharBuffer.wrap(String.valueOf(new Random().nextInt(200)));
+								final CharBuffer buffer = CharBuffer
+										.wrap(String.valueOf(data.get(new Random().nextInt(2000))));
 								while (buffer.hasRemaining()) {
 									clientSocketChannel.write(Charset.defaultCharset().encode(buffer));
 								}

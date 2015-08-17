@@ -282,7 +282,7 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 
 		if ("stop".equals(reqTopic.getResources()[0])) {
 			LOGGER.info("Socket Communication Stopped...");
-			this.m_worker.shutdown();
+			this.m_worker.shutdownNow();
 			LOGGER.info("Socket Communication Done");
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 		}

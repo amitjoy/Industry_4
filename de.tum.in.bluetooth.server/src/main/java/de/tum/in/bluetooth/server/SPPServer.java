@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.bluetooth.LocalDevice;
@@ -46,11 +44,6 @@ public final class SPPServer {
 	private static StreamConnection connection = null;
 
 	/**
-	 * List of data to send
-	 */
-	private static List<BluetoothData> data;
-
-	/**
 	 * The output stream to be used by the server
 	 */
 	private static OutputStream outputStream = null;
@@ -74,7 +67,6 @@ public final class SPPServer {
 
 		streamConnNotifier = (StreamConnectionNotifier) MicroeditionConnector.open(connectionString, Connector.WRITE,
 				false);
-		data = ReadExcel.read();
 		System.out.println("Milling Machine Started. Waiting for clients to connect...");
 		connection = streamConnNotifier.acceptAndOpen();
 
@@ -89,8 +81,7 @@ public final class SPPServer {
 
 	public static void main(final String[] args) throws IOException {
 		final LocalDevice localDevice = LocalDevice.getLocalDevice();
-		System.out.println("Address: " + localDevice.getBluetoothAddress());
-		System.out.println("Name: " + localDevice.getFriendlyName());
+		System.out.println("Milling Machine Device Address: " + localDevice.getBluetoothAddress());
 
 		init();
 
@@ -108,7 +99,7 @@ public final class SPPServer {
 	 * Broadcasts response
 	 */
 	private static void sendResponse() throws IOException {
-		final String value = data.get(new Random().nextInt(2000)).toString();
+		final String value = "12";
 		System.out.println("Broadcasting data (" + value + ")");
 		writer.write(value + "\r\n");
 	}

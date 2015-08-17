@@ -187,7 +187,7 @@ public final class BluetoothConnector implements Runnable {
 	 * Publish the data to message broker
 	 */
 	private void doPublish() throws KuraException {
-		this.m_response = String.valueOf(LocalDateTime.now());
+		this.m_response = String.valueOf(12);
 
 		this.doBroadcastEventsForCaching(this.m_response);
 
@@ -252,9 +252,7 @@ public final class BluetoothConnector implements Runnable {
 	 * TODO Remove this Junk Method
 	 */
 	private void junkMethod() throws KuraException, InterruptedException {
-		int i = 0;
-		while (i < 155) {
-			i++;
+		while (!Thread.currentThread().isInterrupted()) {
 			this.doPublish();
 			TimeUnit.SECONDS.sleep(3);
 		}
@@ -263,15 +261,17 @@ public final class BluetoothConnector implements Runnable {
 	/**
 	 * Reads data from the input stream
 	 */
-	private String readDataFromStream(final InputStream is) throws IOException {
+	private String readDataFromStream(final InputStream inputStream) throws IOException {
 		final StringBuilder builder = new StringBuilder();
 		int i = 0;
 		char c = 0;
-		while ((i = ((NonBlockingInputStream) is).read(TimeUnit.SECONDS.toMillis(3))) != -1) {
+		while ((i = ((NonBlockingInputStream) inputStream).read(TimeUnit.SECONDS.toMillis(3))) != -1) {
 			c = (char) i;
 			builder.append(c);
 		}
-		return builder.toString();
+		final String data = builder.toString();
+		LOGGER.debug("Data from stream: " + data);
+		return data;
 	}
 
 	/**

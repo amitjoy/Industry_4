@@ -13,27 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package de.tum.in.bluetooth.server;
+package de.tum.in.socket.server;
 
-public final class BluetoothData {
-	private String depth_of_cut;
-	private String feed_per_tooth;
+public final class RealtimeData {
 	private String force_x;
 	private String force_y;
 	private String force_z;
-	private String spindle_speed;
 	private String time;
 	private String torque_x;
 	private String torque_y;
 	private String torque_z;
-
-	public String getDepthCut() {
-		return this.depth_of_cut;
-	}
-
-	public String getFeed() {
-		return this.feed_per_tooth;
-	}
 
 	public String getForce_x() {
 		return this.force_x;
@@ -45,10 +34,6 @@ public final class BluetoothData {
 
 	public String getForce_z() {
 		return this.force_z;
-	}
-
-	public String getSpindleSpeed() {
-		return this.spindle_speed;
 	}
 
 	public String getTime() {
@@ -71,10 +56,6 @@ public final class BluetoothData {
 		this.time = depth_of_cut;
 	}
 
-	public void setFeed(final String feed_per_tooth) {
-		this.feed_per_tooth = feed_per_tooth;
-	}
-
 	public void setForce_x(final String force_x) {
 		this.force_x = force_x;
 	}
@@ -85,10 +66,6 @@ public final class BluetoothData {
 
 	public void setForce_z(final String force_z) {
 		this.force_z = force_z;
-	}
-
-	public void setSpindleSpeed(final String spindle_speed) {
-		this.spindle_speed = spindle_speed;
 	}
 
 	public void setTime(final String time) {
@@ -109,9 +86,8 @@ public final class BluetoothData {
 
 	@Override
 	public String toString() {
-		return "depth_of_cut=" + this.depth_of_cut + ", feed_per_tooth=" + this.feed_per_tooth + ", force_x="
-				+ this.force_x + ", force_y=" + this.force_y + ", force_z=" + this.force_z + ", spindle_speed="
-				+ this.spindle_speed + ", time=" + this.time + ", torque_x=" + this.torque_x + ", torque_y="
-				+ this.torque_y + ", torque_z=" + this.torque_z;
+		return "force_x=" + this.force_x + ", force_y=" + this.force_y + ", force_z=" + this.force_z + ", time="
+				+ this.time + ", torque_x=" + this.torque_x + ", torque_y=" + this.torque_y + ", torque_z="
+				+ this.torque_z;
 	}
 }

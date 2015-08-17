@@ -252,7 +252,7 @@ public class BluetoothMillingMachine extends Cloudlet {
 
 		if ("stop".equals(reqTopic.getResources()[0])) {
 			LOGGER.info("Bluetooth Milling Machine Communication Stopped...");
-			this.m_worker.shutdown();
+			this.m_worker.shutdownNow();
 			LOGGER.info("Bluetooth Milling Machine Communication Done");
 			respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_OK);
 		}

@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package de.tum.in.bluetooth.server;
+package de.tum.in.socket.server;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Iterator;
@@ -32,31 +31,6 @@ import com.google.common.collect.Lists;
 
 public class ReadExcel {
 
-	private static void getAndPrintData(final XSSFSheet sheet) {
-
-		System.out.println(" -- getting data from excel -------");
-		final Iterator<Row> rowIterator = sheet.iterator();
-		while (rowIterator.hasNext()) {
-			final Row row = rowIterator.next();
-			final Iterator<Cell> cellIterator = row.cellIterator();
-			while (cellIterator.hasNext()) {
-				final Cell cell = cellIterator.next();
-
-				switch (cell.getCellType()) {
-				case Cell.CELL_TYPE_NUMERIC:
-					System.out.print(cell.getNumericCellValue() + "\t");
-					break;
-				case Cell.CELL_TYPE_STRING:
-					System.out.print(cell.getStringCellValue() + "\t");
-					break;
-
-				}
-			}
-			System.out.println();
-		}
-
-	}
-
 	private static String[] getColumnNames(final Row column) {
 		final String columns[] = new String[column.getPhysicalNumberOfCells()];
 		final Iterator<Cell> cellIterator = column.cellIterator();
@@ -65,7 +39,6 @@ public class ReadExcel {
 			final Cell cell = cellIterator.next();
 			columns[i++] = cell.getStringCellValue();
 		}
-
 		return columns;
 	}
 
@@ -83,8 +56,8 @@ public class ReadExcel {
 		return typedValue;
 	}
 
-	private static List<BluetoothData> loadDataToList(final XSSFSheet sheet, final List<BluetoothData> data,
-			final BluetoothData bluetoothData)
+	private static List<RealtimeData> loadDataToList(final XSSFSheet sheet, final List<RealtimeData> data,
+			final RealtimeData bluetoothData)
 					throws InstantiationException, IllegalAccessException, SecurityException, NoSuchFieldException {
 
 		final Row column = sheet.getRow(0);
@@ -98,7 +71,7 @@ public class ReadExcel {
 			final Row row = rowIterator.next();
 			final Iterator<Cell> cellIterator = row.cellIterator();
 
-			final BluetoothData newRecord = bluetoothData.getClass().newInstance();
+			final RealtimeData newRecord = bluetoothData.getClass().newInstance();
 
 			// Skip First row which is column names
 			if (rowOne > 0) {
@@ -109,7 +82,6 @@ public class ReadExcel {
 					final Field f1 = bluetoothData.getClass().getDeclaredField(columnName.trim());
 					f1.setAccessible(true);
 					f1.set(newRecord, getTypeValue(f1.getType(), cell));
-
 				}
 				data.add(newRecord);
 			}
@@ -119,55 +91,34 @@ public class ReadExcel {
 
 	}
 
-	public static List<BluetoothData> read() throws IOException {
+	public static List<RealtimeData> read() throws IOException {
+		System.out.println("Reading dummy data from Excel.....");
 
-		final List<BluetoothData> data = Lists.newArrayList();
+		final List<RealtimeData> data = Lists.newArrayList();
 		XSSFWorkbook workbook = null;
 
 		try {
 
-			final File file = new File("/home/pi/TUM/GS_d8n19000fz01ap06.xlsx");
+			final File file = new File("GS_d8n19000fz01ap06.xlsx");
 
 			final FileInputStream fileStream = new FileInputStream(file);
+
 			// Get the workbook instance for XLS file
 			workbook = new XSSFWorkbook(fileStream);
+
 			// Get first sheet from the workbook
 			final XSSFSheet sheet = workbook.getSheetAt(0);
 
-			getAndPrintData(sheet);
-
 			// load data from excel file
-
-			final BluetoothData bluetoothData = new BluetoothData();
+			final RealtimeData bluetoothData = new RealtimeData();
 			loadDataToList(sheet, data, bluetoothData);
 
-			for (final BluetoothData dat : data) {
-				System.out.print(dat.getTime() + "\t");
-				System.out.print(dat.getForce_x() + "\t");
-				System.out.print(dat.getForce_y() + "\t");
-				System.out.print(dat.getForce_z() + "\t");
-				System.out.print(dat.getTorqueX() + "\t");
-				System.out.print(dat.getTorqueY() + "\t");
-				System.out.print(dat.getTorqueZ() + "\t");
-				System.out.print(dat.getSpindleSpeed() + "\t");
-				System.out.print(dat.getDepthCut() + "\t");
-				System.out.print(dat.getFeed());
-			}
-		} catch (final FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (final IOException e) {
-			System.out.println(e);
-		} catch (final SecurityException e) {
-			e.printStackTrace();
-		} catch (final InstantiationException e) {
-			e.printStackTrace();
-		} catch (final IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (final NoSuchFieldException e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		} finally {
 			workbook.close();
 		}
+		System.out.println("Reading dummy data from Excel.....Done");
 		return data;
 	}
 }
