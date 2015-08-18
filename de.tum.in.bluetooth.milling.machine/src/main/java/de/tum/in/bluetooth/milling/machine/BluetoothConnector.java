@@ -263,6 +263,7 @@ public final class BluetoothConnector implements Runnable {
 	 * Reads data from the {@link DataInputStream}
 	 */
 	private void readDataFromDataInputStream() throws IOException {
+		LOGGER.debug("Starting to read exactly from the Data Input Stream....");
 		try {
 			while (!Thread.currentThread().isInterrupted()) {
 				String cmd = "";
@@ -278,6 +279,7 @@ public final class BluetoothConnector implements Runnable {
 		} catch (final Exception e) {
 			LOGGER.error("Bluetooth Error Occurred " + Throwables.getStackTraceAsString(e));
 		}
+		LOGGER.debug("Starting to read exactly from the Data Input Stream....Done");
 	}
 
 	/**
