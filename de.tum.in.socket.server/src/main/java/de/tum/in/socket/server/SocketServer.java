@@ -53,8 +53,8 @@ public final class SocketServer {
 	 * ServerSocketChannel represents a channel for sockets that listen to
 	 * incoming connections.
 	 */
-	public static void main(final String[] args) throws IOException {
-		final int port = 9999;
+	public static void main(final String... args) throws IOException {
+		final int port = Integer.valueOf(args[1]);
 		final String ipAddress = args[0];
 
 		data = ReadExcel.read();
