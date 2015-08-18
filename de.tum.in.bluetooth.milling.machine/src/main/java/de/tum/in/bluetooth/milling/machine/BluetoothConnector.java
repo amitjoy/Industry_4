@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -43,7 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
-import com.intel.bluetooth.MicroeditionConnector;
 
 import de.tum.in.events.Events;
 
@@ -151,11 +149,6 @@ public final class BluetoothConnector implements Runnable {
 	private InputStream m_inputStream;
 
 	/**
-	 * Output Connection Stream for the paired bluetooth device
-	 */
-	private OutputStream m_outputStream;
-
-	/**
 	 * The response from the input stream
 	 */
 	private String m_response;
@@ -215,12 +208,8 @@ public final class BluetoothConnector implements Runnable {
 		try {
 			this.m_inputStream = checkNotNull(this.m_streamConnection).openInputStream();
 			LOGGER.debug("Input Stream (Bluetooth): " + this.m_inputStream);
-
 			// this.junkMethod();
-			checkNotNull(this.m_inputStream);
 			this.readDataFromInputStream();
-
-			LOGGER.debug("Bluetooth Data Received: " + this.m_response);
 		} catch (final Exception e) {
 			LOGGER.warn(Throwables.getStackTraceAsString(e));
 		} finally {
@@ -238,13 +227,6 @@ public final class BluetoothConnector implements Runnable {
 	 */
 	public InputStream getInputStream() {
 		return this.m_inputStream;
-	}
-
-	/**
-	 * Getter to retrieve the established output connection
-	 */
-	public OutputStream getOutputStream() {
-		return this.m_outputStream;
 	}
 
 	/**
@@ -288,8 +270,7 @@ public final class BluetoothConnector implements Runnable {
 		try {
 			LOGGER.info("Connecting to..." + s_serviceRecord.getHostDevice().getBluetoothAddress()
 					+ " with connection url " + connectionURL);
-			this.m_streamConnection = (StreamConnection) MicroeditionConnector.open(connectionURL, Connector.READ,
-					false);
+			this.m_streamConnection = (StreamConnection) Connector.open(connectionURL);
 			LOGGER.info("Successfully Connected to " + s_serviceRecord.getHostDevice().getBluetoothAddress()
 					+ " with stream " + this.m_streamConnection);
 		} catch (final IOException e) {
@@ -299,8 +280,7 @@ public final class BluetoothConnector implements Runnable {
 		try {
 			LOGGER.info("Getting IO Streams for " + s_serviceRecord.getHostDevice().getBluetoothAddress());
 			this.doRead();
-			LOGGER.debug(
-					"Streams Returned-> InputStream: " + this.m_inputStream + " OutputStream: " + this.m_outputStream);
+			LOGGER.debug("Streams Returned-> InputStream: " + this.m_inputStream);
 		} catch (final Exception e) {
 			LOGGER.warn("Unable to retrieve stream connection for remote device" + Throwables.getStackTraceAsString(e));
 		}

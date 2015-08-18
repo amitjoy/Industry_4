@@ -28,8 +28,6 @@ import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
-import com.intel.bluetooth.MicroeditionConnector;
-
 /**
  * Creates a bluetooth server instance
  *
@@ -65,8 +63,7 @@ public final class SPPServer {
 		final UUID uuid = new UUID("0000110100001000800000805F9B34FB", false);
 		final String connectionString = "btspp://localhost:" + uuid + ";name=Bluetooth-Milling-Machine-Simulation";
 
-		streamConnNotifier = (StreamConnectionNotifier) MicroeditionConnector.open(connectionString, Connector.WRITE,
-				false);
+		streamConnNotifier = (StreamConnectionNotifier) Connector.open(connectionString);
 		System.out.println("Milling Machine Started. Waiting for devices to connect...");
 		connection = streamConnNotifier.acceptAndOpen();
 
@@ -99,7 +96,7 @@ public final class SPPServer {
 	 * Broadcasts Data
 	 */
 	private static void sendResponse() throws IOException {
-		final String value = "Dummy Data";
+		final String value = "A";
 		writer.write(value + "\r\n");
 		System.out.println("Broadcasting data (" + value + ")");
 	}
