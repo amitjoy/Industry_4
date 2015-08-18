@@ -20,11 +20,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.bluetooth.ServiceRecord;
 import javax.microedition.io.Connector;
@@ -169,7 +172,7 @@ public final class BluetoothConnector implements Runnable {
 	/**
 	 * Publishes asynchronous events for caching
 	 */
-	private void doBroadcastEventsForCaching(final String data) {
+	private void doBroadcastEventForCaching(final String data) {
 		LOGGER.debug("Publishing Event for caching bluetooth data...");
 
 		final Dictionary<String, Object> properties = new Hashtable<>();
@@ -186,15 +189,13 @@ public final class BluetoothConnector implements Runnable {
 	/**
 	 * Publish the data to message broker
 	 */
-	private void doPublish() throws KuraException {
-		this.m_response = String.valueOf(12);
-
-		this.doBroadcastEventsForCaching(this.m_response);
+	private void doPublish(final String data) throws KuraException {
+		this.doBroadcastEventForCaching(this.m_response);
 
 		LOGGER.debug("Publishing Bluetooth Data.....");
 
 		final KuraPayload payload = new KuraPayload();
-		payload.addMetric("result", this.m_response);
+		payload.addMetric("result", data);
 
 		// publishing for mobile client
 		LOGGER.debug("Publishing Bluetooth Data.....to Mobile Clients");
@@ -202,7 +203,7 @@ public final class BluetoothConnector implements Runnable {
 
 		// publishing for Splunk
 		LOGGER.debug("Publishing Bluetooth Data.....to Splunk");
-		s_cloudClient.controlPublish("splunk", s_topic, this.m_response.getBytes(), 0, false, 5);
+		s_cloudClient.controlPublish("splunk", s_topic, data.getBytes(), 0, false, 5);
 
 		LOGGER.debug("Publishing Bluetooth Data.....Done");
 	}
@@ -212,13 +213,12 @@ public final class BluetoothConnector implements Runnable {
 	 */
 	private void doRead() {
 		try {
-			final InputStream inputStream = checkNotNull(this.m_streamConnection).openInputStream();
-			this.m_inputStream = new NonBlockingInputStream(checkNotNull(inputStream), true);
-			LOGGER.debug("Input Stream (Non-Blocking): " + this.m_inputStream);
+			this.m_inputStream = checkNotNull(this.m_streamConnection).openInputStream();
+			LOGGER.debug("Input Stream (Bluetooth): " + this.m_inputStream);
 
-			this.junkMethod();
-
-			this.m_response = this.readDataFromStream(checkNotNull(this.m_inputStream));
+			// this.junkMethod();
+			checkNotNull(this.m_inputStream);
+			this.readDataFromInputStream();
 
 			LOGGER.debug("Bluetooth Data Received: " + this.m_response);
 		} catch (final Exception e) {
@@ -227,7 +227,6 @@ public final class BluetoothConnector implements Runnable {
 			try {
 				checkNotNull(this.m_inputStream).close();
 				checkNotNull(this.m_bufferedReader).close();
-				checkNotNull(((NonBlockingInputStream) this.m_inputStream)).shutdown();
 			} catch (final Exception e) {
 				LOGGER.warn("Error closing input stream");
 			}
@@ -253,7 +252,8 @@ public final class BluetoothConnector implements Runnable {
 	 */
 	private void junkMethod() throws KuraException, InterruptedException {
 		while (!Thread.currentThread().isInterrupted()) {
-			this.doPublish();
+			final Random rnd = new Random(40);
+			this.doPublish(String.valueOf(rnd.nextInt(100)));
 			TimeUnit.SECONDS.sleep(3);
 		}
 	}
@@ -261,17 +261,14 @@ public final class BluetoothConnector implements Runnable {
 	/**
 	 * Reads data from the input stream
 	 */
-	private String readDataFromStream(final InputStream inputStream) throws IOException {
-		final StringBuilder builder = new StringBuilder();
-		int i = 0;
-		char c = 0;
-		while ((i = ((NonBlockingInputStream) inputStream).read(TimeUnit.SECONDS.toMillis(3))) != -1) {
-			c = (char) i;
-			builder.append(c);
-		}
-		final String data = builder.toString();
-		LOGGER.debug("Data from stream: " + data);
-		return data;
+	private void readDataFromInputStream() throws IOException {
+		this.m_bufferedReader = new BufferedReader(new InputStreamReader(checkNotNull(this.m_inputStream)));
+		LOGGER.info("Buffered Reader: " + this.m_bufferedReader);
+		LOGGER.info("Buffered Reader Lines List: "
+				+ checkNotNull(this.m_bufferedReader).lines().collect(Collectors.toList()));
+
+		this.m_response = this.m_bufferedReader.readLine();
+		LOGGER.debug("Data from stream: " + this.m_response);
 	}
 
 	/**
@@ -297,7 +294,7 @@ public final class BluetoothConnector implements Runnable {
 			LOGGER.info("Getting IO Streams for " + s_serviceRecord.getHostDevice().getBluetoothAddress());
 			this.doRead();
 			checkNotNull(this.m_response);
-			this.doPublish();
+			this.doPublish(this.m_response);
 			LOGGER.debug(
 					"Streams Returned-> InputStream: " + this.m_inputStream + " OutputStream: " + this.m_outputStream);
 		} catch (final Exception e) {
