@@ -67,7 +67,7 @@ public final class SPPServer {
 
 		streamConnNotifier = (StreamConnectionNotifier) MicroeditionConnector.open(connectionString, Connector.WRITE,
 				false);
-		System.out.println("Milling Machine Started. Waiting for clients to connect...");
+		System.out.println("Milling Machine Started. Waiting for devices to connect...");
 		connection = streamConnNotifier.acceptAndOpen();
 
 		final RemoteDevice device = RemoteDevice.getRemoteDevice(connection);
@@ -75,7 +75,7 @@ public final class SPPServer {
 		System.out.println("Remote device address: " + device.getBluetoothAddress());
 		System.out.println("Remote device name: " + device.getFriendlyName(true));
 
-		outputStream = connection.openOutputStream();
+		outputStream = connection.openDataOutputStream();
 		writer = new PrintWriter(new OutputStreamWriter(outputStream));
 	}
 
@@ -86,10 +86,10 @@ public final class SPPServer {
 		init();
 
 		while (!Thread.currentThread().isInterrupted()) {
-			sendResponse();
 			try {
+				sendResponse();
 				TimeUnit.SECONDS.sleep(3);
-			} catch (final InterruptedException e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -100,7 +100,7 @@ public final class SPPServer {
 	 */
 	private static void sendResponse() throws IOException {
 		final String value = "12";
-		System.out.println("Broadcasting data (" + value + ")");
 		writer.write(value + "\r\n");
+		System.out.println("Broadcasting data (" + value + ")");
 	}
 }

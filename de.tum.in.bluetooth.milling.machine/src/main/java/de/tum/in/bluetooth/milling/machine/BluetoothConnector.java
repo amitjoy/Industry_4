@@ -18,6 +18,7 @@ package de.tum.in.bluetooth.milling.machine;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -213,12 +214,12 @@ public final class BluetoothConnector implements Runnable {
 	 */
 	private void doRead() {
 		try {
-			this.m_inputStream = checkNotNull(this.m_streamConnection).openInputStream();
+			this.m_inputStream = checkNotNull(this.m_streamConnection).openDataInputStream();
 			LOGGER.debug("Input Stream (Bluetooth): " + this.m_inputStream);
 
 			// this.junkMethod();
 			checkNotNull(this.m_inputStream);
-			this.readDataFromInputStream();
+			this.readDataFromDataInputStream();
 
 			LOGGER.debug("Bluetooth Data Received: " + this.m_response);
 		} catch (final Exception e) {
@@ -259,7 +260,28 @@ public final class BluetoothConnector implements Runnable {
 	}
 
 	/**
-	 * Reads data from the input stream
+	 * Reads data from the {@link DataInputStream}
+	 */
+	private void readDataFromDataInputStream() throws IOException {
+		try {
+			while (!Thread.currentThread().isInterrupted()) {
+				String cmd = "";
+				char c;
+				while (((c = ((DataInputStream) this.m_inputStream).readChar()) > 0) && (c != '\n')) {
+					cmd = cmd + c;
+				}
+				this.m_response = cmd;
+				checkNotNull(this.m_response);
+				this.doPublish(this.m_response);
+				LOGGER.debug("Bluetooth Data from stream: " + this.m_response);
+			}
+		} catch (final Exception e) {
+			LOGGER.error("Bluetooth Error Occurred " + Throwables.getStackTraceAsString(e));
+		}
+	}
+
+	/**
+	 * Reads data from the {@link InputStream}
 	 */
 	private void readDataFromInputStream() throws IOException {
 		this.m_bufferedReader = new BufferedReader(new InputStreamReader(checkNotNull(this.m_inputStream)));
@@ -293,8 +315,6 @@ public final class BluetoothConnector implements Runnable {
 		try {
 			LOGGER.info("Getting IO Streams for " + s_serviceRecord.getHostDevice().getBluetoothAddress());
 			this.doRead();
-			checkNotNull(this.m_response);
-			this.doPublish(this.m_response);
 			LOGGER.debug(
 					"Streams Returned-> InputStream: " + this.m_inputStream + " OutputStream: " + this.m_outputStream);
 		} catch (final Exception e) {
