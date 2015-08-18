@@ -52,8 +52,6 @@ public final class SocketServer {
 	/**
 	 * ServerSocketChannel represents a channel for sockets that listen to
 	 * incoming connections.
-	 *
-	 * @throws IOException
 	 */
 	public static void main(final String[] args) throws IOException {
 		final int port = 9999;
@@ -98,6 +96,8 @@ public final class SocketServer {
 							try {
 								final ByteBuffer buf = ByteBuffer.allocate(500);
 								final CharBuffer cbuf = buf.asCharBuffer();
+								System.out.println(
+										"Broadcasting data..." + data.get(new Random().nextInt(300)).toString());
 								cbuf.put(data.get(new Random().nextInt(300)).toString());
 								cbuf.flip();
 								clientSocketChannel.write(buf);
