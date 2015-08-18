@@ -75,7 +75,7 @@ public final class SPPServer {
 		System.out.println("Remote device address: " + device.getBluetoothAddress());
 		System.out.println("Remote device name: " + device.getFriendlyName(true));
 
-		outputStream = connection.openDataOutputStream();
+		outputStream = connection.openOutputStream();
 		writer = new PrintWriter(new OutputStreamWriter(outputStream));
 	}
 
@@ -96,10 +96,10 @@ public final class SPPServer {
 	};
 
 	/**
-	 * Broadcasts response
+	 * Broadcasts Data
 	 */
 	private static void sendResponse() throws IOException {
-		final String value = "12";
+		final String value = "Dummy Data";
 		writer.write(value + "\r\n");
 		System.out.println("Broadcasting data (" + value + ")");
 	}

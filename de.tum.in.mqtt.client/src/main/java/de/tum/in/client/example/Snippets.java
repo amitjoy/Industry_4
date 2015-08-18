@@ -35,6 +35,7 @@ public final class Snippets {
 	private static IKuraMQTTClient client;
 	private static String clientId = "AMIT";
 	private static String HEARTBEAT = "$EDC/tum/B8:27:EB:A6:A9:8A/HEARTBEAT-V1/mqtt/heartbeat";
+	private static String MILLING_DATA = "$EDC/tum/B8:27:EB:A6:A9:8A/MILLING-V1/data";
 	private static String MILLING_V1_ON_PUBLISH = "$EDC/tum/B8:27:EB:A6:A9:8A/MILLING-V1/EXEC/start";
 	private static String SOCKET_DATA = "$EDC/tum/B8:27:EB:A6:A9:8A/SOCKET-V1/data";
 	private static String SOCKET_V1_ON_SUBSCRIBE = "$EDC/tum/AMIT/SOCKET-V1/REPLY/4234216342143261";
@@ -52,7 +53,7 @@ public final class Snippets {
 
 		// Subscription
 		if (status) {
-			client.subscribe(SOCKET_DATA, new MessageListener() {
+			client.subscribe(MILLING_DATA, new MessageListener() {
 
 				@Override
 				public void processMessage(final KuraPayload payload) {
@@ -74,7 +75,7 @@ public final class Snippets {
 
 		// Publishing
 		if (status) {
-			client.publish(SOCKET_V1_STOP, payload);
+			client.publish(BLUETOOTH_V1_ON_PUBLISH, payload);
 
 			System.out.println("--------------------------------------------------------------------");
 			System.out.println("Request Published");

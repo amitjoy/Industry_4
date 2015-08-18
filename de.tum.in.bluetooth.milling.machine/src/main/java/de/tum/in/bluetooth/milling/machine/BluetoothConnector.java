@@ -18,7 +18,6 @@ package de.tum.in.bluetooth.milling.machine;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -214,12 +213,12 @@ public final class BluetoothConnector implements Runnable {
 	 */
 	private void doRead() {
 		try {
-			this.m_inputStream = checkNotNull(this.m_streamConnection).openDataInputStream();
+			this.m_inputStream = checkNotNull(this.m_streamConnection).openInputStream();
 			LOGGER.debug("Input Stream (Bluetooth): " + this.m_inputStream);
 
 			// this.junkMethod();
 			checkNotNull(this.m_inputStream);
-			this.readDataFromDataInputStream();
+			this.readDataFromInputStream();
 
 			LOGGER.debug("Bluetooth Data Received: " + this.m_response);
 		} catch (final Exception e) {
@@ -260,39 +259,22 @@ public final class BluetoothConnector implements Runnable {
 	}
 
 	/**
-	 * Reads data from the {@link DataInputStream}
-	 */
-	private void readDataFromDataInputStream() throws IOException {
-		LOGGER.debug("Starting to read exactly from the Data Input Stream....");
-		try {
-			while (!Thread.currentThread().isInterrupted()) {
-				String cmd = "";
-				char c;
-				while (((c = ((DataInputStream) this.m_inputStream).readChar()) > 0) && (c != '\n')) {
-					cmd = cmd + c;
-				}
-				this.m_response = cmd;
-				checkNotNull(this.m_response);
-				this.doPublish(this.m_response);
-				LOGGER.debug("Bluetooth Data from stream: " + this.m_response);
-			}
-		} catch (final Exception e) {
-			LOGGER.error("Bluetooth Error Occurred " + Throwables.getStackTraceAsString(e));
-		}
-		LOGGER.debug("Starting to read exactly from the Data Input Stream....Done");
-	}
-
-	/**
 	 * Reads data from the {@link InputStream}
 	 */
 	private void readDataFromInputStream() throws IOException {
-		this.m_bufferedReader = new BufferedReader(new InputStreamReader(checkNotNull(this.m_inputStream)));
-		LOGGER.info("Buffered Reader: " + this.m_bufferedReader);
-		LOGGER.info("Buffered Reader Lines List: "
-				+ checkNotNull(this.m_bufferedReader).lines().collect(Collectors.toList()));
+		try {
+			// while (!Thread.currentThread().isInterrupted()) {
+			this.m_bufferedReader = new BufferedReader(new InputStreamReader(checkNotNull(this.m_inputStream)));
+			LOGGER.info("Buffered Reader: " + this.m_bufferedReader);
+			LOGGER.info("Buffered Reader Lines List: "
+					+ checkNotNull(this.m_bufferedReader).lines().collect(Collectors.toList()));
 
-		this.m_response = this.m_bufferedReader.readLine();
-		LOGGER.debug("Data from stream: " + this.m_response);
+			this.m_response = this.m_bufferedReader.readLine();
+			LOGGER.debug("Data from stream: " + this.m_response);
+			// }
+		} catch (final Exception e) {
+			LOGGER.error("Bluetooth Error Occurred " + Throwables.getStackTraceAsString(e));
+		}
 	}
 
 	/**
