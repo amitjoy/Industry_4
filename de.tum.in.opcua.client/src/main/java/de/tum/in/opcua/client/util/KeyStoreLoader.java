@@ -65,6 +65,7 @@ public final class KeyStoreLoader {
 	/**
 	 * Keystore Server Alias
 	 */
+	@SuppressWarnings("unused")
 	private final String m_serverAlias;
 
 	/**

@@ -24,8 +24,6 @@ import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.bluetooth.ServiceRecord;
@@ -208,7 +206,6 @@ public final class BluetoothConnector implements Runnable {
 		try {
 			this.m_inputStream = checkNotNull(this.m_streamConnection).openInputStream();
 			LOGGER.debug("Input Stream (Bluetooth): " + this.m_inputStream);
-			// this.junkMethod();
 			this.readDataFromInputStream();
 		} catch (final Exception e) {
 			LOGGER.warn(Throwables.getStackTraceAsString(e));
@@ -230,30 +227,21 @@ public final class BluetoothConnector implements Runnable {
 	}
 
 	/**
-	 * TODO Remove this Junk Method
-	 */
-	private void junkMethod() throws KuraException, InterruptedException {
-		while (!Thread.currentThread().isInterrupted()) {
-			final Random rnd = new Random(40);
-			this.doPublish(String.valueOf(rnd.nextInt(100)));
-			TimeUnit.SECONDS.sleep(3);
-		}
-	}
-
-	/**
 	 * Reads data from the {@link InputStream}
 	 */
 	private void readDataFromInputStream() throws IOException {
 		try {
-			// while (!Thread.currentThread().isInterrupted()) {
-			this.m_bufferedReader = new BufferedReader(new InputStreamReader(checkNotNull(this.m_inputStream)));
-			LOGGER.info("Buffered Reader: " + this.m_bufferedReader);
-			LOGGER.info("Buffered Reader Lines List: "
-					+ checkNotNull(this.m_bufferedReader).lines().collect(Collectors.toList()));
+			while (!Thread.currentThread().isInterrupted()) {
+				this.m_bufferedReader = new BufferedReader(new InputStreamReader(checkNotNull(this.m_inputStream)));
+				LOGGER.info("Buffered Reader: " + this.m_bufferedReader);
+				LOGGER.info("Buffered Reader Lines List: "
+						+ checkNotNull(this.m_bufferedReader).lines().collect(Collectors.toList()));
 
-			this.m_response = this.m_bufferedReader.readLine();
-			LOGGER.debug("Data from stream: " + this.m_response);
-			// }
+				this.m_response = this.m_bufferedReader.readLine();
+				checkNotNull(this.m_response);
+				this.doPublish(this.m_response);
+				LOGGER.debug("Data from stream: " + this.m_response);
+			}
 		} catch (final Exception e) {
 			LOGGER.error("Bluetooth Error Occurred " + Throwables.getStackTraceAsString(e));
 		}
