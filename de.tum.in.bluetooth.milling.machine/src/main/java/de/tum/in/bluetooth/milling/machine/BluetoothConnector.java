@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.bluetooth.ServiceRecord;
-import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
 import org.eclipse.kura.KuraException;
@@ -42,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+import com.intel.bluetooth.MicroeditionConnector;
 
 import de.tum.in.events.Events;
 
@@ -270,7 +270,7 @@ public final class BluetoothConnector implements Runnable {
 		try {
 			LOGGER.info("Connecting to..." + s_serviceRecord.getHostDevice().getBluetoothAddress()
 					+ " with connection url " + connectionURL);
-			this.m_streamConnection = (StreamConnection) Connector.open(connectionURL);
+			this.m_streamConnection = (StreamConnection) MicroeditionConnector.open(connectionURL);
 			LOGGER.info("Successfully Connected to " + s_serviceRecord.getHostDevice().getBluetoothAddress()
 					+ " with stream " + this.m_streamConnection);
 		} catch (final IOException e) {

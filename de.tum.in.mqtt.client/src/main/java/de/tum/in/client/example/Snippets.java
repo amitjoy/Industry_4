@@ -75,7 +75,7 @@ public final class Snippets {
 
 		// Publishing
 		if (status) {
-			client.publish(BLUETOOTH_V1_ON_PUBLISH, payload);
+			client.publish(MILLING_V1_ON_PUBLISH, payload);
 
 			System.out.println("--------------------------------------------------------------------");
 			System.out.println("Request Published");
