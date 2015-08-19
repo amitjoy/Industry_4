@@ -27,6 +27,11 @@ public final class CommandUtil {
 	private static final String CMD_PYTHON = "python";
 
 	/**
+	 * Represents the python command line argument
+	 */
+	private static final String CMD_PYTHON_ARG = "gw";
+
+	/**
 	 * Home Folder Location
 	 */
 	private static final String HOME_LOCATION = "/home/pi/TUM/";
@@ -50,7 +55,7 @@ public final class CommandUtil {
 
 		SafeProcess process = null;
 		BufferedReader br = null;
-		final String[] command = { CMD_PYTHON, PYTHON_CODE_LOCATION, macAddress };
+		final String[] command = { CMD_PYTHON, PYTHON_CODE_LOCATION, CMD_PYTHON_ARG, macAddress };
 
 		try {
 			process = ProcessUtil.exec(command);
