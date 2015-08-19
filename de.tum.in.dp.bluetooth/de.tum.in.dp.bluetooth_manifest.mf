@@ -21,3 +21,7 @@ Bundle-Version: 0.0.1.SNAPSHOT
 Name: de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar
 Bundle-SymbolicName: de.tum.in.bluetooth.milling.machine
 Bundle-Version: 1.0.0.SNAPSHOT
+
+Name: de.tum.in.bluetooth.milling-machine-1.0-SNAPSHOT.jar
+Bundle-SymbolicName: de.tum.in.bluetooth.milling-machine
+Bundle-Version: 1.0.0.SNAPSHOT

@@ -32,17 +32,23 @@
 <target name="check.file.exists ../de.tum.in.bluetooth.milling.machine/target/de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar" unless="file.exists.../de.tum.in.bluetooth.milling.machine/target/de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar">
   <fail message="Can not find file ../de.tum.in.bluetooth.milling.machine/target/de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar"/>
 </target>
+<available property="file.exists.../de.tum.in.bluetooth.milling-machine/target/de.tum.in.bluetooth.milling-machine-1.0-SNAPSHOT.jar" file="../de.tum.in.bluetooth.milling-machine/target/de.tum.in.bluetooth.milling-machine-1.0-SNAPSHOT.jar"/>
+<target name="check.file.exists ../de.tum.in.bluetooth.milling-machine/target/de.tum.in.bluetooth.milling-machine-1.0-SNAPSHOT.jar" unless="file.exists.../de.tum.in.bluetooth.milling-machine/target/de.tum.in.bluetooth.milling-machine-1.0-SNAPSHOT.jar">
+  <fail message="Can not find file ../de.tum.in.bluetooth.milling-machine/target/de.tum.in.bluetooth.milling-machine-1.0-SNAPSHOT.jar"/>
+</target>
 <target name="all">
   <mkdir dir="/Users/AMIT/Industry_4.0/de.tum.in.dp.bluetooth"/>
   <antcall target="check.file.exists ../de.tum.in.bluecove.fragment/target/de.tum.in.bluecove.fragment-1.0-SNAPSHOT.jar"/>
   <antcall target="check.file.exists ../de.tum.in.bluecove/target/de.tum.in.bluecove-2.1.0.jar"/>
   <antcall target="check.file.exists ../de.tum.in.bluetooth/target/de.tum.in.bluetooth-0.0.1-SNAPSHOT.jar"/>
   <antcall target="check.file.exists ../de.tum.in.bluetooth.milling.machine/target/de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar"/>
+  <antcall target="check.file.exists ../de.tum.in.bluetooth.milling-machine/target/de.tum.in.bluetooth.milling-machine-1.0-SNAPSHOT.jar"/>
   <jar destfile="de.tum.in.dp.bluetooth.dp" manifest="de.tum.in.dp.bluetooth_manifest.mf">
     <zipfileset file="../de.tum.in.bluecove.fragment/target/de.tum.in.bluecove.fragment-1.0-SNAPSHOT.jar" fullpath="de.tum.in.bluecove.fragment-1.0-SNAPSHOT.jar" />
     <zipfileset file="../de.tum.in.bluecove/target/de.tum.in.bluecove-2.1.0.jar" fullpath="de.tum.in.bluecove-2.1.0.jar" />
     <zipfileset file="../de.tum.in.bluetooth/target/de.tum.in.bluetooth-0.0.1-SNAPSHOT.jar" fullpath="de.tum.in.bluetooth-0.0.1-SNAPSHOT.jar" />
     <zipfileset file="../de.tum.in.bluetooth.milling.machine/target/de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar" fullpath="de.tum.in.bluetooth.milling.machine-1.0-SNAPSHOT.jar" />
+    <zipfileset file="../de.tum.in.bluetooth.milling-machine/target/de.tum.in.bluetooth.milling-machine-1.0-SNAPSHOT.jar" fullpath="de.tum.in.bluetooth.milling-machine-1.0-SNAPSHOT.jar" />
   </jar>
 </target>
 

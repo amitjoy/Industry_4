@@ -101,6 +101,12 @@
 				<artifactId>org.eclipse.kura.api</artifactId>
 				<version>${kura.version}</version>
 			</dependency>
+			
+			<dependency>
+				<groupId>org.eclipse.kura</groupId>
+				<artifactId>org.eclipse.kura.core</artifactId>
+				<version>${kura.version}</version>
+			</dependency>
 
 			<!-- Guava -->
 			<dependency>
@@ -265,6 +271,7 @@
 		<module>../de.tum.in.opcua.client.write.node</module>
 		<module>../de.tum.in.socket.client</module>
 		<module>../de.tum.in.osgi.utility</module>
+		<module>../de.tum.in.bluetooth.milling-machine</module>
 		<module>../de.tum.in.dp.parent</module>
 	</modules>
 
