@@ -1,5 +1,7 @@
 package de.tum.in.python.bluetooth.milling.machine;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,6 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+
+import de.tum.in.osgi.utility.BundleUtils;
 
 /**
  * Used to execute python commands for Milling Machine Communication
@@ -42,9 +46,19 @@ public final class CommandUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CommandUtil.class);
 
 	/**
-	 * Represents location for all the ZWave Related Commands
+	 * Returns the absolute path of the python code to execute
 	 */
-	private static final String PYTHON_CODE_LOCATION = HOME_LOCATION + "bt.py";
+	private static String getPythonProgramLocation() {
+		LOGGER.debug("Retrieving the absolute path of the python program");
+		try {
+			final String filePath = BundleUtils.getResourcePath(CommandUtil.class, "/python/bt.py");
+			LOGGER.debug("Absolute path of the python program: " + filePath);
+			return filePath;
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	/**
 	 * Starts the communication with the provided bluetooth mac address milling
@@ -55,7 +69,8 @@ public final class CommandUtil {
 
 		SafeProcess process = null;
 		BufferedReader br = null;
-		final String[] command = { CMD_PYTHON, PYTHON_CODE_LOCATION, CMD_PYTHON_ARG, macAddress };
+		final String path = getPythonProgramLocation();
+		final String[] command = { CMD_PYTHON, checkNotNull(path), CMD_PYTHON_ARG, macAddress };
 
 		try {
 			process = ProcessUtil.exec(command);

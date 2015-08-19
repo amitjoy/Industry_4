@@ -37,6 +37,12 @@
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>de.tum.in</groupId>
+			<artifactId>de.tum.in.osgi.utility</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>commons-collections</groupId>

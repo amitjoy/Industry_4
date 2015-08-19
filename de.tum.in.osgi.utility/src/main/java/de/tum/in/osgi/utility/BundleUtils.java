@@ -18,7 +18,9 @@ package de.tum.in.osgi.utility;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -91,6 +93,23 @@ public class BundleUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the absolute path of the resource from the bundle
+	 *
+	 * @param bundleClazz
+	 *            the class type
+	 * @param pathToFile
+	 *            the path to file
+	 * @return
+	 * @throws URISyntaxException
+	 */
+	public static String getResourcePath(final Class<?> bundleClazz, final String pathToFile)
+			throws URISyntaxException {
+		final Bundle bundle = FrameworkUtil.getBundle(bundleClazz);
+		final URL url = bundle.getEntry(pathToFile);
+		return Paths.get(url.toURI()).toFile().getAbsolutePath();
 	}
 
 	/**
