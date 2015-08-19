@@ -111,8 +111,14 @@ public class BundleUtils {
 		final URL url = bundle.getEntry(pathToFile);
 		final InputStream stream = new FileInputStream(url.getFile());
 
-		if (resourceTypeclazz.isInstance(InputStream.class)) {
-			return resourceTypeclazz.cast(stream);
+		try {
+			if (resourceTypeclazz.isInstance(InputStream.class)) {
+				return resourceTypeclazz.cast(stream);
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+		} finally {
+			stream.close();
 		}
 
 		return null;
