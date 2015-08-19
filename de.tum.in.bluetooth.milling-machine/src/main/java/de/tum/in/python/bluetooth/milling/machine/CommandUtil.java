@@ -33,7 +33,20 @@ import com.google.common.base.Throwables;
 import de.tum.in.osgi.utility.BundleUtils;
 
 /**
- * Used to execute python commands for Milling Machine Communication
+ * Used to execute python commands for Milling Machine Communication. The Linux
+ * System needs to install the following tools externally to use this bundle.
+ *
+ * 1. pyBluez 2. Paho MQTT for Python 3. libbluetooth-dev 4. bluez-utils 5.
+ * hciconfig 6. hcitool
+ *
+ * You have to run the bluetooth server using the same python code found in
+ * resources directory. Command to execute in the bluetooth server:
+ * <code>python bt.py machine</code>
+ *
+ * The scenario we have here that as soon as the client initiates a connection
+ * with the server, the bluetooth server starts broadcasting data. The client
+ * needs to read the data and publish it for the business clients to use the
+ * data for further usage.
  *
  * @author AMIT KUMAR MONDAL
  *
@@ -49,11 +62,6 @@ public final class CommandUtil {
 	 * Represents the python command line argument
 	 */
 	private static final String CMD_PYTHON_ARG = "gw";
-
-	/**
-	 * Home Folder Location
-	 */
-	private static final String HOME_LOCATION = "/home/pi/TUM/";
 
 	/**
 	 * Logger.
