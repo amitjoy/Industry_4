@@ -112,11 +112,11 @@ public final class CommandUtil {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		} finally {
 			try {
-				LOGGER.debug("Closing Buffered Reader and destroying Process", process);
+				LOGGER.debug("Closing Buffered Reader and destroying Process: " + process);
 				br.close();
 				process.destroy();
 			} catch (final IOException e) {
-				LOGGER.error("Error closing read buffer", Throwables.getStackTraceAsString(e));
+				LOGGER.error("Error closing read buffer: " + Throwables.getStackTraceAsString(e));
 			}
 		}
 	}

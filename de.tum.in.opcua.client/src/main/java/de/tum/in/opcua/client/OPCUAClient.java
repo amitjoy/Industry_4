@@ -325,7 +325,8 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 							.setKeyStorePassword(this.m_keystorePassword)
 							.setKeyStoreServerAlias(this.m_keystoreServerAlias).setKeystoreType(this.m_keystoreType)
 							.setEndpointUrl(opcuaClientAction.getEndpointUrl())
-							.setSecurityPolicy(this.m_opcuaSecurityPolicy).build();
+							.setSecurityPolicy(this.m_opcuaSecurityPolicy).setOpcUaUsername(this.m_opcuaUsername)
+							.setOpcUaPassword(this.m_opcuaPassword).build();
 					clientActionRunner.run();
 				});
 
