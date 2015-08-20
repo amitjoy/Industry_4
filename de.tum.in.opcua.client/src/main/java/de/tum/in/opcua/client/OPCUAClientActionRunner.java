@@ -16,6 +16,7 @@
 package de.tum.in.opcua.client;
 
 import static com.digitalpetri.opcua.stack.core.types.builtin.unsigned.Unsigned.uint;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -28,6 +29,9 @@ import org.slf4j.LoggerFactory;
 
 import com.digitalpetri.opcua.sdk.client.OpcUaClient;
 import com.digitalpetri.opcua.sdk.client.api.config.OpcUaClientConfig;
+import com.digitalpetri.opcua.sdk.client.api.identity.AnonymousProvider;
+import com.digitalpetri.opcua.sdk.client.api.identity.IdentityProvider;
+import com.digitalpetri.opcua.sdk.client.api.identity.UsernameProvider;
 import com.digitalpetri.opcua.stack.client.UaTcpStackClient;
 import com.digitalpetri.opcua.stack.core.Stack;
 import com.digitalpetri.opcua.stack.core.security.SecurityPolicy;
@@ -92,6 +96,16 @@ public final class OpcUaClientActionRunner {
 		private String m_keyStoreType;
 
 		/**
+		 * OPC-UA username
+		 */
+		private String m_opcuaPassword;
+
+		/**
+		 * OPC-UA Password
+		 */
+		private String m_opcuaUsername;
+
+		/**
 		 * OPC-UA Request timeout
 		 */
 		private int m_requestTimeout;
@@ -105,9 +119,9 @@ public final class OpcUaClientActionRunner {
 		 * Returns the main Runner
 		 */
 		public OpcUaClientActionRunner build() {
-			return new OpcUaClientActionRunner(this.m_endpointUrl, this.m_securityPolicy, this.m_clientAction,
-					this.m_keyStoreType, this.m_keyStoreServerAlias, this.m_keyStoreClientAlias,
-					this.m_keyStorePassword, this.m_applicationName, this.m_applicationUri,
+			return new OpcUaClientActionRunner(this.m_endpointUrl, this.m_securityPolicy, this.m_opcuaUsername,
+					this.m_opcuaPassword, this.m_clientAction, this.m_keyStoreType, this.m_keyStoreServerAlias,
+					this.m_keyStoreClientAlias, this.m_keyStorePassword, this.m_applicationName, this.m_applicationUri,
 					this.m_applicationCertificate, this.m_requestTimeout);
 		}
 
@@ -180,6 +194,22 @@ public final class OpcUaClientActionRunner {
 		 */
 		public final Builder setKeystoreType(final String keystoreType) {
 			this.m_keyStoreType = keystoreType;
+			return this;
+		}
+
+		/**
+		 * Setter for opcua password
+		 */
+		public final Builder setOpcUaPassword(final String password) {
+			this.m_opcuaPassword = password;
+			return this;
+		}
+
+		/**
+		 * Setter for opcua username
+		 */
+		public final Builder setOpcUaUsername(final String username) {
+			this.m_opcuaUsername = username;
 			return this;
 		}
 
@@ -262,6 +292,16 @@ public final class OpcUaClientActionRunner {
 	private final KeyStoreLoader m_loader;
 
 	/**
+	 * OPC-UA username
+	 */
+	private final String m_opcuaPassword;
+
+	/**
+	 * OPC-UA Password
+	 */
+	private final String m_opcuaUsername;
+
+	/**
 	 * OPC-UA Request timeout
 	 */
 	private final int m_requestTimeout;
@@ -275,9 +315,10 @@ public final class OpcUaClientActionRunner {
 	 * Constructor
 	 */
 	private OpcUaClientActionRunner(final String endpointUrl, final SecurityPolicy securityPolicy,
-			final OpcUaClientAction clientAction, final String keystoreType, final String keystoreServerAlias,
-			final String keystoreClientAlias, final String keystorePassword, final String applicationName,
-			final String applicationUri, final String applicationCert, final int requestTimeout) {
+			final String opcuaUsername, final String opcuaPassword, final OpcUaClientAction clientAction,
+			final String keystoreType, final String keystoreServerAlias, final String keystoreClientAlias,
+			final String keystorePassword, final String applicationName, final String applicationUri,
+			final String applicationCert, final int requestTimeout) {
 		this.m_endpointUrl = endpointUrl;
 		this.m_securityPolicy = securityPolicy;
 		this.m_clientAction = clientAction;
@@ -289,6 +330,8 @@ public final class OpcUaClientActionRunner {
 		this.m_keyStorePassword = keystorePassword;
 		this.m_applicationCertificate = applicationCert;
 		this.m_requestTimeout = requestTimeout;
+		this.m_opcuaUsername = opcuaUsername;
+		this.m_opcuaPassword = opcuaPassword;
 		this.m_loader = new KeyStoreLoader(this.m_keyStoreType, this.m_keyStoreClientAlias, this.m_keyStoreServerAlias,
 				this.m_keyStorePassword, this.m_applicationCertificate);
 	}
@@ -307,11 +350,19 @@ public final class OpcUaClientActionRunner {
 
 		this.m_loader.load();
 
+		IdentityProvider identityProvider = null;
+
+		if (isNullOrEmpty(this.m_opcuaUsername) && isNullOrEmpty(this.m_opcuaPassword)) {
+			identityProvider = new AnonymousProvider();
+		} else {
+			identityProvider = new UsernameProvider(this.m_opcuaUsername, this.m_opcuaPassword);
+		}
+
 		final OpcUaClientConfig config = OpcUaClientConfig.builder()
 				.setApplicationName(LocalizedText.english(this.m_applicationName))
 				.setApplicationUri(this.m_applicationUri).setCertificate(this.m_loader.getClientCertificate())
 				.setKeyPair(this.m_loader.getClientKeyPair()).setEndpoint(endpoint)
-				.setRequestTimeout(uint(this.m_requestTimeout * 1000)).build();
+				.setIdentityProvider(identityProvider).setRequestTimeout(uint(this.m_requestTimeout * 1000)).build();
 
 		return new OpcUaClient(config);
 	}

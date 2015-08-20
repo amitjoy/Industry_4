@@ -48,6 +48,14 @@
 			<Option label="Basic256" value="2" />
 			<Option label="Basic256Sha256" value="3" />
 		</AD>
+		
+		<AD id="opcua.username" name="opcua.password"
+			type="String" cardinality="0" required="false" default=""
+			description="Configurable Property to set opc-ua server username" />
+		
+		<AD id="opcua.password" name="opcua.password"
+			type="String" cardinality="0" required="false" default=""
+			description="Configurable Property to set opc-ua server password" />
 
 		<AD id="keystore.client.alias" name="keystore.client.alias" type="String"
 			cardinality="0" required="true" default="client-ai"

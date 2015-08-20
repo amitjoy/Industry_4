@@ -15,6 +15,8 @@
  *******************************************************************************/
 package de.tum.in.opcua.client;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.digitalpetri.opcua.stack.core.security.SecurityPolicy;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import de.tum.in.activity.log.ActivityLogService;
@@ -105,6 +106,11 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	private static final String OPCUA_APPLICATION_URI = "opcua.application.uri";
 
 	/**
+	 * Configurable Property to opc-ua server password
+	 */
+	private static final String OPCUA_PASSWORD = "opcua.password";
+
+	/**
 	 * Configurable property specifying the request timeout
 	 */
 	private static final String OPCUA_REQUEST_TIMEOUT = "opcua.request.timeout";
@@ -113,6 +119,11 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	 * Configurable property specifying the Security Policy
 	 */
 	private static final String OPCUA_SECURITY_POLICY = "opcua.security.policy";
+
+	/**
+	 * Configurable Property to set opc-ua server username
+	 */
+	private static final String OPCUA_USERNAME = "opcua.password";
 
 	/**
 	 * Activity Log Service Dependency
@@ -179,9 +190,19 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	private final List<OpcUaClientAction> m_opcuaClientActions = Lists.newCopyOnWriteArrayList();
 
 	/**
+	 * Placeholder for opcua password
+	 */
+	private String m_opcuaPassword;
+
+	/**
 	 * Placeholder for security policy
 	 */
 	private SecurityPolicy m_opcuaSecurityPolicy;
+
+	/**
+	 * Placeholder for opcua username
+	 */
+	private String m_opcuaUsername;
 
 	/**
 	 * Map to store list of configurations
@@ -292,7 +313,7 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 			final KuraResponsePayload respPayload) throws KuraException {
 		LOGGER.info("OPC-UA Client Action Started...");
 		final String clientName = (String) reqPayload.getMetric("opcClientName");
-		Preconditions.checkNotNull(clientName);
+		checkNotNull(clientName);
 
 		this.m_opcuaClientActions.stream().filter(opcClientName -> clientName.equals(opcClientName))
 				.forEach(opcuaClientAction -> {
@@ -378,6 +399,8 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 		this.m_securityPolicy = (int) this.m_properties.get(OPCUA_SECURITY_POLICY);
 		this.m_requestTimeout = (int) this.m_properties.get(OPCUA_REQUEST_TIMEOUT);
 		this.m_keystoreType = (String) this.m_properties.get(KEYSTORE_TYPE);
+		this.m_opcuaPassword = (String) this.m_properties.get(OPCUA_PASSWORD);
+		this.m_opcuaUsername = (String) this.m_properties.get(OPCUA_USERNAME);
 	}
 
 	/**
