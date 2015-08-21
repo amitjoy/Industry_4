@@ -139,13 +139,13 @@ public class SplunkConfiguration implements ConfigurableComponent {
 	 * Used to be called when configurations will get updated
 	 */
 	public void updated(final Map<String, Object> properties) {
-		LOGGER.info("Updated Splunk Configuration Component...");
+		LOGGER.info("Updating Splunk Configuration Component...");
 
 		this.m_properties = properties;
 		this.setConfiguration();
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
-		LOGGER.info("Updated Splunk Configuration Component... Done.");
+		LOGGER.info("Updating Splunk Configuration Component... Done.");
 	}
 
 }

@@ -32,6 +32,9 @@ import com.google.common.collect.Lists;
 
 public class ReadExcel {
 
+	/**
+	 * Returns the excel column names
+	 */
 	private static String[] getColumnNames(final Row column) {
 		final String columns[] = new String[column.getPhysicalNumberOfCells()];
 		final Iterator<Cell> cellIterator = column.cellIterator();
@@ -43,6 +46,9 @@ public class ReadExcel {
 		return columns;
 	}
 
+	/**
+	 * Returns the type of value from a cell
+	 */
 	private static Object getTypeValue(final Class<?> type, final Cell cell) {
 		Object typedValue = null;
 		final DataFormatter formatter = new DataFormatter();
@@ -58,6 +64,9 @@ public class ReadExcel {
 		return typedValue;
 	}
 
+	/**
+	 * Loads the retrieved data from excel to the list
+	 */
 	private static List<RealtimeData> loadDataToList(final XSSFSheet sheet, final List<RealtimeData> data,
 			final RealtimeData bluetoothData)
 					throws InstantiationException, IllegalAccessException, SecurityException, NoSuchFieldException {
@@ -92,6 +101,9 @@ public class ReadExcel {
 
 	}
 
+	/**
+	 * Reads the excel
+	 */
 	public static List<RealtimeData> read() throws IOException {
 		System.out.println("Reading dummy data from Excel.....");
 

@@ -30,6 +30,10 @@ import de.tum.in.client.message.KuraPayload;
 @Beta
 public interface IKuraMQTTClient {
 
+	/**
+	 * Connection related exception
+	 *
+	 */
 	class ConnectionException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
 
@@ -38,6 +42,9 @@ public interface IKuraMQTTClient {
 		}
 	}
 
+	/**
+	 * Protocol
+	 */
 	public static final String PROTOCOL = "tcp";
 
 	/**
@@ -69,8 +76,6 @@ public interface IKuraMQTTClient {
 
 	/**
 	 * Checks whether the client is connected to Message Broker
-	 *
-	 * @return
 	 */
 	public boolean isConnected();
 

@@ -166,13 +166,13 @@ public class HSqlConfiguration implements ConfigurableComponent {
 	 * Used to be called when configurations will get updated
 	 */
 	public void updated(final Map<String, Object> properties) {
-		LOGGER.info("Updated HyperSQL Configuration Component...");
+		LOGGER.info("Updating HyperSQL Configuration Component...");
 
 		this.m_properties = properties;
 		this.setConfiguration();
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
-		LOGGER.info("Updated HyperSQL Configuration Component... Done.");
+		LOGGER.info("Updating HyperSQL Configuration Component... Done.");
 	}
 
 }

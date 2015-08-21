@@ -244,13 +244,13 @@ public class MongoDBServiceConfiguration extends Cloudlet implements Configurabl
 	 * Used to be called when configurations will get updated
 	 */
 	public void updated(final Map<String, Object> properties) {
-		LOGGER.info("Updated MongoDB Component...");
+		LOGGER.info("Updating MongoDB Component...");
 
 		this.m_properties = properties;
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 		this.doRegister(this.m_context, properties);
 
-		LOGGER.info("Updated MongoDB Component... Done.");
+		LOGGER.info("Updating MongoDB Component... Done.");
 	}
 
 }

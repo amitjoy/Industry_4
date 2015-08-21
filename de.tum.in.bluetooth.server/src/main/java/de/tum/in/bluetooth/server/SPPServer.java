@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.bluetooth.LocalDevice;
@@ -97,7 +98,7 @@ public final class SPPServer {
 	 * Broadcasts Data
 	 */
 	private static void sendResponse() throws IOException {
-		final String value = "A";
+		final String value = String.valueOf(new Random().nextInt());
 		writer.write(value + "\r\n");
 		System.out.println("Broadcasting data (" + value + ")");
 	}

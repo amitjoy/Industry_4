@@ -1038,11 +1038,11 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	 * Used to be called when configurations will get updated
 	 */
 	public void updated(final Map<String, Object> properties) {
-		LOGGER.info("Updated Bluetooth Component...");
+		LOGGER.info("Updating Bluetooth Component...");
 
 		this.m_properties = properties;
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
-		LOGGER.info("Updated Bluetooth Component... Done.");
+		LOGGER.info("Updating Bluetooth Component... Done.");
 	}
 }

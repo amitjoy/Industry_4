@@ -436,14 +436,14 @@ public class SocketClient extends Cloudlet implements ConfigurableComponent {
 	 * Used to be called when configurations get updated
 	 */
 	public void updated(final Map<String, Object> properties) {
-		LOGGER.info("Updated Socket Client Component...");
+		LOGGER.info("Updating Socket Client Component...");
 
 		this.m_properties = properties;
 		this.extractConfiguration();
 
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
-		LOGGER.info("Updated Socket Client Component... Done.");
+		LOGGER.info("Updating Socket Client Component... Done.");
 	}
 
 }

@@ -192,13 +192,13 @@ public class IFTTTConfgurationImpl implements ConfigurableComponent, IFTTTConfig
 	 * Used to be called when configurations will get updated
 	 */
 	public void updated(final Map<String, Object> properties) {
-		LOGGER.info("Updated IFTTT Component...");
+		LOGGER.info("Updating IFTTT Component...");
 
 		this.m_properties = properties;
 		this.extractConfiguration();
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
-		LOGGER.info("Updated IFTTT Component... Done.");
+		LOGGER.info("Updating IFTTT Component... Done.");
 	}
 
 }

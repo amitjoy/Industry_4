@@ -177,7 +177,7 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 	 * Used to be called when configurations will get updated
 	 */
 	public void updated(final Map<String, Object> properties) {
-		LOGGER.info("Updated MQTT Heartbeat Component...");
+		LOGGER.info("Updating MQTT Heartbeat Component...");
 
 		this.m_properties = properties;
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
@@ -187,7 +187,7 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 		} catch (final Exception e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
-		LOGGER.info("Updated MQTT Heartbeat Component... Done.");
+		LOGGER.info("Updating MQTT Heartbeat Component... Done.");
 	}
 
 }

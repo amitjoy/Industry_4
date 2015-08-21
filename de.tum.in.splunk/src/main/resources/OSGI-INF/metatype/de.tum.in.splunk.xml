@@ -21,7 +21,7 @@
 		description="This bundle is used to configure information bus end-points">
 
 		<Icon
-			resource="http://icons.iconarchive.com/icons/custom-icon-design/flatastic-8/128/Open-folder-info-icon.png"
+			resource="http://icons.iconarchive.com/icons/cornmanthe3rd/plex/128/System-settings-icon.png"
 			size="32" />
 
 		<AD id="bluetooth.realtime.topic" name="bluetooth.realtime.topic" type="String"

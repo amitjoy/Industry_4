@@ -164,17 +164,17 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	private String m_keystoreType;
 
 	/**
-	 * Placeholder for opc-ua certificate location
+	 * Placeholder for OPC-UA certificate location
 	 */
 	private String m_opcuaApplicationCert;
 
 	/**
-	 * Placeholder for opc-ua application name
+	 * Placeholder for OPC-UA application name
 	 */
 	private String m_opcuaApplicationName;
 
 	/**
-	 * Placeholder for opc-ua application uri
+	 * Placeholder for OPC-UA application uri
 	 */
 	private String m_opcuaApplicationUri;
 
@@ -190,7 +190,7 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	private final List<OpcUaClientAction> m_opcuaClientActions = Lists.newCopyOnWriteArrayList();
 
 	/**
-	 * Placeholder for opcua password
+	 * Placeholder for OPC-UA password
 	 */
 	private String m_opcuaPassword;
 
@@ -200,7 +200,7 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	private SecurityPolicy m_opcuaSecurityPolicy;
 
 	/**
-	 * Placeholder for opcua username
+	 * Placeholder for OPC-UA username
 	 */
 	private String m_opcuaUsername;
 
@@ -453,13 +453,13 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	 * Used to be called when configurations get updated
 	 */
 	public void updated(final Map<String, Object> properties) {
-		LOGGER.info("Updated OPC-UA Component...");
+		LOGGER.info("Updating OPC-UA Component...");
 
 		this.reinitializeConfiguration(properties);
 
 		properties.keySet().forEach(s -> LOGGER.info("Update - " + s + ": " + properties.get(s)));
 
-		LOGGER.info("Updated OPC-UA Component... Done.");
+		LOGGER.info("Updating OPC-UA Component... Done.");
 	}
 
 }
