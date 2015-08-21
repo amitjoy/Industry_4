@@ -54,6 +54,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.eclipse.kura</groupId>
 			<artifactId>org.eclipse.kura.api</artifactId>
 		</dependency>
@@ -123,6 +128,9 @@
 					<instructions>
 						<Bundle-Vendor>TU Munich</Bundle-Vendor>
 						<Bundle-Developer>Amit Kumar Mondal</Bundle-Developer>
+						<Embed-Dependency>
+							quartz
+						</Embed-Dependency>
 					</instructions>
 				</configuration>
 			</plugin>
