@@ -40,7 +40,11 @@ import com.google.common.io.Files;
 @Component(name = "de.tum.in.activity.log.publisher")
 public class ActivityLogPublisher {
 
+	/**
+	 * Application Identifier
+	 */
 	private static final String APP_ID = "ACTIVTY-LOG-PUBLISHER";
+
 	/**
 	 * Configurable Property to set Activity Events Topic Namespace
 	 */
@@ -136,7 +140,7 @@ public class ActivityLogPublisher {
 	}
 
 	/**
-	 * Kura Cloud Service Callback while deregistering
+	 * Cloud Service Callback while deregistering
 	 */
 	public synchronized void unbindCloudService(final CloudService cloudService) {
 		if (this.m_cloudService == cloudService) {

@@ -59,7 +59,7 @@ public class ActivityLogService extends Cloudlet implements IActivityLogService 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ActivityLogService.class);
 
 	/**
-	 * Kura Cloud Service Injection
+	 * Cloud Service Injection
 	 */
 	@Reference(bind = "bindCloudService", unbind = "unbindCloudService")
 	private volatile CloudService m_cloudService;
