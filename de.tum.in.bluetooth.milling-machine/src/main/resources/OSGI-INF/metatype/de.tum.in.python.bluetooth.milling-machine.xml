@@ -27,7 +27,7 @@
 		<AD id="bluetooh.milling.machines" name="bluetooh.milling.machines"
 			type="String" cardinality="0" required="true"
 			default="00:1A:7D:DA:71:15#50:1B:7D:AA:92:11"
-			description="Configurable property to set list of bluetooth enabled milling machines to be discovered" />
+			description="Configurable property to set list of bluetooth enabled milling machines to be discovered (Separated by #)" />
 
 
 	</OCD>
