@@ -55,7 +55,7 @@ public class ActivityLogPublisher implements Job {
 	/**
 	 * Application Identifier
 	 */
-	private static final String APP_ID = "ACTIVTY-LOG-PUBLISHER";
+	private static final String APP_ID = "ACTIVITY-LOG-PUBLISHER";
 
 	/**
 	 * Configurable Property to set Activity Events Topic Namespace
