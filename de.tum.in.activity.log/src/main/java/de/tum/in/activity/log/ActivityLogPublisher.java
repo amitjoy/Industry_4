@@ -126,7 +126,8 @@ public class ActivityLogPublisher {
 		LOGGER.debug("Publishing Activity Log Started.....");
 		try {
 			final String activityLogTopic = this.m_systemService.getProperties().getProperty(EVENT_LOG_TOPIC);
-			Files.newReader(new File(IActivityLogService.LOCATION_TUM_LOG), Charsets.UTF_8).lines().forEach(line -> {
+			final File tumLogFile = new File(IActivityLogService.LOCATION_TUM_LOG);
+			Files.newReader(tumLogFile, Charsets.UTF_8).lines().forEach(line -> {
 				try {
 					this.m_cloudService.newCloudClient(APP_ID).controlPublish("splunk", activityLogTopic,
 							line.getBytes(), 0, false, 5);
@@ -134,6 +135,8 @@ public class ActivityLogPublisher {
 					LOGGER.error(Throwables.getStackTraceAsString(e));
 				}
 			});
+			// After publishing clear the log file
+			Files.write("", tumLogFile, Charsets.UTF_8);
 		} catch (final IOException e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
