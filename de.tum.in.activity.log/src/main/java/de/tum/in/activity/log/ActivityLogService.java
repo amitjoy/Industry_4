@@ -164,4 +164,5 @@ public class ActivityLogService extends Cloudlet implements IActivityLogService 
 			super.setCloudService(this.m_cloudService = null);
 		}
 	}
+
 }

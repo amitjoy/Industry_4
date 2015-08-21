@@ -69,7 +69,7 @@ public class SplunkConfiguration implements ConfigurableComponent {
 	private Map<String, Object> m_properties;
 
 	/**
-	 * Eclipse Kura System Service Dependency
+	 * System Service Dependency
 	 */
 	@Reference(bind = "bindSystemService", unbind = "unbindSystemService")
 	private volatile SystemService m_systemService;
