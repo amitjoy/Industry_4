@@ -15,12 +15,12 @@
  *******************************************************************************/
 package de.tum.in.osgi.utility;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Paths;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -109,7 +109,7 @@ public class BundleUtils {
 			throws URISyntaxException {
 		final Bundle bundle = FrameworkUtil.getBundle(bundleClazz);
 		final URL url = bundle.getEntry(pathToFile);
-		return Paths.get(url.toURI()).toFile().getAbsolutePath();
+		return new File(url.getPath()).getAbsolutePath();
 	}
 
 	/**

@@ -49,7 +49,7 @@
 			<Option label="Basic256Sha256" value="3" />
 		</AD>
 		
-		<AD id="opcua.username" name="opcua.password"
+		<AD id="opcua.username" name="opcua.username"
 			type="String" cardinality="0" required="false" default=""
 			description="Configurable Property to set opc-ua server username" />
 		

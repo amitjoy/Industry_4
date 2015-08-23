@@ -25,17 +25,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
-import org.quartz.Job;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +39,7 @@ import com.google.common.io.Files;
  * @author AMIT KUMAR MONDAL
  */
 @Component(name = "de.tum.in.activity.log.publisher")
-public class ActivityLogPublisher implements Job {
+public class ActivityLogPublisher {
 
 	/**
 	 * Application Identifier
@@ -109,7 +98,7 @@ public class ActivityLogPublisher implements Job {
 	@Activate
 	protected synchronized void activate(final ComponentContext context) {
 		LOGGER.info("Activating Bluetooth Service Discovery....");
-		this.initJob();
+		// TODO Implement Scheduler
 		LOGGER.info("Activating Bluetooth Service Discovery....Done");
 	}
 
@@ -163,31 +152,6 @@ public class ActivityLogPublisher implements Job {
 			// After publishing clear the log file
 			Files.write("", tumLogFile, Charsets.UTF_8);
 		} catch (final IOException e) {
-			LOGGER.error(Throwables.getStackTraceAsString(e));
-		}
-	}
-
-	/** {@inheritDoc}} */
-	@Override
-	public void execute(final JobExecutionContext executionContext) throws JobExecutionException {
-		this.doPublish();
-	}
-
-	/**
-	 * Initialize the cronjob configuration
-	 */
-	private void initJob() {
-		final JobDetail job = JobBuilder.newJob(this.getClass()).withIdentity(JOB_ID, GROUP_ID).build();
-
-		final Trigger trigger = TriggerBuilder.newTrigger().withIdentity(TRIGGER_ID, GROUP_ID)
-				.withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInHours(5).repeatForever()).build();
-
-		Scheduler scheduler = null;
-		try {
-			scheduler = new StdSchedulerFactory().getScheduler();
-			scheduler.start();
-			scheduler.scheduleJob(job, trigger);
-		} catch (final SchedulerException e) {
 			LOGGER.error(Throwables.getStackTraceAsString(e));
 		}
 	}
