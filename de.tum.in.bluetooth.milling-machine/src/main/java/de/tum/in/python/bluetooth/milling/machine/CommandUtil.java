@@ -70,8 +70,8 @@ public final class CommandUtil {
 	private static final String PROGRAM_LOCATION = "/home/pi/TUM/bt.py";
 
 	/**
-	 * Starts the communication with the provided bluetooth mac address milling
-	 * machine
+	 * Starts the communication with the provided bluetooth mac address of
+	 * milling machine
 	 */
 	public static void initCommunication(final String macAddress) {
 		LOGGER.info("Starting Python Bluetooth Milling Machine Communication...");

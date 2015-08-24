@@ -33,7 +33,7 @@ class BT(object):
     def __exit__(self):
         self.Disconnect()
         
-    def Connect(self, mac, port= 3333):
+    def Connect(self, mac, port = 3333):
         self.btSocket.connect((mac, port))
 
     def Disconnect(self):
@@ -81,7 +81,8 @@ def StartIoTGateway(addr):
     while True:
         try:
             data = cli.Receive()
-            publish.single("$EDC/tum/BLUETOOTH-V1/"+mac+"/data", data, hostname="iot.eclipse.org")
+            #As soon as we receive the real-time data, publish it to cloud
+            publish.single("$EDC/tum/BLUETOOTH-V1/" + mac + "/data", data, hostname="iot.eclipse.org")
         except Exception as e:
             print(e.__str__())
             break
@@ -98,7 +99,7 @@ def StartMillingMachine(addr):
         try:
             while True:
                 data = str(randint(1,1000));
-                print("Broadcasting data..."+data)
+                print("Broadcasting data..." + data)
                 client.send(data)
                 time.sleep(3)
         except:
