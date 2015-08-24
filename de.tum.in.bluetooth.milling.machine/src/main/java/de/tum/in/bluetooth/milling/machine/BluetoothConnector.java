@@ -44,7 +44,7 @@ import com.google.common.base.Throwables;
 import de.tum.in.events.Events;
 
 /**
- * Used to establish connection between the paired bluetooth device and RPi
+ * Used to establish connection between the paired bluetooth device and Gateway
  *
  * @author AMIT KUMAR MONDAL
  *
@@ -248,7 +248,8 @@ public final class BluetoothConnector implements Runnable {
 	}
 
 	/**
-	 * Used to establish connection between the paired bluetooth device and RPi
+	 * Used to establish connection between the paired bluetooth device and
+	 * Gateway
 	 */
 	@Override
 	public void run() {

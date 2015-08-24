@@ -41,8 +41,8 @@ import com.google.common.base.Throwables;
  *
  * The scenario we have here that as soon as the client initiates a connection
  * with the server, the bluetooth server starts broadcasting data. The client
- * needs to read the data and publish it for the business clients to use the
- * data for further usage.
+ * needs to read the data in real-time and publish it for the business clients
+ * to use the data for further usage.
  *
  * @author AMIT KUMAR MONDAL
  *

@@ -54,6 +54,11 @@ import de.tum.in.activity.log.IActivityLogService;
  * bluetooth milling machine. The primary focus is to control all the milling
  * machines remotely.
  *
+ * The scenario we have here that as soon as the client initiates a connection
+ * with the server, the bluetooth server starts broadcasting data. The client
+ * needs to read the data in real-time and publish it for the business clients
+ * to use the data for further usage.
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
