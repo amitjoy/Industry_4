@@ -324,7 +324,7 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 							.setRequestTimeout(this.m_requestTimeout).setKeyStoreClientAlias(this.m_keystoreClientAlias)
 							.setKeyStorePassword(this.m_keystorePassword)
 							.setKeyStoreServerAlias(this.m_keystoreServerAlias).setKeystoreType(this.m_keystoreType)
-							.setEndpointUrl(opcuaClientAction.getEndpointUrl())
+							.setEndpointUrl(opcuaClientAction.endpointUrl())
 							.setSecurityPolicy(this.m_opcuaSecurityPolicy).setOpcUaUsername(this.m_opcuaUsername)
 							.setOpcUaPassword(this.m_opcuaPassword).build();
 					clientActionRunner.run();
@@ -362,7 +362,7 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 
 		if ("list".equals(reqTopic.getResources()[0])) {
 			final KuraPayload payload = new KuraPayload();
-			this.m_opcuaClientActions.stream().map(opcClientAction -> opcClientAction.getName())
+			this.m_opcuaClientActions.stream().map(opcClientAction -> opcClientAction.name())
 					.forEach(opcClientActionName -> payload.addMetric("action", opcClientActionName));
 		}
 

@@ -82,13 +82,13 @@ public class OpcUaClientWrite implements OpcUaClientAction {
 
 	/** {@inheritDoc}} */
 	@Override
-	public String getEndpointUrl() {
+	public String endpointUrl() {
 		return ENDPOINT_URL;
 	}
 
 	/** {@inheritDoc}} */
 	@Override
-	public String getName() {
+	public String name() {
 		return "OPC-UA-CLIENT-WRITE";
 	}
 

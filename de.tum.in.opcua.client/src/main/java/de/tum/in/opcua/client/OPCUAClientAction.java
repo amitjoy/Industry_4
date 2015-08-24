@@ -31,12 +31,12 @@ public interface OpcUaClientAction {
 	/**
 	 * Returns Endpoint URL
 	 */
-	public String getEndpointUrl();
+	public String endpointUrl();
 
 	/**
 	 * Returns the name of the client action
 	 */
-	public String getName();
+	public String name();
 
 	/**
 	 * The main action to perform
