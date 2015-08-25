@@ -26,6 +26,7 @@ import de.tum.in.client.message.KuraPayload;
  * @author AMIT KUMAR MONDAL
  *
  */
+@SuppressWarnings({ "unused" })
 public final class Snippets {
 
 	private static String BLUETOOTH_V1_CONF_PUBLISH = "$EDC/tum/B8:27:EB:A6:A9:8A/BLUETOOTH-V1/GET/configurations";

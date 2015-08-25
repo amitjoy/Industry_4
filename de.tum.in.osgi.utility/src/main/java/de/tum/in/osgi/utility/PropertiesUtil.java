@@ -27,7 +27,7 @@ import java.util.Map;
  *
  * @author AMIT KUMAR MONDAL
  */
-public class PropertiesUtil {
+public final class PropertiesUtil {
 
 	private static boolean isEmpty(final String str) {
 		return (str == null) || (str.length() == 0);
@@ -292,6 +292,10 @@ public class PropertiesUtil {
 	private static String trimToNull(final String str) {
 		final String ts = trim(str);
 		return isEmpty(ts) ? null : ts;
+	}
+
+	/** Constructor */
+	private PropertiesUtil() {
 	}
 
 }

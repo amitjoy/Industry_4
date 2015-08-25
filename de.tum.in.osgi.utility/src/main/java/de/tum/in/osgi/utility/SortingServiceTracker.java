@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
  *
  * @author AMIT KUMAR MONDAL
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class SortingServiceTracker<T> extends ServiceTracker<Object, Object> {
 
 	private int lastCount = -1;
@@ -94,7 +95,6 @@ public class SortingServiceTracker<T> extends ServiceTracker<Object, Object> {
 				Arrays.sort(references);
 				result = new ArrayList<T>();
 				for (int i = 0; i < references.length; i++) {
-					@SuppressWarnings("unchecked")
 					final T service = (T) this.getService(references[references.length - 1 - i]);
 					if (service != null) {
 						result.add(service);

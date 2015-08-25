@@ -45,7 +45,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * @see org.osgi.util.tracker.ServiceTrackerCustomizer
  * @see org.osgi.framework.Filter
  */
-public class ServiceUtils {
+@SuppressWarnings({ "rawtypes", "unchecked" })
+public final class ServiceUtils {
 
 	public static final class ComparableImplementation implements Comparable<Object> {
 
@@ -56,7 +57,6 @@ public class ServiceUtils {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public int compareTo(final Object reference) {
 			final Long otherId;
 			Object otherRankObj;

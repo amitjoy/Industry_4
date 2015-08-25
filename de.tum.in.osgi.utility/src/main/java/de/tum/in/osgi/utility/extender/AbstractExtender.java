@@ -18,7 +18,6 @@ package de.tum.in.osgi.utility.extender;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,6 +32,8 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
+
+import com.google.common.collect.Maps;
 
 /**
  * Base class to write bundle extenders. This extender tracks started bundles
@@ -53,9 +54,9 @@ public abstract class AbstractExtender
 		implements BundleActivator, BundleTrackerCustomizer<Object>, SynchronousBundleListener {
 
 	private BundleContext context;
-	private final ConcurrentMap<Bundle, FutureTask> destroying = new ConcurrentHashMap<Bundle, FutureTask>();
+	private final ConcurrentMap<Bundle, FutureTask<Void>> destroying = Maps.newConcurrentMap();
 	private ExecutorService executors;
-	private final ConcurrentMap<Bundle, Extension> extensions = new ConcurrentHashMap<Bundle, Extension>();
+	private final ConcurrentMap<Bundle, Extension> extensions = Maps.newConcurrentMap();
 
 	private boolean preemptiveShutdown;
 	private volatile boolean stopped;

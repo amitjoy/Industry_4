@@ -29,7 +29,7 @@ import org.osgi.framework.InvalidSyntaxException;
  *
  * @author AMIT KUMAR MONDAL
  */
-public class FilterUtils {
+public final class FilterUtils {
 	/**
 	 * AND filter template
 	 */
@@ -153,7 +153,7 @@ public class FilterUtils {
 	 *             If <code>clazz</code> is <code>null</code>
 	 * @see Constants#OBJECTCLASS
 	 */
-	public static Filter create(final Class clazz) throws InvalidSyntaxException {
+	public static Filter create(final Class<?> clazz) throws InvalidSyntaxException {
 		return eq(Constants.OBJECTCLASS, clazz.getName());
 	}
 
@@ -173,7 +173,7 @@ public class FilterUtils {
 	 *             <code>null</code>
 	 * @see Constants#OBJECTCLASS
 	 */
-	public static Filter create(final Class clazz, final Filter filter) throws InvalidSyntaxException {
+	public static Filter create(final Class<?> clazz, final Filter filter) throws InvalidSyntaxException {
 		return and(create(clazz), filter);
 	}
 
@@ -193,7 +193,7 @@ public class FilterUtils {
 	 *             <code>null</code>
 	 * @see Constants#OBJECTCLASS
 	 */
-	public static Filter create(final Class clazz, final String filter) throws InvalidSyntaxException {
+	public static Filter create(final Class<?> clazz, final String filter) throws InvalidSyntaxException {
 		return and(create(clazz), filter);
 	}
 

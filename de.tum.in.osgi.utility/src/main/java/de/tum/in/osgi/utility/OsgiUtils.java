@@ -121,6 +121,7 @@ public final class OsgiUtils {
 	/**
 	 * Check whether a bundle is started or not
 	 */
+	@SuppressWarnings("unused")
 	private static void checkStarted(final Bundle bundle) {
 		Preconditions.checkNotNull(bundle);
 		final int bundleState = bundle.getState();
@@ -613,6 +614,10 @@ public final class OsgiUtils {
 
 			return false;
 		}
+	}
+
+	/** Constructor */
+	private OsgiUtils() {
 	}
 
 }

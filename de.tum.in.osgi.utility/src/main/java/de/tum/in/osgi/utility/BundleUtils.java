@@ -35,7 +35,8 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @see org.osgi.service.packageadmin.PackageAdmin
  * @see org.osgi.framework.BundleContext
  */
-public class BundleUtils {
+@SuppressWarnings("deprecation")
+public final class BundleUtils {
 	/**
 	 * Find bundle by ID
 	 *

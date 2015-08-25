@@ -36,7 +36,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author AMIT KUMAR MONDAL
  *
  */
-public class OsgiUtilsActivator extends AbstractBundleActivator {
+public final class OsgiUtilsActivator extends AbstractBundleActivator {
 
 	/**
 	 * The singleton instance of this activator
