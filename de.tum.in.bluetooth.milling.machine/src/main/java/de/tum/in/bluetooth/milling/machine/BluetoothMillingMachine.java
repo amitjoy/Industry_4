@@ -53,7 +53,7 @@ import de.tum.in.activity.log.ActivityLogService;
 import de.tum.in.activity.log.IActivityLogService;
 
 /**
- * Used to consume all the service record provided by all the paired Bluetooth
+ * Used to consume all the service records provided by all the paired Bluetooth
  * Enabled Milling Machines
  *
  * @author AMIT KUMAR MONDAL

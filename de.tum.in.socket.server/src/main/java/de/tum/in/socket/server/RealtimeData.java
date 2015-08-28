@@ -15,6 +15,8 @@
  *******************************************************************************/
 package de.tum.in.socket.server;
 
+import com.google.common.base.Objects;
+
 public final class RealtimeData {
 	private String force_x;
 	private String force_y;
@@ -50,6 +52,12 @@ public final class RealtimeData {
 
 	public String getTorqueZ() {
 		return this.torque_z;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(this.force_x, this.force_y, this.force_z, this.time, this.torque_x, this.torque_y,
+				this.torque_z);
 	}
 
 	public void setDepthCut(final String depth_of_cut) {
