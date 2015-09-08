@@ -35,7 +35,7 @@
             <name>Amit Kumar Mondal</name>
             <email>admin@amitinside.com</email>
         </developer>
-    </developers>
+	</developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
