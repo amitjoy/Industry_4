@@ -67,7 +67,7 @@ public class BluetoothServiceDiscovery {
 	/**
 	 * Service Name Attribute ID in Bluetooth Service Record
 	 */
-	private static final int SERVICE_NAME_ATTRIBUTE = ServiceConstants.SERVICE_NAME.getServiceId();
+	private static final int SERVICE_NAME_ATTRIBUTE = ServiceConstants.SERVICE_NAME.serviceId();
 
 	/**
 	 * List of device under attempts.

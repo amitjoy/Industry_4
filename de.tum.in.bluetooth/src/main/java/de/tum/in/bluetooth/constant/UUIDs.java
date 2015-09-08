@@ -46,7 +46,7 @@ public enum UUIDs {
 	/**
 	 * Returns the UUID of the constant
 	 */
-	public final UUID getUUID() {
+	public final UUID uuid() {
 		return new UUID(this.m_uuid);
 	}
 }

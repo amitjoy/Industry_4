@@ -43,7 +43,7 @@ public enum ServiceConstants {
 	/**
 	 * @return the m_serviceId
 	 */
-	public final int getServiceId() {
+	public final int serviceId() {
 		return this.m_serviceId;
 	}
 

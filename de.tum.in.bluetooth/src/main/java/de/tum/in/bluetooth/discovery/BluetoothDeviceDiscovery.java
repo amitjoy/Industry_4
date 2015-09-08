@@ -144,7 +144,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 					if (Env.isTestEnvironmentEnabled()) {
 						this.m_logger.warn("=== TEST ENVIRONMENT ENABLED ===");
 					} else {
-						final UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP.getUUID() };
+						final UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP.uuid() };
 						local.getDiscoveryAgent().searchServices(null, searchUuidSet, this.m_device, this);
 					}
 					this.wait();

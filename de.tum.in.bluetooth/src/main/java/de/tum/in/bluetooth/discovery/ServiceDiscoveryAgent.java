@@ -44,7 +44,7 @@ import de.tum.in.bluetooth.constant.UUIDs;
  */
 public final class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 
-	private static int[] attrIDs = new int[] { ServiceConstants.SERVICE_NAME.getServiceId() };
+	private static int[] attrIDs = new int[] { ServiceConstants.SERVICE_NAME.serviceId() };
 
 	/**
 	 * Logger
@@ -54,7 +54,7 @@ public final class ServiceDiscoveryAgent implements DiscoveryListener, Runnable 
 	/**
 	 * RFCOMM UUID to discover devices for pairing
 	 */
-	private static UUID[] searchUuidSet = { UUIDs.RFCOMM.getUUID() };
+	private static UUID[] searchUuidSet = { UUIDs.RFCOMM.uuid() };
 
 	/**
 	 * The target {@link RemoteDevice} to search for {@link ServiceRecord}
