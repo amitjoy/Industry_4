@@ -91,22 +91,22 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpcUaClient.class);
 
 	/**
-	 * Configurable Property to set opc-ua application certificate
+	 * Configurable Property to set OPC-UA application certificate
 	 */
 	private static final String OPCUA_APPLICATION_CERTIFICATE = "opcua.certificate.location";
 
 	/**
-	 * Configurable Property to set opc-ua application name
+	 * Configurable Property to set OPC-UA application name
 	 */
 	private static final String OPCUA_APPLICATION_NAME = "opcua.application.name";
 
 	/**
-	 * Configurable Property to set opc-ua application uri
+	 * Configurable Property to set OPC-UA application uri
 	 */
 	private static final String OPCUA_APPLICATION_URI = "opcua.application.uri";
 
 	/**
-	 * Configurable Property to opc-ua server password
+	 * Configurable Property to OPC-UA server password
 	 */
 	private static final String OPCUA_PASSWORD = "opcua.password";
 
@@ -121,7 +121,7 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	private static final String OPCUA_SECURITY_POLICY = "opcua.security.policy";
 
 	/**
-	 * Configurable Property to set opc-ua server username
+	 * Configurable Property to set OPC-UA server username
 	 */
 	private static final String OPCUA_USERNAME = "opcua.password";
 
@@ -277,21 +277,21 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	}
 
 	/**
-	 * Retrieves Proper Security Policy
+	 * Retrieves Proper Security Policy required for the client actions
 	 */
 	private void configureSecurityPolicy() {
 		switch (this.m_securityPolicy) {
 		case 0:
-			this.m_opcuaSecurityPolicy = SecurityPolicy.None;
+			this.m_opcuaSecurityPolicy = SecurityPolicy.NONE;
 			break;
 		case 1:
-			this.m_opcuaSecurityPolicy = SecurityPolicy.Basic128Rsa15;
+			this.m_opcuaSecurityPolicy = SecurityPolicy.BASIC_128_RSA_15;
 			break;
 		case 2:
-			this.m_opcuaSecurityPolicy = SecurityPolicy.Basic256;
+			this.m_opcuaSecurityPolicy = SecurityPolicy.BASIC_256;
 			break;
 		case 3:
-			this.m_opcuaSecurityPolicy = SecurityPolicy.Basic256Sha256;
+			this.m_opcuaSecurityPolicy = SecurityPolicy.BASIC_256_SHA256;
 			break;
 		}
 	}
@@ -303,7 +303,6 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	@Deactivate
 	protected void deactivate(final ComponentContext context) {
 		LOGGER.debug("Deactivating OPC-UA Component...");
-
 		LOGGER.debug("Deactivating OPC-UA Component... Done.");
 	}
 
