@@ -48,6 +48,10 @@ import de.tum.in.opcua.client.util.KeyStoreLoader;
  *
  */
 public final class OpcUaClientActionRunner {
+
+	/**
+	 * OPC-UA Client Builder
+	 */
 	public static class Builder {
 
 		/**
@@ -198,7 +202,7 @@ public final class OpcUaClientActionRunner {
 		}
 
 		/**
-		 * Setter for opcua password
+		 * Setter for OPC-UA password
 		 */
 		public final Builder setOpcUaPassword(final String password) {
 			this.m_opcuaPassword = password;
@@ -206,7 +210,7 @@ public final class OpcUaClientActionRunner {
 		}
 
 		/**
-		 * Setter for opcua username
+		 * Setter for OPC-UA username
 		 */
 		public final Builder setOpcUaUsername(final String username) {
 			this.m_opcuaUsername = username;
@@ -346,7 +350,7 @@ public final class OpcUaClientActionRunner {
 				.filter(e -> e.getSecurityPolicyUri().equals(this.m_securityPolicy.getSecurityPolicyUri())).findFirst()
 				.orElseThrow(() -> new Exception("no desired endpoints returned"));
 
-		LOGGER.info("Using endpoint: " + endpoint.getEndpointUrl() + " with " + this.m_securityPolicy);
+		LOGGER.info("Using endpoint " + endpoint.getEndpointUrl() + " with " + this.m_securityPolicy);
 
 		this.m_loader.load();
 
