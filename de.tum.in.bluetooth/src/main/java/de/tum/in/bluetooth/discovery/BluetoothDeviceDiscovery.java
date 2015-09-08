@@ -37,6 +37,7 @@ import javax.bluetooth.DiscoveryListener;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
+import javax.bluetooth.UUID;
 
 import org.apache.commons.collections.IterableMap;
 import org.apache.commons.collections.MapIterator;
@@ -74,6 +75,7 @@ import com.intel.bluetooth.RemoteDeviceHelper;
 import de.tum.in.activity.log.ActivityLogService;
 import de.tum.in.activity.log.IActivityLogService;
 import de.tum.in.bluetooth.BluetoothController;
+import de.tum.in.bluetooth.constant.UUIDs;
 import de.tum.in.bluetooth.devices.Device;
 import de.tum.in.bluetooth.devices.DeviceList;
 
@@ -142,7 +144,7 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 					if (Env.isTestEnvironmentEnabled()) {
 						this.m_logger.warn("=== TEST ENVIRONMENT ENABLED ===");
 					} else {
-						final javax.bluetooth.UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP };
+						final UUID[] searchUuidSet = { UUIDs.PUBLIC_BROWSE_GROUP.getUUID() };
 						local.getDiscoveryAgent().searchServices(null, searchUuidSet, this.m_device, this);
 					}
 					this.wait();
@@ -328,8 +330,8 @@ public class BluetoothDeviceDiscovery extends Cloudlet
 	 *            a non-null list of remote device
 	 * @param device
 	 *            the device to check
-	 * @return <code>true</code> if the device is in the list,
-	 *         <code>false</code> otherwise.
+	 * @return {@code true} if the device is in the list, {@çode false}
+	 *         otherwise.
 	 */
 
 	public static boolean contains(final Set<RemoteDevice> list, final RemoteDevice device) {

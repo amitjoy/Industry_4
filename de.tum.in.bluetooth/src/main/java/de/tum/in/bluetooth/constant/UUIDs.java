@@ -13,43 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package de.tum.in.bluetooth.devices;
+package de.tum.in.bluetooth.constant;
 
-import java.util.List;
-import java.util.Objects;
-
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.Lists;
+import javax.bluetooth.UUID;
 
 /**
- * Java class for DeviceList complex type.
+ * All the UUIDs needed for communication
  *
  * @author AMIT KUMAR MONDAL
+ *
  */
-public final class DeviceList {
+public enum UUIDs {
 
-	private List<Device> devices;
+	ATT(0x0007), BNEP(0x000F), BROWSE_GROUP_DESCRIPTOR_SERVICE_CLASSID(0x1001), GROUP_NETWORK(0x1117), HTTP(
+			0x000C), L2CAP(0x0100), NETWORK_ACCESS_POUUID(0x1116), OBEX(0x0008), OBEX_FILE_TRANSFER_PROFILE(
+					0x1106), OBEX_OBJECT_PUSH_PROFILE(0x1105), PERSONAL_AREA_NETWORKING_USER(
+							0x1115), PUBLIC_BROWSE_GROUP(0x1002), RFCOMM(0x0003), SDP(0x0001), SERIAL_PORT(
+									0x1101), SERVICE_DISCOVERY_SERVER_SERVICE_CLASSID(0x1000);
 
 	/**
-	 * Gets the value of the devices property.
+	 * UUID constant
 	 */
-	public List<Device> getDevices() {
-		if (this.devices == null) {
-			this.devices = Lists.newArrayList();
-		}
-		return this.devices;
+	private final int m_uuid;
+
+	/**
+	 * Constructor
+	 */
+	private UUIDs(final int uuid) {
+		this.m_uuid = uuid;
 	}
 
-	/** {@inheritDoc} */
-	@Override
-	public int hashCode() {
-		return Objects.hashCode(this.devices);
+	/**
+	 * Returns the UUID of the constant
+	 */
+	public final UUID getUUID() {
+		return new UUID(this.m_uuid);
 	}
-
-	/** {@inheritDoc} */
-	@Override
-	public String toString() {
-		return MoreObjects.toStringHelper(this).add("devices", Lists.newArrayList(this.devices).toString()).toString();
-	}
-
 }

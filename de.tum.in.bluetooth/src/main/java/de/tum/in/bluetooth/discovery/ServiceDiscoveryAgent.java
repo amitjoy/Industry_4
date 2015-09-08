@@ -33,15 +33,18 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
+import de.tum.in.bluetooth.constant.ServiceConstants;
+import de.tum.in.bluetooth.constant.UUIDs;
+
 /**
  * Discovery Agent searching services for one specific device. If a matching
- * service is found, we publishes an ??
+ * service is found, we publishes an OSGi service matching the service record
  *
  * @author AMIT KUMAR MONDAL
  */
-public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
+public final class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 
-	private static int[] attrIDs = new int[] { ServiceConstants.SERVICE_NAME };
+	private static int[] attrIDs = new int[] { ServiceConstants.SERVICE_NAME.getServiceId() };
 
 	/**
 	 * Logger
@@ -49,9 +52,9 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDiscoveryAgent.class);
 
 	/**
-	 * RFCOMM UUID to discover
+	 * RFCOMM UUID to discover devices for pairing
 	 */
-	private static UUID[] searchUuidSet = { UUIDs.RFCOMM };
+	private static UUID[] searchUuidSet = { UUIDs.RFCOMM.getUUID() };
 
 	/**
 	 * The target {@link RemoteDevice} to search for {@link ServiceRecord}
@@ -63,6 +66,9 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 	 */
 	private final List<ServiceRecord> m_discoveredServices = Lists.newArrayList();
 
+	/**
+	 * The name of the device to be discovered
+	 */
 	private String m_name;
 
 	/**
@@ -82,16 +88,21 @@ public class ServiceDiscoveryAgent implements DiscoveryListener, Runnable {
 		}
 	}
 
-	/*
-	 *
-	 * ********* DiscoveryListener **********
-	 */
+	/***************************************
+	 * DiscoveryListener
+	 ***************************************/
 	/** {@inheritDoc} */
 	@Override
 	public void deviceDiscovered(final RemoteDevice btDevice, final DeviceClass cod) {
 		// Not used here.
 	}
 
+	/**
+	 * Search for device service records to search
+	 *
+	 * @param local
+	 *            the local device reference
+	 */
 	void doSearch(final LocalDevice local) {
 		synchronized (this) {
 			this.m_searchInProgress = true;

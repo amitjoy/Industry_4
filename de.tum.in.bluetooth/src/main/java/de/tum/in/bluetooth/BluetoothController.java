@@ -24,8 +24,7 @@ package de.tum.in.bluetooth;
 public interface BluetoothController {
 
 	/**
-	 * Exception class for Bluetooth Communication Problem
-	 *
+	 * Exception for Bluetooth Communication Problem
 	 */
 	final class BluetoothException extends Exception {
 

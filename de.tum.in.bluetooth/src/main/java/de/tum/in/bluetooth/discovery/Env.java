@@ -16,23 +16,39 @@
 package de.tum.in.bluetooth.discovery;
 
 /**
- * System Property Utility classes to determine whether bluetooth application
- * will be used for testing purposes or production purposes
+ * System Property Utility class to determine whether bluetooth application will
+ * be used for testing purposes or production purposes
  *
  * @author AMIT KUMAR MONDAL
  *
  */
-public class Env {
+public final class Env {
 
+	/**
+	 * Disables the test environment
+	 */
 	public static void disableTestEnvironment() {
 		System.setProperty("bluetooth.test", "false");
 	}
 
+	/**
+	 * Enables the test environment
+	 */
 	public static void enableTestEnvironment() {
 		System.setProperty("bluetooth.test", "true");
 	}
 
+	/**
+	 * Checks to see if test environment is enables
+	 *
+	 * @return true if test environment is enabled
+	 */
 	public static boolean isTestEnvironmentEnabled() {
 		return Boolean.getBoolean("bluetooth.test");
+	}
+
+	/** Constructor */
+	private Env() {
+		// Empty. Not used for instantiation
 	}
 }

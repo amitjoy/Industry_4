@@ -18,7 +18,7 @@ package de.tum.in.events;
 /**
  * All the system event constants should be registered here. To get your data
  * cached, you have to add your event which must have a topic starting with
- * <code>de/tum/in/device/cache/<code>
+ * {@code de/tum/in/device/cache/}
  *
  * @author AMIT KUMAR MONDAL
  *

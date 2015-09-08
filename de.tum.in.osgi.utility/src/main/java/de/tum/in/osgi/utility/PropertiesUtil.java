@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The <code>PropertiesUtil</code> is a utility class providing some usefull
+ * The <code>PropertiesUtil</code> is a utility class providing some useful
  * utility methods for converting property types.
  *
  * @author AMIT KUMAR MONDAL

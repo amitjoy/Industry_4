@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * The <code>ServiceUtil</code> is a utility class providing some usefull
+ * The <code>ServiceUtil</code> is a utility class providing some useful
  * utility methods for service handling.
  *
  * @author AMIT KUMAR MONDAL
@@ -38,8 +38,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 /**
  * OSGi Services utilities class
  *
- * @author dmytro.pishchukhin
- * @version 1.0
  * @see org.osgi.framework.BundleContext
  * @see org.osgi.util.tracker.ServiceTracker
  * @see org.osgi.util.tracker.ServiceTrackerCustomizer

@@ -34,7 +34,7 @@ import com.google.common.base.Throwables;
  *
  * @author AMIT KUMAR MONDAL
  */
-public class BluetoothThreadManager {
+public final class BluetoothThreadManager {
 
 	/**
 	 * Logger.

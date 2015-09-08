@@ -37,9 +37,9 @@ public final class NonBlockingInputStream extends InputStream implements Runnabl
 	private boolean threadIsReading = false;
 
 	/**
-	 * Creates a <code>NonBlockingInputStream</code> out of a normal blocking
-	 * stream. Note that this call also spawn a separate thread to perform the
-	 * blocking I/O on behalf of the thread that is using this class. The
+	 * Creates a {@code NonBlockingInputStream} out of a normal blocking stream.
+	 * Note that this call also spawn a separate thread to perform the blocking
+	 * I/O on behalf of the thread that is using this class. The
 	 * {@link #shutdown()} method must be called in order to shut this thread
 	 * down.
 	 *

@@ -43,21 +43,21 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
 	private final static Logger LOGGER = LoggerFactory.getLogger(ConnectionFactoryImpl.class);
 
 	/**
-	 * Create a new <code>Connection</code> object for a comm specified URI.
+	 * Create a new {@code Connection} object for a comm specified URI.
 	 *
 	 * @param name
-	 *            The full URI passed to the <code>ConnectorService.open</code>
+	 *            The full URI passed to the {@code ConnectorService.open}
 	 *            method
 	 * @param mode
-	 *            The mode parameter passed to the
-	 *            <code>ConnectorService.open</code> method
+	 *            The mode parameter passed to the {@code ConnectorService.open}
+	 *            method
 	 * @param timeouts
 	 *            The timeouts parameter passed to the
-	 *            <code>ConnectorService.open</code> method
-	 * @return A new <code>javax.microedition.io.Connection</code> object.
+	 *            {@code ConnectorService.open} method
+	 * @return A new {@code javax.microedition.io.Connection} object.
 	 * @throws IOException
-	 *             If a <code>javax.microedition.io.Connection</code> object can
-	 *             not not be created.
+	 *             If a {@code javax.microedition.io.Connection} object can not
+	 *             not be created.
 	 */
 	@Override
 	public Connection createConnection(String name, int mode, final boolean timeouts) throws IOException {

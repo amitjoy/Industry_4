@@ -37,7 +37,7 @@ import com.google.common.base.Throwables;
  *
  * You have to run the bluetooth server using the same python code found in
  * resources directory. Command to execute in the bluetooth server:
- * <code>python bt.py machine</code>
+ * {@code python bt.py machine}
  *
  * The scenario we have here that as soon as the client initiates a connection
  * with the server, the bluetooth server starts broadcasting data. The client

@@ -42,7 +42,7 @@ import de.tum.in.bluetooth.discovery.BluetoothDeviceDiscovery.DiscoveryMode;
  * @author AMIT KUMAR MONDAL
  *
  */
-public class DeviceDiscoveryAgent implements Runnable {
+public final class DeviceDiscoveryAgent implements Runnable {
 
 	public class DeviceDiscoveryListener implements DiscoveryListener {
 
@@ -177,24 +177,46 @@ public class DeviceDiscoveryAgent implements Runnable {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(DeviceDiscoveryAgent.class);
 
+	/**
+	 * Device Discovery Listener
+	 */
 	private DeviceDiscoveryListener m_listener;
 
+	/**
+	 * Synchronization lock
+	 */
 	private final Object m_lock = new Object();
 
+	/**
+	 * Discovery Mode
+	 */
 	private final DiscoveryMode m_mode;
 
+	/**
+	 * Online Check on Discovery
+	 */
 	private final boolean m_onlineCheckOnDiscovery;
 
+	/**
+	 * Bluetooth Device Discovery Reference
+	 */
 	private final BluetoothDeviceDiscovery m_parent;
 
-	DeviceDiscoveryAgent(final BluetoothDeviceDiscovery parent, final DiscoveryMode mode,
+	/** Constructor */
+	public DeviceDiscoveryAgent(final BluetoothDeviceDiscovery parent, final DiscoveryMode mode,
 			final boolean onlineCheckOnDiscovery) {
 		this.m_mode = mode;
 		this.m_parent = parent;
 		this.m_onlineCheckOnDiscovery = onlineCheckOnDiscovery;
 	}
 
-	void doInquiry(final LocalDevice local) {
+	/**
+	 * Initiates Device Discovery Inquiry
+	 *
+	 * @param local
+	 *            the local bluetooth device
+	 */
+	public void doInquiry(final LocalDevice local) {
 		try {
 			LOGGER.info("Starting device inquiry...");
 
@@ -247,6 +269,11 @@ public class DeviceDiscoveryAgent implements Runnable {
 		return 0; // Cannot happen.
 	}
 
+	/**
+	 * Initialize local bluetooth device
+	 *
+	 * @return local bluetooth device
+	 */
 	private LocalDevice initialize() {
 		LocalDevice local;
 		try {

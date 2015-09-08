@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 
+import de.tum.in.bluetooth.constant.ServiceConstants;
 import de.tum.in.bluetooth.devices.Device;
 import de.tum.in.bluetooth.devices.DeviceList;
 
@@ -66,7 +67,7 @@ public class BluetoothServiceDiscovery {
 	/**
 	 * Service Name Attribute ID in Bluetooth Service Record
 	 */
-	private static final int SERVICE_NAME_ATTRIBUTE = ServiceConstants.SERVICE_NAME;
+	private static final int SERVICE_NAME_ATTRIBUTE = ServiceConstants.SERVICE_NAME.getServiceId();
 
 	/**
 	 * List of device under attempts.
