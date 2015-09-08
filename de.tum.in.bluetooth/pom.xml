@@ -29,6 +29,14 @@
 	<name>Bluetooth OSGi Service</name>
 	<description>Bundle exposing OSGi services from discovered bluetooth devices and services. Apart from this, it also registers a Connection Factory Implementation for Bluetooth Serial Port Profile</description>
 	<packaging>bundle</packaging>
+	
+	<developers>
+        <developer>
+            <id>I-AM-IT</id>
+            <name>Amit Kumar Mondal</name>
+            <email>admin@amitinside.com</email>
+        </developer>
+    </developers>
 
 	<dependencies>
 		<dependency>

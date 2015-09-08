@@ -26,6 +26,14 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Complete IDP Parent POM</name>
 	<packaging>pom</packaging>
+	
+	<developers>
+        <developer>
+            <id>I-AM-IT</id>
+            <name>Amit Kumar Mondal</name>
+            <email>admin@amitinside.com</email>
+        </developer>
+    </developers>
 
 	<properties>
 		<!-- Dependencies version -->

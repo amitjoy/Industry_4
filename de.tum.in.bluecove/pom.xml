@@ -28,6 +28,14 @@
 	<version>${bluecove.version}</version>
 	<name>Bluecove for OSGi</name>
 	<packaging>bundle</packaging>
+	
+	<developers>
+        <developer>
+            <id>I-AM-IT</id>
+            <name>Amit Kumar Mondal</name>
+            <email>admin@amitinside.com</email>
+        </developer>
+    </developers>
 
 
 	<properties>

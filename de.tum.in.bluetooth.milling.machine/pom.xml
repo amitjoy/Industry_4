@@ -31,6 +31,14 @@
 	<artifactId>de.tum.in.bluetooth.milling.machine</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<name>Bluetooth Enabled Milling Machines</name>
+	
+	<developers>
+        <developer>
+            <id>I-AM-IT</id>
+            <name>Amit Kumar Mondal</name>
+            <email>admin@amitinside.com</email>
+        </developer>
+    </developers>
 
 	<dependencies>
 		<dependency>

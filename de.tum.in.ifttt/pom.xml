@@ -31,6 +31,14 @@
 	<packaging>bundle</packaging>
 
 	<name>IFTTT Email IF</name>
+	
+	<developers>
+        <developer>
+            <id>I-AM-IT</id>
+            <name>Amit Kumar Mondal</name>
+            <email>admin@amitinside.com</email>
+        </developer>
+    </developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

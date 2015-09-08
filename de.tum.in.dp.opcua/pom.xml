@@ -31,6 +31,14 @@
 	<packaging>pom</packaging>
 
 	<name>OPC-UA Deployment Package</name>
+	
+	<developers>
+        <developer>
+            <id>I-AM-IT</id>
+            <name>Amit Kumar Mondal</name>
+            <email>admin@amitinside.com</email>
+        </developer>
+    </developers>
 
 	<organization>
 		<name>Technical University of Munich</name>

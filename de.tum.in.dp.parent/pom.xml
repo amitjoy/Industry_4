@@ -31,6 +31,14 @@
 	<packaging>pom</packaging>
 
 	<name>Deployment Package Parent POM</name>
+	
+	<developers>
+        <developer>
+            <id>I-AM-IT</id>
+            <name>Amit Kumar Mondal</name>
+            <email>admin@amitinside.com</email>
+        </developer>
+    </developers>
 
 	<build>
 		<plugins>

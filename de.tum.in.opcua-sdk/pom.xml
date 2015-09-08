@@ -30,6 +30,14 @@
 	<packaging>bundle</packaging>
 
 	<name>OPC-UA SDK</name>
+	
+	<developers>
+        <developer>
+            <id>I-AM-IT</id>
+            <name>Amit Kumar Mondal</name>
+            <email>admin@amitinside.com</email>
+        </developer>
+    </developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -144,5 +152,5 @@
 		<url>http://www.tum.de</url>
 	</organization>
 
-	<description>This bundle is responsible for embedding opcua sdk dependency</description>
+	<description>This bundle is responsible for embedding OPC-UA SDK dependency</description>
 </project>
