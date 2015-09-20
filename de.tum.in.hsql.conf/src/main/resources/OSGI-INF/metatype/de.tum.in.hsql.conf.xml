@@ -18,7 +18,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
 	localization="en_us">
 	<OCD id="de.tum.in.hsql.conf" name="HyperSQL"
-		description="This is used to configure HypeSQL Connection">
+		description="This is used to configure HyperSQL Connection">
 
 		<Icon
 			resource="http://icons.iconarchive.com/icons/oxygen-icons.org/oxygen/128/Places-server-database-icon.png"
