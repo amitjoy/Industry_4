@@ -53,12 +53,12 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 	private static final String APP_ID = "HEARTBEAT-V1";
 
 	/**
-	 * Configurable property to set MQTT Hearbeat Period
+	 * Configurable property to set MQTT Heartbeat Period
 	 */
 	private static final String HEARTBEAT_PERIOD = "de.tum.in.mqtt.heartbeat.period";
 
 	/**
-	 * Configurable property to set MQTT Hearbeat Topic Namespace
+	 * Configurable property to set MQTT Heartbeat Topic Namespace
 	 */
 	private static final String HEARTBEAT_TOPIC = "de.tum.in.mqtt.heartbeat.topic";
 
@@ -146,7 +146,7 @@ public class MQTTHeartbeat extends Cloudlet implements ConfigurableComponent {
 	 */
 	private void doBroadcastHeartbeat(final Map<String, Object> properties) throws KuraException {
 
-		// cancel a current worker handle if one if active
+		// cancel a current worker handle if one is active
 		if (this.m_handle != null) {
 			this.m_handle.cancel(true);
 		}
