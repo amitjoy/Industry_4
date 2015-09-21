@@ -207,7 +207,7 @@ public class BluetoothMillingMachine extends Cloudlet implements ConfigurableCom
 	 *
 	 */
 	private void doCommunicate(final String macAddress) {
-		// cancel a current worker handle if one if active
+		// cancel a current worker handle if one is active
 		if (this.m_handle != null) {
 			this.m_handle.cancel(true);
 		}
