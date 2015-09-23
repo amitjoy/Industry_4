@@ -18,12 +18,17 @@ package de.tum.in.mongodb;
 import com.mongodb.client.MongoDatabase;
 
 /**
- * Mongo DB Service
- * 
+ * MongoDB Service
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
 public interface MongoDBService {
+
+	/**
+	 * Closes the Service
+	 */
+	void close();
 
 	/**
 	 * Used to get database object

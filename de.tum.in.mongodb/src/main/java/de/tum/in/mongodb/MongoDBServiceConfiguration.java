@@ -37,8 +37,7 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 
 /**
- * Used to consume all the service record provided by all the paired Bluetooth
- * Enabled Milling Machines
+ * MongoDB Service Registration Component
  *
  * @author AMIT KUMAR MONDAL
  *

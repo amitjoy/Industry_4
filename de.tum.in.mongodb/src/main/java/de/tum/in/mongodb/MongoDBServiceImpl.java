@@ -20,33 +20,29 @@ import com.mongodb.client.MongoDatabase;
 
 /**
  * Implementation class of {@link MongoDBService}
- * 
+ *
  * @author AMIT KUMAR MONDAL
  *
  */
 public class MongoDBServiceImpl implements MongoDBService {
-	private final Mongo m_mongo;
 	private final MongoDatabase m_db;
+	private final Mongo m_mongo;
 
 	/** Constructor */
-	public MongoDBServiceImpl(Mongo mongo, MongoDatabase db) {
-		m_mongo = mongo;
-		m_db = db;
+	public MongoDBServiceImpl(final Mongo mongo, final MongoDatabase db) {
+		this.m_mongo = mongo;
+		this.m_db = db;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void close() {
+		this.m_mongo.close();
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public MongoDatabase getDatabase() {
-		return m_db;
-	}
-
-	/** {@inheritDoc} */
-	public void close() {
-		m_mongo.close();
-	}
-
-	/** {@inheritDoc} */
-	public void stop() {
-		close();
+		return this.m_db;
 	}
 }
