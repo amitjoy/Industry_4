@@ -282,16 +282,16 @@ public class OpcUaClient extends Cloudlet implements ConfigurableComponent {
 	private void configureSecurityPolicy() {
 		switch (this.m_securityPolicy) {
 		case 0:
-			this.m_opcuaSecurityPolicy = SecurityPolicy.NONE;
+			this.m_opcuaSecurityPolicy = SecurityPolicy.None;
 			break;
 		case 1:
-			this.m_opcuaSecurityPolicy = SecurityPolicy.BASIC_128_RSA_15;
+			this.m_opcuaSecurityPolicy = SecurityPolicy.Basic128Rsa15;
 			break;
 		case 2:
-			this.m_opcuaSecurityPolicy = SecurityPolicy.BASIC_256;
+			this.m_opcuaSecurityPolicy = SecurityPolicy.Basic256;
 			break;
 		case 3:
-			this.m_opcuaSecurityPolicy = SecurityPolicy.BASIC_256_SHA256;
+			this.m_opcuaSecurityPolicy = SecurityPolicy.Basic256Sha256;
 			break;
 		}
 	}

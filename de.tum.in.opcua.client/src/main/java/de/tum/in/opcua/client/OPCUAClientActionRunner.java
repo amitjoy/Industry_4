@@ -375,18 +375,19 @@ public final class OpcUaClientActionRunner {
 	 * Finalize the required action
 	 */
 	public void run() {
-		this.m_future.whenComplete((c, ex) -> {
-			if (c != null) {
+		this.m_future.whenComplete((client, ex) -> {
+			if (client != null) {
 				try {
-					c.disconnect().get(1, TimeUnit.SECONDS);
+					client.disconnect().get(1, TimeUnit.SECONDS);
+					Stack.releaseSharedResources();
 				} catch (InterruptedException | ExecutionException | TimeoutException e) {
 					LOGGER.error("Error waiting for disconnect: " + Throwables.getStackTraceAsString(e));
 				}
 			} else {
 				LOGGER.error("Error running example: " + Throwables.getStackTraceAsString(ex));
+				Stack.releaseSharedResources();
 			}
 
-			Stack.releaseSharedResources();
 		});
 
 		try {
@@ -402,6 +403,12 @@ public final class OpcUaClientActionRunner {
 		} catch (final Throwable t) {
 			LOGGER.error("Error running client example: " + Throwables.getStackTraceAsString(t));
 			this.m_future.completeExceptionally(t);
+		}
+
+		try {
+			Thread.sleep(999999999);
+		} catch (final InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 }
