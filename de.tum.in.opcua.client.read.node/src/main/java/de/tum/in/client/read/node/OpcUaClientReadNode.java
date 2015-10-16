@@ -47,6 +47,11 @@ import de.tum.in.opcua.client.OpcUaClientAction;
 public class OpcUaClientReadNode implements OpcUaClientAction {
 
 	/**
+	 * Application Identifier
+	 */
+	private static final String APP_ID = "OPC-READ-NODE-V1";
+
+	/**
 	 * The OPC-UA Endpoint URL
 	 */
 	private static final String ENDPOINT_URL = "opc.tcp://localhost:12685/tum";
@@ -125,9 +130,10 @@ public class OpcUaClientReadNode implements OpcUaClientAction {
 
 		final KuraPayload payload = new KuraPayload();
 		payload.addMetric("value", value);
+
+		// Publish the data to $EDC/account_name/device_id/OPC-READ-NODE-V1/data
 		try {
-			this.m_cloudService.newCloudClient("OPC-READ-NODE-V1").controlPublish("opc-read-node-v1", payload, 0, false,
-					5);
+			this.m_cloudService.newCloudClient(APP_ID).controlPublish("data", payload, 0, false, 5);
 		} catch (final Exception e) {
 			LOGGER.warn(Throwables.getStackTraceAsString(e));
 		}
