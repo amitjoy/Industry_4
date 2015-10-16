@@ -41,9 +41,11 @@
 		<osgi-core.version>5.0.0</osgi-core.version>
 		<osgi.version>4.3.1</osgi.version>
 		<slf4j.version>1.6.4</slf4j.version>
-		<ua-client.version>1.0.2-SNAPSHOT</ua-client.version>
-		<ua-server.version>0.4.2-SNAPSHOT</ua-server.version>
-		<ctt-namespace.version>0.4.2-SNAPSHOT</ctt-namespace.version>
+		<opc-stack-client.version>1.0.2</opc-stack-client.version>
+		<opc-stack-core.version>1.0.2</opc-stack-core.version>
+		<ua-client.version>1.0.3-SNAPSHOT</ua-client.version>
+		<ua-server.version>0.4.3-SNAPSHOT</ua-server.version>
+		<ctt-namespace.version>0.4.3-SNAPSHOT</ctt-namespace.version>
 		<kura.version>1.0.5-SNAPSHOT</kura.version>
 		<guava.version>18.0</guava.version>
 		<mongo.version>3.0.1</mongo.version>
@@ -192,13 +194,13 @@
 			<dependency>
 				<groupId>com.digitalpetri.opcua</groupId>
 				<artifactId>stack-client</artifactId>
-				<version>${ua-client.version}</version>
+				<version>${opc-stack-client.version}</version>
 			</dependency>
 			
 			<dependency>
 				<groupId>com.digitalpetri.opcua</groupId>
 				<artifactId>stack-core</artifactId>
-				<version>${ua-client.version}</version>
+				<version>${opc-stack-core.version}</version>
 			</dependency>
 			
 			<!-- Quartz -->
