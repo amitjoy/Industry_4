@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -378,13 +377,13 @@ public final class OpcUaClientActionRunner {
 		this.m_future.whenComplete((client, ex) -> {
 			if (client != null) {
 				try {
-					client.disconnect().get(1, TimeUnit.SECONDS);
+					client.disconnect().get();
 					Stack.releaseSharedResources();
-				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					LOGGER.error("Error waiting for disconnect: " + Throwables.getStackTraceAsString(e));
+				} catch (InterruptedException | ExecutionException e) {
+					LOGGER.error("Error disconnecting: " + Throwables.getStackTraceAsString(e));
 				}
 			} else {
-				LOGGER.error("Error running example: " + Throwables.getStackTraceAsString(ex));
+				LOGGER.error("Error running OPC-UA Action: " + Throwables.getStackTraceAsString(ex));
 				Stack.releaseSharedResources();
 			}
 
@@ -397,11 +396,11 @@ public final class OpcUaClientActionRunner {
 				this.m_clientAction.run(client, this.m_future);
 				this.m_future.get(5, TimeUnit.SECONDS);
 			} catch (final Throwable t) {
-				LOGGER.error("Error running client example: " + Throwables.getStackTraceAsString(t));
+				LOGGER.error("Error running OPC-UA Action: " + Throwables.getStackTraceAsString(t));
 				this.m_future.complete(client);
 			}
 		} catch (final Throwable t) {
-			LOGGER.error("Error running client example: " + Throwables.getStackTraceAsString(t));
+			LOGGER.error("Error running OPC-UA Action: " + Throwables.getStackTraceAsString(t));
 			this.m_future.completeExceptionally(t);
 		}
 
