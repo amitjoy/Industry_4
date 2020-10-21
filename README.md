@@ -1,4 +1,4 @@
-# README #
+# Industry 4.0 #
 
 This is the repository for the development of a complete end-to-end Industry 4.0 - Industrial Automation solution.
 
